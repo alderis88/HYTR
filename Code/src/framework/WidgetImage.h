@@ -15,9 +15,8 @@ namespace ui
     virtual InputEventState ProcessInput(const InputEvent& event) override;
     virtual void Draw(RenderContext& context) const override;
 
-    // Override position setters to update sprite position
-    virtual void SetPosX(int posX) override;
-    virtual void SetPosY(int posY) override;
+    // Override position update notification
+    virtual void UpdatePosition() override;
 
     // Image specific methods
     bool LoadImage(const std::string& imagePath);

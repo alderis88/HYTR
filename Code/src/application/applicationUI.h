@@ -3,8 +3,11 @@
 #include "../framework/WidgetImage.h"
 #include "../framework/WidgetButton.h"
 #include "../framework/WidgetContainer.h"
+#include "../framework/WidgetProgressBar.h"
 #include <SFML/Graphics.hpp>
 #include "pch.h"
+
+class Application; // Forward declaration
 
 //==============================================================================
 // ApplicationUI Class - Handles all UI initialization and management
@@ -17,7 +20,7 @@ public:
   ~ApplicationUI() = default;
 
   // Main initialization functions
-  void InitializeUI();
+  void InitializeUI(Application* app);
   void InitializeContainersUI();
 
   // Individual UI initialization functions
@@ -26,7 +29,11 @@ public:
   void UI_InitializeSubMenuContainer();
   void UI_InitializeGameTimeWidget();
   void UI_InitializeImageWidgets();
+  void UI_InitializeProgressBars();
   void UI_DebugContainers();
+
+  // Update functions
+  void UpdateProductDisplays();
 
   // Getters for UI components
   std::unique_ptr<ui::WidgetContainer>& GetRootContainer() { return m_rootContainer; }
@@ -40,10 +47,22 @@ public:
   ui::WidgetImage* GetIconMaterialNeuro() const { return m_iconMaterialNeuro; }
   ui::WidgetImage* GetIconMaterialTritanium() const { return m_iconMaterialTritanium; }
   ui::WidgetImage* GetIconMaterialZeromass() const { return m_iconMaterialZeromass; }
-  ui::WidgetImage* GetImageTrendArrowDown() const { return m_imageTrendArrowDown; }
-  ui::WidgetImage* GetImageTrendArrowUp() const { return m_imageTrendArrowUp; }
+  ui::WidgetImage* GetImageTrendArrowDown(int monitorIndex) const { return (monitorIndex >= 0 && monitorIndex < 5) ? m_imageTrendArrowDown[monitorIndex] : nullptr; }
+  ui::WidgetImage* GetImageTrendArrowUp(int monitorIndex) const { return (monitorIndex >= 0 && monitorIndex < 5) ? m_imageTrendArrowUp[monitorIndex] : nullptr; }
+
+  // Getters for Text Widgets
+  ui::WidgetText* GettxtProd(int monitorIndex) const { return (monitorIndex >= 0 && monitorIndex < 5) ? m_txtProd[monitorIndex] : nullptr; }
+  ui::WidgetText* GettxtProdQuantity(int monitorIndex) const { return (monitorIndex >= 0 && monitorIndex < 5) ? m_txtProdQuantity[monitorIndex] : nullptr; }
+  ui::WidgetText* GettxtProdPrice(int monitorIndex) const { return (monitorIndex >= 0 && monitorIndex < 5) ? m_txtProdPrice[monitorIndex] : nullptr; }
+
+  // Getters for Progress Bars
+  ui::WidgetProgressBar* GetHealthProgressBar() const { return m_healthProgressBar; }
+  ui::WidgetProgressBar* GetEnergyProgressBar() const { return m_energyProgressBar; }
 
 private:
+  // Application reference
+  Application* m_application = nullptr;
+
   // UI variables
   std::unique_ptr<ui::WidgetContainer> m_rootContainer; // Root container for all widgets
   ui::WidgetContainer* m_monitorMenuContainer; // Pointer to monitor menu container (owned by root container)
@@ -64,9 +83,18 @@ private:
   ui::WidgetImage* m_iconMaterialTritanium;
   ui::WidgetImage* m_iconMaterialZeromass;
 
-  // Trend Images
-  ui::WidgetImage* m_imageTrendArrowDown;
-  ui::WidgetImage* m_imageTrendArrowUp;
+  // Trend Images - Arrays for multiple monitors
+  ui::WidgetImage* m_imageTrendArrowDown[5]; // One for each monitor
+  ui::WidgetImage* m_imageTrendArrowUp[5];   // One for each monitor
+
+  // Monitor Text Widgets - Arrays for multiple monitors
+  ui::WidgetText* m_txtProd[5];       // Product monitor text for each monitor
+  ui::WidgetText* m_txtProdQuantity[5];     // Current quantity text for each monitor
+  ui::WidgetText* m_txtProdPrice[5];         // Trend text for each monitor
+
+  // Progress Bars
+  ui::WidgetProgressBar* m_healthProgressBar;  // Health/HP progress bar
+  ui::WidgetProgressBar* m_energyProgressBar;  // Energy/Mana progress bar
 
   // Fonts
   sf::Font m_digitalFont; // Font for game time display

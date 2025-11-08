@@ -55,7 +55,6 @@ public:
 	void InitializeProductValues();
 	void CalculateProductPrice(StockProduct& product);
 	void CalculateOnlyPlayerInfluenceChangePrice(StockProduct& product);
-	void UpdateStockVisual(StockProduct& product);
 	void ReducePlayerImpact(StockProduct& product);
 	void ProductStockReplenishment(StockProduct& product);
 
@@ -65,9 +64,13 @@ public:
 	bool BuyFromStock(const std::string& productId, uint32_t quantity);
 	void SellForStock(const std::string& productId, uint32_t quantity);
 
+	// === Current Product Management ===
+	void SetCurrentProductID(const std::string& productId);
+
 	// === Public State Variables ===
-	float m_currentCycleTime = 0.0f;    ///< Current time within market cycle (seconds)
-	uint32_t m_cycleCount = 0;           ///< Total number of completed market cycles
+	float m_currentCycleTime = 0.0f;    	///< Current time within market cycle (seconds)
+	uint32_t m_cycleCount = 0;           	///< Total number of completed market cycles
+	std::string currentProductID;        	///< Currently selected product ID
 
 private:
 	// === System References ===
@@ -78,7 +81,7 @@ private:
 	std::vector<StockVendor> m_stockVendors;    ///< All vendor characters
 	std::vector<News> m_news;                   ///< All market news items
 	uint32_t m_newsIndex = 0;                   ///< Current news index for rotation
-	
+
 	// === Market Constants ===
 	static constexpr float s_randomPriceInfluenceFactor = 0.025f;  ///< Max random price variation (±2.5%)
 	static constexpr float s_stockCycleTime = 5.0f;                ///< Time between market cycles (seconds)

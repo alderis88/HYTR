@@ -39,7 +39,7 @@ namespace ui
     if (m_debugDraw)
     {
       sf::RectangleShape debugRect(sf::Vector2f(static_cast<float>(GetWidth()), static_cast<float>(GetHeight())));
-      debugRect.setPosition(static_cast<float>(GetPosX()), static_cast<float>(GetPosY()));
+      debugRect.setPosition(static_cast<float>(GetPosAbsX()), static_cast<float>(GetPosAbsY()));
       debugRect.setFillColor(sf::Color::Transparent);
       debugRect.setOutlineColor(m_debugColor);
       debugRect.setOutlineThickness(1.0f);
@@ -51,11 +51,26 @@ namespace ui
   {
     if (widget)
     {
+      // Store the original position as relative position
+      int relX = widget->GetPosRelX();  // Widget's initial position is stored as relative
+      int relY = widget->GetPosRelY();
+      widget->SetPosRelX(relX);
+      widget->SetPosRelY(relY);
+
       // Convert relative position to absolute position based on container position
       if (m_layoutType == LayoutType::Native)
       {
-        widget->SetPosX(widget->GetPosX() + GetPosX());
-        widget->SetPosY(widget->GetPosY() + GetPosY());
+        // Calculate absolute position by adding container's absolute position
+        int absX = relX + GetPosAbsX();
+        int absY = relY + GetPosAbsY();
+
+        // Position calculation completed successfully
+
+        widget->SetPosAbsX(absX);
+        widget->SetPosAbsY(absY);
+
+        // Notify widget that position has changed (important for text widgets!)
+        widget->UpdatePosition();
       }
 
       m_children.push_back(std::move(widget));
@@ -112,21 +127,25 @@ namespace ui
       return; // No layout adjustment needed
     }
 
-    int currentX = GetPosX();
-    int currentY = GetPosY();
+    int currentX = GetPosAbsX();
+    int currentY = GetPosAbsY();
 
     for (auto& child : m_children)
     {
       if (m_layoutType == LayoutType::Horizontal)
       {
-        child->SetPosX(currentX);
-        child->SetPosY(GetPosY());
+        // Horizontal: Control X position, preserve relative Y
+        child->SetPosAbsX(currentX);
+        child->SetPosAbsY(GetPosAbsY() + child->GetPosRelY());
+        child->UpdatePosition();
         currentX += child->GetWidth() + m_spacing;
       }
       else if (m_layoutType == LayoutType::Vertical)
       {
-        child->SetPosX(GetPosX());
-        child->SetPosY(currentY);
+        // Vertical: Control Y position, preserve relative X
+        child->SetPosAbsX(GetPosAbsX() + child->GetPosRelX());
+        child->SetPosAbsY(currentY);
+        child->UpdatePosition();
         currentY += child->GetHeight() + m_spacing;
       }
     }

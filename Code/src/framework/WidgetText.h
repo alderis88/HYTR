@@ -37,6 +37,9 @@ namespace ui
     sf::Color GetTextColor() const;
     unsigned int GetCharacterSize() const;
 
+    // Override position update notification
+    void UpdatePosition() override;
+
   private:
     sf::Text m_text;
     sf::Font m_defaultFont;

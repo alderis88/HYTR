@@ -67,7 +67,7 @@ void Application::Initialize()
 	{
 		// Create and initialize UI management class
 		m_applicationUI = std::make_unique<ApplicationUI>();
-		m_applicationUI->InitializeUI();
+		m_applicationUI->InitializeUI(this);
 
 		// Get root container from UI manager
 		m_rootWidgetContainer = std::move(m_applicationUI->GetRootContainer());
@@ -85,7 +85,7 @@ void Application::Initialize()
 void Application::SetVideoSettings()
 {
 	// Create 1920x1080 window with specified title
-	m_renderContext = std::make_unique<RenderContext>(sf::VideoMode(1920, 1080), "Recruitment task");
+	m_renderContext = std::make_unique<RenderContext>(sf::VideoMode(1920, 1080), "Hyper Trade");
 	// Limit framerate to 30 FPS for consistent performance
 	m_renderContext->setFramerateLimit(30);
 }
@@ -435,6 +435,14 @@ ui::Window* Application::GetMainWindow() const
 Inventory* Application::GetPlayerInventory() const
 {
 	return m_playerInventory.get();
+}
+
+/// @brief Get access to the application UI system
+/// @return Pointer to the application UI object, or nullptr if not initialized
+/// Used by subsystems that need to update UI displays
+ApplicationUI* Application::GetApplicationUI() const
+{
+	return m_applicationUI.get();
 }
 
 /// @brief Sets the global data directory path for JSON and data file loading

@@ -97,6 +97,7 @@
     <ClCompile Include="WidgetButton.cpp" />
     <ClCompile Include="WidgetContainer.cpp" />
     <ClCompile Include="WidgetImage.cpp" />
+    <ClCompile Include="WidgetProgressBar.cpp" />
     <ClCompile Include="WidgetText.cpp" />
     <ClCompile Include="window.cpp" />
   </ItemGroup>
@@ -106,6 +107,7 @@
     <ClInclude Include="WidgetButton.h" />
     <ClInclude Include="WidgetContainer.h" />
     <ClInclude Include="WidgetImage.h" />
+    <ClInclude Include="WidgetProgressBar.h" />
     <ClInclude Include="WidgetText.h" />
     <ClInclude Include="window.h" />
   </ItemGroup>

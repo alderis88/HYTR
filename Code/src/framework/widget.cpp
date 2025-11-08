@@ -4,23 +4,36 @@
 namespace ui
 {
   Widget::Widget( int posX, int posY, int width, int height )
-    : m_posX( posX )
-    , m_posY( posY )
+    : m_posRelX( posX )
+    , m_posRelY( posY )
+    , m_posAbsX( posX )
+    , m_posAbsY( posY )
     , m_width( width )
     , m_height( height )
+    , m_visible( true )
   {
   }
 
   Widget::~Widget() = default;
 
-  int Widget::GetPosX() const
+  int Widget::GetPosRelX() const
   {
-    return m_posX;
+    return m_posRelX;
   }
 
-  int Widget::GetPosY() const
+  int Widget::GetPosRelY() const
   {
-    return m_posY;
+    return m_posRelY;
+  }
+
+  int Widget::GetPosAbsX() const
+  {
+    return m_posAbsX;
+  }
+
+  int Widget::GetPosAbsY() const
+  {
+    return m_posAbsY;
   }
 
   int Widget::GetWidth() const
@@ -33,14 +46,24 @@ namespace ui
     return m_height;
   }
 
-  void Widget::SetPosX(int posX)
+  void Widget::SetPosRelX(int posRelX)
   {
-    m_posX = posX;
+    m_posRelX = posRelX;
   }
 
-  void Widget::SetPosY(int posY)
+  void Widget::SetPosRelY(int posRelY)
   {
-    m_posY = posY;
+    m_posRelY = posRelY;
+  }
+
+  void Widget::SetPosAbsX(int posAbsX)
+  {
+    m_posAbsX = posAbsX;
+  }
+
+  void Widget::SetPosAbsY(int posAbsY)
+  {
+    m_posAbsY = posAbsY;
   }
 
   void Widget::SetWidth(int width)
@@ -51,6 +74,16 @@ namespace ui
   void Widget::SetHeight(int height)
   {
     m_height = height;
+  }
+
+  void Widget::SetVisible(bool visible)
+  {
+    m_visible = visible;
+  }
+
+  bool Widget::IsVisible() const
+  {
+    return m_visible;
   }
 
 }

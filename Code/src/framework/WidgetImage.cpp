@@ -26,7 +26,8 @@ namespace ui
 
   void WidgetImage::Draw(RenderContext& context) const
   {
-    if (m_imageLoadStockProductsed)
+    // Only draw if widget is visible
+    if (IsVisible() && m_imageLoadStockProductsed)
     {
       context.draw(m_sprite);
     }
@@ -42,7 +43,7 @@ namespace ui
       m_sprite.setTexture(m_texture);
 
       // Set the position based on widget coordinates
-      m_sprite.setPosition(static_cast<float>(GetPosX()), static_cast<float>(GetPosY()));
+      m_sprite.setPosition(static_cast<float>(GetPosAbsX()), static_cast<float>(GetPosAbsY()));
 
       // Scale the image to fit the widget dimensions if needed
       sf::Vector2u textureSize = m_texture.getSize();
@@ -70,21 +71,11 @@ namespace ui
     m_sprite.setScale(scaleX, scaleY);
   }
 
-  void WidgetImage::SetPosX(int posX)
+  void WidgetImage::UpdatePosition()
   {
-    Widget::SetPosX(posX);
     if (m_imageLoadStockProductsed)
     {
-      m_sprite.setPosition(static_cast<float>(GetPosX()), static_cast<float>(GetPosY()));
-    }
-  }
-
-  void WidgetImage::SetPosY(int posY)
-  {
-    Widget::SetPosY(posY);
-    if (m_imageLoadStockProductsed)
-    {
-      m_sprite.setPosition(static_cast<float>(GetPosX()), static_cast<float>(GetPosY()));
+      m_sprite.setPosition(static_cast<float>(GetPosAbsX()), static_cast<float>(GetPosAbsY()));
     }
   }
 }

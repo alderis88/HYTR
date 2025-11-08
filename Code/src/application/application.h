@@ -37,6 +37,7 @@ public:
 
 	ui::Window* GetMainWindow() const;
 	Inventory* GetPlayerInventory() const;
+	ApplicationUI* GetApplicationUI() const;
 
 	static std::string s_dataPath;
 	static std::string s_assetsPath;

@@ -120,6 +120,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\data\item_products.json" />
+    <None Include="..\..\data\news.json" />
     <None Include="..\..\data\vendor_characters.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

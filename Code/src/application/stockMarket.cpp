@@ -2,6 +2,7 @@
 #include "stockMarket.h"
 #include "utilTools.h"
 #include "application.h"
+#include "applicationUI.h"
 
 /// @brief Initialize the entire stock market system
 /// Loads all data files and sets up initial market state
@@ -13,13 +14,25 @@ void StockMarket::InitializeStockMarket(Application* app)
 	DebugLog("StockMarket - Application reference set");
 
 	// Reset market timing
-	m_currentCycleTime = 0.0f;
+	m_currentCycleTime = 4.5f;
 	m_cycleCount = 0;
 
 	// Load stock products from JSON
 	std::ostringstream pathBuilder;
 	pathBuilder << Application::s_dataPath << "item_products.json";
 	LoadJsonStockProducts(pathBuilder.str());
+
+	// Load stock vendors from JSON
+	pathBuilder.str("");  // Clear the stringstream
+	pathBuilder.clear();  // Reset any error flags
+	pathBuilder << Application::s_dataPath << "vendor_characters.json";
+	LoadJsonStockVendors(pathBuilder.str());
+
+	// Load news from JSON
+	pathBuilder.str("");  // Clear the stringstream
+	pathBuilder.clear();  // Reset any error flags
+	pathBuilder << Application::s_dataPath << "news.json";
+	LoadJsonNews(pathBuilder.str());
 
 	// Initialize random starting values for all products
 	InitializeProductValues();
@@ -79,9 +92,12 @@ void StockMarket::StockMarketCycleStep()
 		CalculateProductPrice(product);
 	}
 
-}
-
-/// @brief Update cycle timer (mainly for debugging purposes)
+	// Update UI displays with new product data
+	if (m_application && m_application->GetApplicationUI())
+	{
+		m_application->GetApplicationUI()->UpdateProductDisplays();
+	}
+}/// @brief Update cycle timer (mainly for debugging purposes)
 /// Currently disabled but can be used to monitor cycle timing
 void StockMarket::CycleTimerUpdate()
 {
@@ -95,11 +111,24 @@ void StockMarket::LoadJsonStockProducts(const std::string& path)
 {
 	DebugLog("Loading Stock Products from: " + path);
 	std::ifstream stream(path);
+	if (!stream.is_open()) {
+		DebugLog("Failed to open file: " + path);
+	}
 	std::string fileData((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
+	DebugLog("File data size: " + std::to_string(fileData.size()));
 
 	Json::Document document;
 	document.Parse(fileData.c_str());
-	assert(!document.HasParseError());
+	if (document.HasParseError()) {
+		DebugLog("JSON Parse Error: " + std::string(Json::GetParseError_En(document.GetParseError())));
+		DebugLog("JSON Parse Error Offset: " + std::to_string(document.GetErrorOffset()));
+		DebugLog("File size: " + std::to_string(fileData.size()));
+		if (!fileData.empty()) {
+			DebugLog("First 100 chars: " + fileData.substr(0, std::min(100, (int)fileData.size())));
+		}
+		DebugLog("Skipping JSON loading due to parse error");
+		return; // Return early instead of asserting
+	}
 
 	assert(document.IsObject());
 
@@ -261,7 +290,7 @@ void StockMarket::CalculateProductPrice(StockProduct& product)
 	std::uniform_real_distribution<float> randomInfluence(1.0f - s_randomPriceInfluenceFactor, 1.0f + s_randomPriceInfluenceFactor);
 	float randomInfluenceFactor = randomInfluence(Application::GetRandomGenerator());
 
-	
+
 	// Apply player impact multiplier
 	float playerImpactMultiplier = 1.0f;
 	if (product.m_currentPlayerImpact > 0.0f)
@@ -276,11 +305,11 @@ void StockMarket::CalculateProductPrice(StockProduct& product)
 	}
 
 
-	// Calculate and store price without player impact
-	product.m_currentPriceWithoutPlayerImpact = static_cast<uint32_t>(product.m_basePrice * baseTrendPrice * randomInfluenceFactor);
+	// Calculate and store price without player impact (ensure minimum value of 1)
+	product.m_currentPriceWithoutPlayerImpact = std::max(1u, static_cast<uint32_t>(product.m_basePrice * baseTrendPrice * randomInfluenceFactor));
 
-	// Calculate current price: basePrice * aggregated multiplier
-	uint32_t newPrice = static_cast<uint32_t>(playerImpactMultiplier * product.m_currentPriceWithoutPlayerImpact);
+	// Calculate current price: basePrice * aggregated multiplier (ensure minimum value of 1)
+	uint32_t newPrice = std::max(1u, static_cast<uint32_t>(playerImpactMultiplier * product.m_currentPriceWithoutPlayerImpact));
 
 	// Compare with current price and set trend direction
 	if (newPrice > product.m_currentPrice)
@@ -305,9 +334,7 @@ void StockMarket::CalculateProductPrice(StockProduct& product)
 	// 	", Final Price: " + std::to_string(product.m_currentPrice) +
 	// 	", Trend Increased: " + (product.m_trendIncreased ? "true" : "false"));
 
-	UpdateStockVisual(product);
-	
-}
+	}
 
 /// @brief Calculate price using only player influence change
 /// Takes m_currentPriceWithoutPlayerImpact and applies only player impact multiplier and trend calculation
@@ -327,8 +354,8 @@ void StockMarket::CalculateOnlyPlayerInfluenceChangePrice(StockProduct& product)
 		playerImpactMultiplier = std::min(1.5f, 1.0f + std::abs(product.m_currentPlayerImpact));
 	}
 
-	// Calculate new price using the stored price without player impact
-	uint32_t newPrice = static_cast<uint32_t>(playerImpactMultiplier * product.m_currentPriceWithoutPlayerImpact);
+	// Calculate new price using the stored price without player impact (ensure minimum value of 1)
+	uint32_t newPrice = std::max(1u, static_cast<uint32_t>(playerImpactMultiplier * product.m_currentPriceWithoutPlayerImpact));
 
 	// Compare with current price and set trend direction
 	if (newPrice > product.m_currentPrice)
@@ -345,27 +372,12 @@ void StockMarket::CalculateOnlyPlayerInfluenceChangePrice(StockProduct& product)
 	product.m_currentPrice = newPrice;
 
 	// Debug log the price calculation
-	// DebugLog("CalculateOnlyPlayerInfluenceChangePrice - Product: " + product.m_name + 
+	// DebugLog("CalculateOnlyPlayerInfluenceChangePrice - Product: " + product.m_name +
 	// 	" - CPI: " + std::to_string(product.m_currentPlayerImpact) +
 	// 	", PIM: " + std::to_string(playerImpactMultiplier) +
 	// 	", Base Price Without Impact: " + std::to_string(product.m_currentPriceWithoutPlayerImpact) +
 	// 	", Final Price: " + std::to_string(product.m_currentPrice) +
 	// 	", Trend Increased: " + (product.m_trendIncreased ? "true" : "false"));
-
-	UpdateStockVisual(product);
-}
-
-/// @brief Update visual representation of stock product
-/// Passes through the product that needs visual updates (price, trend arrows, stock amounts)
-/// @param product Reference to the product that needs visual update
-void StockMarket::UpdateStockVisual(StockProduct& product)
-{
-	// TODO: Implement visual update logic
-	// This function should update:
-	// - Price text display
-	// - Trend arrows (up/down based on m_trendIncreased)
-	// - Stock quantity display
-	// - Price color (green for increase, red for decrease)
 }
 
 /// @brief Reduce player impact on product price over time
@@ -474,7 +486,7 @@ bool StockMarket::ValidateBuyFromStock(const std::string& productId, uint32_t de
 
 /// @brief Execute a buy transaction from stock market
 /// Reduces the available stock quantity by the exact amount purchased
-/// @param productId ID of the product to buy  
+/// @param productId ID of the product to buy
 /// @param quantity Amount to purchase
 /// @return true if successful, false if insufficient stock or product not found
 bool StockMarket::BuyFromStock(const std::string& productId, uint32_t quantity)
@@ -517,7 +529,7 @@ bool StockMarket::BuyFromStock(const std::string& productId, uint32_t quantity)
 
 		// Deduct the cost from player's money
 		m_application->GetPlayerInventory()->SetCurrentMoney(currentMoney - totalCost);
-		
+
 		// Add the purchased product to player's inventory
 		m_application->GetPlayerInventory()->AddProduct(productId, quantity);
 	}
@@ -603,11 +615,30 @@ void StockMarket::LoadJsonStockVendors(const std::string& path)
 {
 	DebugLog("Loading Stock Vendors from: " + path);
 	std::ifstream stream(path);
+	
+	if (!stream.is_open()) {
+		DebugLog("ERROR: Could not open file: " + path);
+		assert(false);
+	}
+	
 	std::string fileData((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
+	
+	if (fileData.empty()) {
+		DebugLog("ERROR: File is empty: " + path);
+		assert(false);
+	}
+	
+	DebugLog("File size: " + std::to_string(fileData.size()) + " bytes");
 
 	Json::Document document;
 	document.Parse(fileData.c_str());
-	assert(!document.HasParseError());
+	
+	if (document.HasParseError()) {
+		DebugLog("ERROR: JSON Parse Error at offset " + std::to_string(document.GetErrorOffset()));
+		DebugLog("ERROR: " + std::string(Json::GetParseError_En(document.GetParseError())));
+		DebugLog("File content preview (first 200 chars): " + fileData.substr(0, 200));
+		assert(false);
+	}
 
 	assert(document.IsObject());
 
@@ -790,4 +821,12 @@ News* StockMarket::GetNextNews()
 	}
 
 	return currentNews;
+}
+
+/// @brief Set the current product ID for market operations
+/// @param productId The ID of the product to select (e.g., "TRI", "NFX", etc.)
+void StockMarket::SetCurrentProductID(const std::string& productId)
+{
+	currentProductID = productId;
+	DebugLog("StockMarket - Current product ID set to: " + productId);
 }

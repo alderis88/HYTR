@@ -93,12 +93,12 @@ namespace ui
       SetText(m_textString);
     }
   }
-  
+
   void WidgetText::SetPosition(float x, float y)
   {
-    // ApplicationUpdate widget position
-    SetPosX(static_cast<int>(x));
-    SetPosY(static_cast<int>(y));
+    // ApplicationUpdate widget position - now using absolute position directly
+    SetPosAbsX(static_cast<int>(x));
+    SetPosAbsY(static_cast<int>(y));
 
     // ApplicationUpdate text position based on alignment
     ApplicationUpdateTextPosition();
@@ -128,8 +128,8 @@ namespace ui
   void WidgetText::ApplicationUpdateTextPosition()
   {
     sf::FloatRect textBounds = m_text.getLocalBounds();
-    float posX = static_cast<float>(GetPosX());
-    float posY = static_cast<float>(GetPosY());
+    float posX = static_cast<float>(GetPosAbsX());
+    float posY = static_cast<float>(GetPosAbsY());
 
     // Apply alignment
     switch (m_alignment)
@@ -154,5 +154,10 @@ namespace ui
     m_text.setPosition(posX, posY);
   }
 
+  void WidgetText::UpdatePosition()
+  {
+    // Called when position is changed by container - update SFML text position
+    ApplicationUpdateTextPosition();
+  }
 
 }
