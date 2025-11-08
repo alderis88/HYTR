@@ -10,7 +10,7 @@ void StockMarket::InitializeStockMarket()
 
 	std::ostringstream pathBuilder;
 	pathBuilder << Application::s_dataPath << "item_products.json";
-	LoadStockProducts(pathBuilder.str());
+	LoadJsonStockProducts(pathBuilder.str());
 	
 	// Initialize random quantities for all stock products
 	InitializeProductValues();
@@ -80,7 +80,7 @@ void StockMarket::CycleTimerUpdate()
 	//DebugLog("CycleTime:" + std::to_string(currentCyleTime));
 }
 
-void StockMarket::LoadStockProducts(const std::string& path)
+void StockMarket::LoadJsonStockProducts(const std::string& path)
 {
 	DebugLog("Loading Stock Products from: " + path);
 	std::ifstream stream(path);
@@ -337,4 +337,296 @@ void StockMarket::ProductStockReplenishment(StockProduct& product)
 				 "Quantity: " + std::to_string(oldQuantity) + " -> " + std::to_string(product.m_quantity) + 
 				 "/" + std::to_string(product.m_maxQuantity));
 	}
+}
+
+StockProduct* StockMarket::GetStockProductById(const std::string& productId)
+{
+	// Find the product by ID
+	for (auto& product : m_stockProducts)
+	{
+		if (product.m_id == productId)
+		{
+			return &product;
+		}
+	}
+	
+	// Product not found
+	return nullptr;
+}
+
+bool StockMarket::ValidateBuyFromStock(const std::string& productId, uint32_t desiredQuantity)
+{
+	// Get the product by ID
+	StockProduct* product = GetStockProductById(productId);
+	
+	if (product == nullptr)
+	{
+		// Product not found
+		DebugLog("Product with ID: " + productId + " not found in stock market", DebugType::Warning);
+		return false;
+	}
+	
+	// Check if desired quantity is available
+	bool isValidTrade = product->m_quantity >= desiredQuantity;
+	
+	// Debug log the validation result
+	DebugLog("Product: " + product->m_name + " (ID: " + productId + ") - " +
+			 "Desired quantity: " + std::to_string(desiredQuantity) + 
+			 ", Available: " + std::to_string(product->m_quantity) + 
+			 ", Valid trade: " + (isValidTrade ? "true" : "false"));
+	
+	return isValidTrade;
+}
+
+bool StockMarket::BuyFromStock(const std::string& productId, uint32_t quantity)
+{
+	// Get the product by ID
+	StockProduct* product = GetStockProductById(productId);
+	
+	if (product == nullptr)
+	{
+		// Product not found
+		DebugLog("BuyFromStock - Product with ID: " + productId + " not found in stock market", DebugType::Warning);
+		return false;
+	}
+	
+	// Check if we have enough stock
+	if (product->m_quantity < quantity)
+	{
+		DebugLog("BuyFromStock - Not enough stock for product: " + product->m_name + 
+				 " (ID: " + productId + ") - Requested: " + std::to_string(quantity) + 
+				 ", Available: " + std::to_string(product->m_quantity), DebugType::Warning);
+		return false;
+	}
+	
+	// Store old quantity for logging
+	uint32_t oldQuantity = product->m_quantity;
+	
+	// Reduce stock quantity exactly by the requested amount
+	product->m_quantity -= quantity;
+	
+	// Debug log the purchase
+	DebugLog("BuyFromStock - Product: " + product->m_name + " (ID: " + productId + ") - " +
+			 "Bought: " + std::to_string(quantity) + 
+			 ", Quantity: " + std::to_string(oldQuantity) + " -> " + std::to_string(product->m_quantity) + 
+			 "/" + std::to_string(product->m_maxQuantity));
+	
+	return true;
+}
+
+void StockMarket::SellForStock(const std::string& productId, uint32_t quantity)
+{
+	// Get the product by ID
+	StockProduct* product = GetStockProductById(productId);
+	
+	if (product == nullptr)
+	{
+		// Product not found
+		DebugLog("SellForStock - Product with ID: " + productId + " not found in stock market", DebugType::Warning);
+		return;
+	}
+	
+	// Store old quantity for logging
+	uint32_t oldQuantity = product->m_quantity;
+	
+	// Calculate the actual stock increase using sellStackRatio
+	uint32_t stockIncrease = static_cast<uint32_t>(quantity * product->m_sellStackRatio);
+	
+	// Ensure we don't exceed max quantity
+	product->m_quantity = std::min(product->m_maxQuantity, product->m_quantity + stockIncrease);
+	
+	// Debug log the sale
+	DebugLog("SellForStock - Product: " + product->m_name + " (ID: " + productId + ") - " +
+			 "Sold: " + std::to_string(quantity) + 
+			 ", Stock increase: " + std::to_string(stockIncrease) + 
+			 " (ratio: " + std::to_string(product->m_sellStackRatio) + "), " +
+			 "Quantity: " + std::to_string(oldQuantity) + " -> " + std::to_string(product->m_quantity) + 
+			 "/" + std::to_string(product->m_maxQuantity));
+}
+
+void StockMarket::LoadJsonStockVendors(const std::string& path)
+{
+	DebugLog("Loading Stock Vendors from: " + path);
+	std::ifstream stream(path);
+	std::string fileData((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
+
+	Json::Document document;
+	document.Parse(fileData.c_str());
+	assert(!document.HasParseError());
+
+	assert(document.IsObject());
+
+	//characters
+	assert(document.HasMember("characters"));
+	const Json::Value& arrayObject = document["characters"];
+	assert(arrayObject.IsArray());
+	for (Json::SizeType i = 0; i < arrayObject.Size(); i++)
+	{
+		StockVendor newVendor;
+
+		// id
+		assert(arrayObject[i].HasMember("id"));
+		assert(arrayObject[i]["id"].IsString());
+		newVendor.m_id = arrayObject[i]["id"].GetString();
+
+		// product_id
+		assert(arrayObject[i].HasMember("product_id"));
+		assert(arrayObject[i]["product_id"].IsString());
+		newVendor.m_productId = arrayObject[i]["product_id"].GetString();
+
+		// name
+		assert(arrayObject[i].HasMember("name"));
+		assert(arrayObject[i]["name"].IsString());
+		newVendor.m_name = arrayObject[i]["name"].GetString();
+
+		// alias (optional)
+		if (arrayObject[i].HasMember("alias"))
+		{
+			assert(arrayObject[i]["alias"].IsString());
+			newVendor.m_alias = arrayObject[i]["alias"].GetString();
+		}
+
+		// company
+		assert(arrayObject[i].HasMember("company"));
+		assert(arrayObject[i]["company"].IsString());
+		newVendor.m_company = arrayObject[i]["company"].GetString();
+
+		// role
+		assert(arrayObject[i].HasMember("role"));
+		assert(arrayObject[i]["role"].IsString());
+		newVendor.m_role = arrayObject[i]["role"].GetString();
+
+		// profile
+		assert(arrayObject[i].HasMember("profile"));
+		assert(arrayObject[i]["profile"].IsString());
+		newVendor.m_profile = arrayObject[i]["profile"].GetString();
+
+		// appearance
+		assert(arrayObject[i].HasMember("appearance"));
+		assert(arrayObject[i]["appearance"].IsString());
+		newVendor.m_appearance = arrayObject[i]["appearance"].GetString();
+
+		// mood
+		assert(arrayObject[i].HasMember("mood"));
+		assert(arrayObject[i]["mood"].IsString());
+		newVendor.m_mood = arrayObject[i]["mood"].GetString();
+
+		// colorTheme
+		assert(arrayObject[i].HasMember("colorTheme"));
+		const Json::Value& colorArray = arrayObject[i]["colorTheme"];
+		assert(colorArray.IsArray());
+		for (Json::SizeType j = 0; j < colorArray.Size(); j++)
+		{
+			assert(colorArray[j].IsString());
+			newVendor.m_colorTheme.push_back(colorArray[j].GetString());
+		}
+
+		// quote
+		assert(arrayObject[i].HasMember("quote"));
+		assert(arrayObject[i]["quote"].IsString());
+		newVendor.m_quote = arrayObject[i]["quote"].GetString();
+
+		// style
+		assert(arrayObject[i].HasMember("style"));
+		assert(arrayObject[i]["style"].IsString());
+		newVendor.m_style = arrayObject[i]["style"].GetString();
+
+		// personality
+		assert(arrayObject[i].HasMember("personality"));
+		const Json::Value& personalityObject = arrayObject[i]["personality"];
+		assert(personalityObject.IsObject());
+
+		assert(personalityObject.HasMember("discipline"));
+		assert(personalityObject["discipline"].IsInt());
+		newVendor.m_personality.discipline = static_cast<uint32_t>(personalityObject["discipline"].GetInt());
+
+		assert(personalityObject.HasMember("riskTaking"));
+		assert(personalityObject["riskTaking"].IsInt());
+		newVendor.m_personality.riskTaking = static_cast<uint32_t>(personalityObject["riskTaking"].GetInt());
+
+		assert(personalityObject.HasMember("greed"));
+		assert(personalityObject["greed"].IsInt());
+		newVendor.m_personality.greed = static_cast<uint32_t>(personalityObject["greed"].GetInt());
+
+		assert(personalityObject.HasMember("honor"));
+		assert(personalityObject["honor"].IsInt());
+		newVendor.m_personality.honor = static_cast<uint32_t>(personalityObject["honor"].GetInt());
+
+		m_stockVendors.push_back(std::move(newVendor));
+	}
+	
+	DebugLog("Loaded " + std::to_string(m_stockVendors.size()) + " stock vendors");
+}
+
+void StockMarket::LoadJsonNews(const std::string& path)
+{
+	DebugLog("Loading News from: " + path);
+	std::ifstream stream(path);
+	std::string fileData((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
+
+	Json::Document document;
+	document.Parse(fileData.c_str());
+	assert(!document.HasParseError());
+
+	assert(document.IsObject());
+
+	//news
+	assert(document.HasMember("news"));
+	const Json::Value& arrayObject = document["news"];
+	assert(arrayObject.IsArray());
+	for (Json::SizeType i = 0; i < arrayObject.Size(); i++)
+	{
+		News newNews;
+
+		// newsContent
+		assert(arrayObject[i].IsString());
+		newNews.m_newsContent = arrayObject[i].GetString();
+
+		m_news.push_back(std::move(newNews));
+	}
+	
+	// Shuffle the news items randomly
+	std::shuffle(m_news.begin(), m_news.end(), Application::GetRandomGenerator());
+
+	// Reset news index to 0
+	m_newsIndex = 0;
+
+	DebugLog("Loaded and shuffled " + std::to_string(m_news.size()) + " news items");
+}
+
+News* StockMarket::GetNextNews()
+{
+	// Check if we have any news items
+	if (m_news.empty())
+	{
+		DebugLog("GetNextNews - No news items available", DebugType::Warning);
+		return nullptr;
+	}
+	
+	// Ensure index is within bounds before accessing
+	if (m_newsIndex >= m_news.size())
+	{
+		m_newsIndex = 0;
+		DebugLog("GetNextNews - Index was out of bounds, reset to 0");
+	}
+	
+	// Get the current news item (safe now)
+	News* currentNews = &m_news[m_newsIndex];
+	
+	// Debug log before incrementing
+	DebugLog("GetNextNews - Returning news at index " + std::to_string(m_newsIndex));
+	
+	// Increment the index for next call
+	m_newsIndex++;
+	
+	// Check if next index would overflow, reset and shuffle if so
+	if (m_newsIndex >= m_news.size())
+	{
+		m_newsIndex = 0;
+		// Shuffle the news items randomly
+		std::shuffle(m_news.begin(), m_news.end(), Application::GetRandomGenerator());
+		DebugLog("GetNextNews - Reached end of news, reset to 0 and reshuffled for next call");
+	}
+	
+	return currentNews;
 }
