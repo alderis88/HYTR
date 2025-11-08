@@ -27,8 +27,5 @@
     <None Include="..\..\data\vendor_characters.json">
       <Filter>data</Filter>
     </None>
-    <None Include="..\..\data\news.json">
-      <Filter>data</Filter>
-    </None>
   </ItemGroup>
 </Project>

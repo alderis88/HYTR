@@ -91,6 +91,7 @@ namespace ui
 
 		// Always draw text on top
 		context.draw(m_text);
+		DrawDebugBounds(context);
 	}
 
 
@@ -101,9 +102,25 @@ namespace ui
 
 		// Center the text in the button
 		sf::FloatRect textBounds = m_text.getLocalBounds();
-		float centerX = GetPosX() + (GetWidth() / 2.0f) - (textBounds.width / 2.0f);
-		float centerY = GetPosY() + (GetHeight() / 2.0f) - (textBounds.height / 2.0f);
+		float centerX = GetAbsolutePosX() + (GetWidth() / 2.0f) - (textBounds.width / 2.0f);
+		float centerY = GetAbsolutePosY() + (GetHeight() / 2.0f) - (textBounds.height / 2.0f);
 		m_text.setPosition(centerX, centerY);
+	}
+
+	void WidgetButton::OnAbsolutePositionChanged()
+	{
+		// First let image update its sprite position
+		WidgetImage::OnAbsolutePositionChanged();
+		// Re-center text in button
+		if (!m_text.getString().isEmpty())
+		{
+			sf::FloatRect textBounds = m_text.getLocalBounds();
+			float centerX = GetAbsolutePosX() + (GetWidth() / 2.0f) - (textBounds.width / 2.0f);
+			float centerY = GetAbsolutePosY() + (GetHeight() / 2.0f) - (textBounds.height / 2.0f);
+			centerX -= textBounds.left; // Adjust for local bounds offset
+			centerY -= textBounds.top;
+			m_text.setPosition(centerX, centerY);
+		}
 	}
 
 	void WidgetButton::SetFont(const sf::Font& font)
@@ -158,7 +175,7 @@ namespace ui
 
 	bool WidgetButton::IsPointInside(float x, float y) const
 	{
-		return (x >= GetPosX() && x <= GetPosX() + GetWidth() &&
-				y >= GetPosY() && y <= GetPosY() + GetHeight());
+		return (x >= GetAbsolutePosX() && x <= GetAbsolutePosX() + GetWidth() &&
+				y >= GetAbsolutePosY() && y <= GetAbsolutePosY() + GetHeight());
 	}
 }

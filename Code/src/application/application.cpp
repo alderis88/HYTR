@@ -1,21 +1,25 @@
 #include "pch.h"
-#include "../framework/window.h"
-#include "../framework/WidgetImage.h"
-#include "../framework/WidgetButton.h"
-#include "../framework/WidgetText.h"
-#include "inventory.h"
-#include "application.h"
-#include "utilTools.h"
-#include "stockMarket.h"
+#include "application.h" // Own header (already includes needed UI + other headers)
+#include "stockMarket.h" // StockMarket used directly in StockMarketSetup()
+#include "inventory.h"   // Inventory used directly in InventorySetup()
+#include "utilTools.h"   // Utility functions used in this translation unit
+#include <sstream>
+#include <iomanip>
+#include <cmath>
 
 // Static member definitions
 std::string Application::s_dataPath;
 std::string Application::s_assetsPath;
 
-Application::Application() = default;
+Application::Application()
+	: m_mainMenuContainer(nullptr)
+	, m_subMenuContainer(nullptr)
+	, m_gameTimeText(nullptr)
+{
+}
 Application::~Application() = default;
 
-float Application::s_totalGameTime = 0.0f; // Initialize total game time to 0
+double Application::s_totalGameTime = 0.0; // Initialize total game time to 0 (double precision)
 bool Application::s_pauseGame = false;
 float Application::s_stockGameSpeed = 1.0f;
 
@@ -38,7 +42,7 @@ void Application::Initialize()
 
 	if (m_mainWindow = std::make_unique<ui::Window>())
 	{
-		// here you can create your layout
+		// Initialize UI and add widgets to the root container
 		InitializeUI();
 	}
 }
@@ -62,44 +66,7 @@ void Application::InventorySetup()
 	m_playerInventory->InventoryInitialize();
 }
 
-void Application::InitializeUI()
-{
-
-	// Create background image that fills the entire window (1920x1080) - now with filename in constructor
-	auto imageWidget = std::make_unique<ui::WidgetImage>(0, 0, 1920, 1080, "BgInit.png");
-	m_mainWindow->AddWidget(std::move(imageWidget));
-
-	// Create title text "Hyper Trade" at the top (10 pixels from top)
-	auto titleText = std::make_unique<ui::WidgetText>(960, 100, "Hyper Trade");
-	titleText->SetCharacterSize(30);
-	titleText->SetStyle(sf::Text::Bold);
-	titleText->SetAlignment(ui::WidgetText::Alignment::Center);
-	titleText->SetTextColor(sf::Color::White);
-	m_mainWindow->AddWidget(std::move(titleText));
-
-	// Create a button in the center of the screen
-	auto button = std::make_unique<ui::WidgetButton>(860, 500, 300, 300);
-	button->LoadImage("FluxNeurals.png");
-	button->SetText("Test Button");
-	button->SetOnClickCallback([]()
-		{
-			// Button click callback - you can add functionality here
-		});
-	m_mainWindow->AddWidget(std::move(button));
-
-
-	// Create Gametime at right corner
-	m_gameTimeText = std::make_unique<ui::WidgetText>(1700, 100, "GametimeInitText");
-	m_gameTimeText->SetCharacterSize(20);
-	m_gameTimeText->SetStyle(sf::Text::Bold);
-	m_gameTimeText->SetAlignment(ui::WidgetText::Alignment::Center);
-	m_gameTimeText->SetTextColor(sf::Color::White);
-
-	m_mainWindow->AddWidget(std::move(m_gameTimeText));
-	// Add a copy of the widget to the main window
-//m_mainWindow->AddWidget(std::make_unique<ui::WidgetText>(*m_gameTimeText));
-
-}
+// void Application::InitializeUI() moved to applicationUI.cpp
 
 void Application::Run()
 {
@@ -138,25 +105,20 @@ void Application::ApplicationUpdate(sf::Time delta)
 
 void Application::TotalGameTimeUpdate(sf::Time& delta)
 {
-	s_totalGameTime += delta.asSeconds();
+	s_totalGameTime += static_cast<double>(delta.asSeconds());
 	if (m_gameTimeText)
 	{
-		//DebugLog("Gametime: " + std::to_string(totalGameTime) + " s", DebugType::Message);
-
-		m_gameTimeText->SetText("Gametime: " + std::to_string(s_totalGameTime) + "s");
-	}
-	else
-	{
-		//DebugLog("Timetext not exist", DebugType::Error);
+		// Display only whole seconds (truncated)
+		m_gameTimeText->SetText(std::to_string(static_cast<int>(s_totalGameTime)) + " sec");
 	}
 }
 
 void Application::DisplayHandle()
 {
-
 	m_renderContext->clear();
+	if (m_rootWidgetContainer)
 	{
-		m_mainWindow->Draw(*m_renderContext);
+		m_rootWidgetContainer->Draw(*m_renderContext);
 	}
 	m_renderContext->display();
 }
@@ -172,7 +134,11 @@ void Application::InputHandle()
 		}
 		else
 		{
-			m_mainWindow->ProcessInput(event);
+			// Process input through the root widget container
+			if (m_rootWidgetContainer)
+			{
+				m_rootWidgetContainer->ProcessInput(event);
+			}
 		}
 	}
 }

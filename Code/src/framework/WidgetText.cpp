@@ -4,26 +4,36 @@
 
 namespace ui
 {
-	WidgetText::WidgetText(int posX, int posY, const std::string& text)
-		: Widget(posX, posY, 0, 0)  // Width and height will be calculated based on text
+	WidgetText::WidgetText(int posX, int posY, const std::string& text, const std::string& fontFilename)
+		: Widget(posX, posY, 0, 0)  // Width/height computed from text
 		, m_hasCustomFont(false)
 		, m_alignment(Alignment::Left)
 		, m_textString(text)
+		, m_fontFilename(fontFilename)
 	{
-		std::string fullPath = Application::s_assetsPath + "FontBasic.ttf";
-
-		// LoadStockProducts default font from assets
-		if (m_defaultFont.loadFromFile(fullPath))
+		// Megprobaljuk betolteni a kervenyzett fontot; ha sikertelen, fallback a default-ra
+		if (!fontFilename.empty())
 		{
-			m_text.setFont(m_defaultFont);
+			if (!LoadFont(fontFilename))
+			{
+				// Fallback: probaljuk a FontBasic.ttf-t ha nem az volt
+				if (fontFilename != "FontBasic.ttf")
+				{
+					LoadFont("FontBasic.ttf");
+				}
+			}
+		}
+		else
+		{
+			LoadFont("FontBasic.ttf");
 		}
 
-		// Set default text properties
+		// Alap szoveg tulajdonsagok
 		m_text.setFillColor(sf::Color::White);
 		m_text.setCharacterSize(24);
 		m_text.setStyle(sf::Text::Regular);
 
-		// Set the text and ApplicationUpdate position
+		// Beallitjuk a szoveget
 		SetText(text);
 	}
 
@@ -39,6 +49,7 @@ namespace ui
 	void WidgetText::Draw(RenderContext& context) const
 	{
 		context.draw(m_text);
+		DrawDebugBounds(context);
 	}
 
 	void WidgetText::SetText(const std::string& text)
@@ -67,6 +78,18 @@ namespace ui
 		}
 	}
 
+	bool WidgetText::LoadFont(const std::string& fontFilename)
+	{
+		std::string fullPath = Application::s_assetsPath + fontFilename;
+		if (m_defaultFont.loadFromFile(fullPath))
+		{
+			m_text.setFont(m_defaultFont);
+			m_fontFilename = fontFilename;
+			return true;
+		}
+		return false;
+	}
+
 	void WidgetText::SetTextColor(const sf::Color& color)
 	{
 		m_text.setFillColor(color);
@@ -93,7 +116,7 @@ namespace ui
 			SetText(m_textString);
 		}
 	}
-	
+
 	void WidgetText::SetPosition(float x, float y)
 	{
 		// ApplicationUpdate widget position
@@ -128,8 +151,8 @@ namespace ui
 	void WidgetText::ApplicationUpdateTextPosition()
 	{
 		sf::FloatRect textBounds = m_text.getLocalBounds();
-		float posX = static_cast<float>(GetPosX());
-		float posY = static_cast<float>(GetPosY());
+		float posX = static_cast<float>(GetAbsolutePosX());
+		float posY = static_cast<float>(GetAbsolutePosY());
 
 		// Apply alignment
 		switch (m_alignment)
@@ -152,6 +175,12 @@ namespace ui
 		posY -= textBounds.top;
 
 		m_text.setPosition(posX, posY);
+	}
+
+	void WidgetText::OnAbsolutePositionChanged()
+	{
+		// Re-apply alignment relative to new absolute position
+		ApplicationUpdateTextPosition();
 	}
 
 

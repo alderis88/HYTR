@@ -21,6 +21,9 @@ namespace ui
 		void SetScale(float scaleX, float scaleY);
 
 	protected:
+		virtual void OnAbsolutePositionChanged() override; // Update sprite position
+
+	protected:
 		sf::Texture m_texture;
 		sf::Sprite m_sprite;
 		bool m_imageLoadStockProductsed;

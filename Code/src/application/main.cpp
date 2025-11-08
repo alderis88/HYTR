@@ -2,7 +2,7 @@
 #include "pch.h"
 #include "application.h"
 
-int main()
+uint32_t main()
 {
 
 	if( auto app = std::make_unique<Application>() )

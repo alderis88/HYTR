@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "../framework/widget.h"
 
 namespace ui
@@ -17,6 +18,7 @@ namespace ui
 	};
 
 	Image::Image(const std::string& imagePath)
+		: Widget(0, 0, 0, 0) // Call base constructor with default values
 	{
 		if (!m_texture.loadFromFile(imagePath))
 		{

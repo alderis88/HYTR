@@ -2,7 +2,6 @@
   "characters": [
     {
       "id": "TRI_CEO",
-      "product_id": "TRI",
       "name": "Boros Kane",
       "company": "Triton Dynamics",
       "role": "CEO",
@@ -10,7 +9,7 @@
       "appearance": "Worn exosuit armor, face smudged with grease, a glowing blue cyber-implant behind his left eye, rugged build.",
       "mood": "Reliable, technocratic",
       "colorTheme": ["#3B6EA5", "#D6A23D"],
-      "quote": "I don't believe in promises - only in metal.",
+      "quote": "I don’t believe in promises — only in metal.",
       "personality": {
         "discipline": 8,
         "riskTaking": 6,
@@ -21,7 +20,6 @@
     },
     {
       "id": "NFX_AI",
-      "product_id": "NFX",
       "name": "FLX-9",
       "alias": "The Whisper",
       "company": "Flux Neural Systems",
@@ -30,7 +28,7 @@
       "appearance": "Suspended in a fluid capsule, transparent skull with visible optical fibers glowing pink and violet, mechanical neural implants.",
       "mood": "Futuristic, organic",
       "colorTheme": ["#E04DD2", "#A25AF8"],
-      "quote": "Data never lies - humans just refuse to read it.",
+      "quote": "Data never lies — humans just refuse to read it.",
       "personality": {
         "discipline": 10,
         "riskTaking": 9,
@@ -41,7 +39,6 @@
     },
     {
       "id": "ZER_SCI",
-      "product_id": "ZER",
       "name": "Dr. Nyra Voss",
       "company": "Zeromass Labs",
       "role": "Lead Quantum Scientist",
@@ -49,7 +46,7 @@
       "appearance": "Tall, elegant figure wearing black and violet scientific robes, slim frame, calm precision in her gaze.",
       "mood": "Mysterious, elegant",
       "colorTheme": ["#4A148C", "#000000"],
-      "quote": "The universe doesn't ask for permission.",
+      "quote": "The universe doesn’t ask for permission.",
       "personality": {
         "discipline": 10,
         "riskTaking": 4,
@@ -60,7 +57,6 @@
     },
     {
       "id": "NAN_YAK",
-      "product_id": "NAN",
       "name": "Riku Tanaka",
       "company": "Nanodyne Industries",
       "role": "Corporate Enforcer / CEO",
@@ -68,7 +64,7 @@
       "appearance": "Dark tailored suit with faint glowing magenta tattoos underneath, steel gaze, mirrored cyber-lenses reflecting neon light.",
       "mood": "Precise, technological",
       "colorTheme": [ "#FF007F", "#555B6E" ],
-      "quote": "Precision is not mercy - it's dominance.",
+      "quote": "Precision is not mercy — it’s dominance.",
       "personality": {
         "discipline": 9,
         "riskTaking": 7,
@@ -79,15 +75,14 @@
     },
     {
       "id": "LUM_CEO",
-      "product_id": "LUM",
       "name": "Elara Sunvale",
       "company": "LumaCore Energy",
       "role": "Founder & CEO",
-      "profile": "Ambassador of light and energy - an idealist leader who literally illuminates the future.",
+      "profile": "Ambassador of light and energy — an idealist leader who literally illuminates the future.",
       "appearance": "White and gold attire surrounded by a soft luminescent aura, her eyes radiate pure light instead of lenses.",
       "mood": "Radiant, optimistic",
       "colorTheme": ["#FFD54F", "#FFB74D", "#FFFFFF"],
-      "quote": "Light not only reveals - it guides.",
+      "quote": "Light not only reveals — it guides.",
       "personality": {
         "discipline": 8,
         "riskTaking": 5,

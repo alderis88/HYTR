@@ -7,6 +7,7 @@
     <ClCompile Include="WidgetImage.cpp" />
     <ClCompile Include="WidgetButton.cpp" />
     <ClCompile Include="WidgetText.cpp" />
+    <ClCompile Include="WidgetContainer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -15,5 +16,6 @@
     <ClInclude Include="WidgetImage.h" />
     <ClInclude Include="WidgetButton.h" />
     <ClInclude Include="WidgetText.h" />
+    <ClInclude Include="WidgetContainer.h" />
   </ItemGroup>
 </Project>

@@ -90,6 +90,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="application.cpp" />
+    <ClCompile Include="applicationUI.cpp" />
     <ClCompile Include="inventory.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp">
@@ -118,7 +119,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\data\item_products.json" />
-    <None Include="..\..\data\news.json" />
     <None Include="..\..\data\vendor_characters.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

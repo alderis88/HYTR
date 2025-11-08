@@ -26,6 +26,9 @@ namespace ui
 		bool IsPressed() const;
 		void SetOnClickCallback(std::function<void()> callback);
 
+	protected:
+		virtual void OnAbsolutePositionChanged() override; // Keep text centered when moved
+
 	private:
 		sf::Font m_font;
 		sf::Text m_text;

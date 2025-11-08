@@ -30,6 +30,7 @@ namespace ui
 		{
 			context.draw(m_sprite);
 		}
+		DrawDebugBounds(context);
 	}
 
 	bool WidgetImage::LoadImage(const std::string& imagePath)
@@ -40,17 +41,14 @@ namespace ui
 		if (m_texture.loadFromFile(fullPath))
 		{
 			m_sprite.setTexture(m_texture);
-
-			// Set the position based on widget coordinates
-			m_sprite.setPosition(static_cast<float>(GetPosX()), static_cast<float>(GetPosY()));
-
 			// Scale the image to fit the widget dimensions if needed
 			sf::Vector2u textureSize = m_texture.getSize();
 			float scaleX = static_cast<float>(GetWidth()) / textureSize.x;
 			float scaleY = static_cast<float>(GetHeight()) / textureSize.y;
 			m_sprite.setScale(scaleX, scaleY);
-
+			// Position will be set by OnAbsolutePositionChanged ensuring parent offset applied
 			m_imageLoadStockProductsed = true;
+			OnAbsolutePositionChanged();
 			return true;
 		}
 		else
@@ -68,5 +66,13 @@ namespace ui
 	void WidgetImage::SetScale(float scaleX, float scaleY)
 	{
 		m_sprite.setScale(scaleX, scaleY);
+	}
+
+	void WidgetImage::OnAbsolutePositionChanged()
+	{
+		if (m_imageLoadStockProductsed)
+		{
+			m_sprite.setPosition(static_cast<float>(GetAbsolutePosX()), static_cast<float>(GetAbsolutePosY()));
+		}
 	}
 }

@@ -1,0 +1,40 @@
+
+Az Application::InitializeUI() adja be a widgeteket.
+Ird át a programot, hogy a WidgetContainer használatával a RootWidgetContainer->Add adja be a widget-eket.
+
+  // Debug drawing of container bounds
+  void EnableDebugDraw(bool enable, sf::Color color = sf::Color(255, 0, 0, 80));
+
+  enum class LayoutType
+  {
+    Native,     // Manual positioning - widgets keep their original positions
+    Horizontal, // Widgets arranged horizontally side-by-side with optional spacing
+    Vertical    // Widgets arranged vertically top-to-bottom with optional spacing
+  };
+  
+<ui::WidgetContainer>(0, 0, 1920, 1080);
+<ui::WidgetImage>(0, 0, 1920, 1080, "BgInit.png");
+<ui::WidgetText>(960, 100, "Hyper Trade");
+<ui::WidgetText>(1700, 100, "GametimeInitText");
+
+	//---------------------------------------------------------------------------
+	// 2. Menu Main Container - Horizontal Layout (0, 200, full screen, 300)
+	//---------------------------------------------------------------------------
+ menuMainContainer = std::make_unique<ui::WidgetContainer>(0, 200, 1920, 300);
+ Horizontal, 50, 50, 20);
+ 
+ 		auto btn = std::make_unique<ui::WidgetButton>(0, 0, 300, 100);
+		btn->LoadImage(i==0?"ButtonMain1.png": i==1?"ButtonMain2.png":"ButtonMain3.png");
+    
+	//--------------------------------------------------------------------------
+	// 3. Menu Sub Container - Vertical Layout (50, 500, 500, 400)
+	//--------------------------------------------------------------------------
+	auto menuSubContainer = std::make_unique<ui::WidgetContainer>(50, 500, 500, 400);
+	menuSubContainer->SetLayout(ui::LayoutType::Vertical, 20, 10, 10); // spacing=20, paddingX=10, paddingY=10
+
+	for (int i = 0; i < 4; ++i)
+	{
+		auto subBtn = std::make_unique<ui::WidgetButton>(0, 0, 200, 60);
+		subBtn->LoadImage(i%3==0?"ButtonMain1.png": i%3==1?"ButtonMain2.png":"ButtonMain3.png");
+		subBtn->SetOnClickCallback([i]() { /* Sub button i click */ });
+		menuSubContainer->AddWidget(std::move(subBtn));    
