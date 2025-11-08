@@ -3,19 +3,23 @@
 #include "utilTools.h"
 #include "application.h"
 
+/// @brief Initialize the entire stock market system
+/// Loads all data files and sets up initial market state
 void StockMarket::InitializeStockMarket()
 {
+	// Reset market timing
 	m_currentCycleTime = 0.0f;
 	m_cycleCount = 0;
 
+	// Load stock products from JSON
 	std::ostringstream pathBuilder;
 	pathBuilder << Application::s_dataPath << "item_products.json";
 	LoadJsonStockProducts(pathBuilder.str());
 	
-	// Initialize random quantities for all stock products
+	// Initialize random starting values for all products
 	InitializeProductValues();
 
-	DebugLog("Stock Init Done");
+	DebugLog("Stock Market initialization completed");
 	//DebugLog(m_stockProducts[3].m_name);
 
 	//Randomize starting prices for 5 stock products
@@ -23,21 +27,24 @@ void StockMarket::InitializeStockMarket()
 
 }
 
+/// @brief Main update loop for the stock market system
+/// Called every frame to handle timing and trigger market cycles
+/// @param delta Time elapsed since last frame
 void StockMarket::StockMarketUpdate(sf::Time delta)
 {
+	// Only update when game is not paused
 	if (!Application::s_pauseGame)
 	{
+		// Accumulate time for market cycle timing
 		m_currentCycleTime += delta.asSeconds() /* * Application::s_stockGameSpeed */;
 
+		// Check if it's time for a new market cycle
 		if (m_currentCycleTime >= s_stockCycleTime)
 		{
-			// Perform stock market ApplicationUpdate logic here
-			// For example, adjust stock prices, notify players, etc.
-			// Reset the cycle timer
-
-			m_currentCycleTime = 0.0f;
-			m_cycleCount++;
-			StockMarketCycleStep();
+			// Execute market cycle: price updates, stock replenishment, trend shifts
+			m_currentCycleTime = 0.0f;  // Reset cycle timer
+			m_cycleCount++;             // Increment cycle counter
+			StockMarketCycleStep();     // Perform all market updates
 		}
 
 		// Always Update the cycle timer, even if no cycle step occurred
@@ -45,9 +52,11 @@ void StockMarket::StockMarketUpdate(sf::Time delta)
 	}
 }
 
+/// @brief Execute one complete market cycle
+/// Updates trends, reduces player impact, replenishes stock, and recalculates prices
 void StockMarket::StockMarketCycleStep()
 {
-	DebugLog("Cycle:" + std::to_string(m_cycleCount));
+	DebugLog("Market Cycle #" + std::to_string(m_cycleCount) + " executing");
 
 	// Update trend pointers for all stock products
 	for (auto& product : m_stockProducts)
@@ -75,11 +84,16 @@ void StockMarket::StockMarketCycleStep()
 
 }
 
+/// @brief Update cycle timer (mainly for debugging purposes)
+/// Currently disabled but can be used to monitor cycle timing
 void StockMarket::CycleTimerUpdate()
 {
 	//DebugLog("CycleTime:" + std::to_string(m_currentCycleTime));
 }
 
+/// @brief Load stock products from JSON file
+/// Parses item_products.json and populates the m_stockProducts vector
+/// @param path Full path to the JSON file to load
 void StockMarket::LoadJsonStockProducts(const std::string& path)
 {
 	DebugLog("Loading Stock Products from: " + path);
@@ -195,6 +209,8 @@ void StockMarket::LoadJsonStockProducts(const std::string& path)
 	}
 }
 
+/// @brief Initialize random starting values for all loaded products
+/// Sets random quantities, trend pointers, player impact, and calculates initial prices
 void StockMarket::InitializeProductValues()
 {
 	// Create uniform distribution for trend pointer (0-49)
@@ -228,6 +244,9 @@ void StockMarket::InitializeProductValues()
 	}
 }
 
+/// @brief Calculate and update the current price for a product
+/// Uses trend data, random influence, and player impact to determine final price
+/// @param product Reference to the product to update
 void StockMarket::CalculateProductPrice(StockProduct& product)
 {
 	// Get the trend value from m_trends using m_trendPointer as index
@@ -288,6 +307,9 @@ void StockMarket::CalculateProductPrice(StockProduct& product)
 			 ", Trend Increased: " + (product.m_trendIncreased ? "true" : "false"));
 }
 
+/// @brief Reduce player impact on product price over time
+/// Gradually moves player impact back toward 0 (neutral)
+/// @param product Reference to the product to update
 void StockMarket::ReducePlayerImpact(StockProduct& product)
 {
 	if (product.m_currentPlayerImpact != 0.0f)
@@ -314,6 +336,9 @@ void StockMarket::ReducePlayerImpact(StockProduct& product)
 	}
 }
 
+/// @brief Replenish stock quantity for a product
+/// Adds random amount based on stackReplenishment value (75%-125% variation)
+/// @param product Reference to the product to replenish
 void StockMarket::ProductStockReplenishment(StockProduct& product)
 {
 	// Generate random number between 0.75 and 1.25
@@ -339,6 +364,9 @@ void StockMarket::ProductStockReplenishment(StockProduct& product)
 	}
 }
 
+/// @brief Find a stock product by its unique ID
+/// @param productId The product ID to search for
+/// @return Pointer to the product if found, nullptr if not found
 StockProduct* StockMarket::GetStockProductById(const std::string& productId)
 {
 	// Find the product by ID
@@ -354,6 +382,11 @@ StockProduct* StockMarket::GetStockProductById(const std::string& productId)
 	return nullptr;
 }
 
+/// @brief Validate if a buy transaction is possible
+/// Checks if sufficient stock is available without actually executing the trade
+/// @param productId ID of the product to check
+/// @param desiredQuantity Amount the player wants to buy
+/// @return true if transaction is valid, false if insufficient stock or product not found
 bool StockMarket::ValidateBuyFromStock(const std::string& productId, uint32_t desiredQuantity)
 {
 	// Get the product by ID
@@ -378,14 +411,18 @@ bool StockMarket::ValidateBuyFromStock(const std::string& productId, uint32_t de
 	return isValidTrade;
 }
 
+/// @brief Execute a buy transaction from stock market
+/// Reduces the available stock quantity by the exact amount purchased
+/// @param productId ID of the product to buy  
+/// @param quantity Amount to purchase
+/// @return true if successful, false if insufficient stock or product not found
 bool StockMarket::BuyFromStock(const std::string& productId, uint32_t quantity)
 {
-	// Get the product by ID
+	// Find the product in our inventory
 	StockProduct* product = GetStockProductById(productId);
 	
 	if (product == nullptr)
 	{
-		// Product not found
 		DebugLog("BuyFromStock - Product with ID: " + productId + " not found in stock market", DebugType::Warning);
 		return false;
 	}
@@ -414,14 +451,17 @@ bool StockMarket::BuyFromStock(const std::string& productId, uint32_t quantity)
 	return true;
 }
 
+/// @brief Execute a sell transaction to stock market
+/// Increases available stock by quantity * sellStackRatio (not 1:1 ratio)
+/// @param productId ID of the product to sell
+/// @param quantity Amount player is selling
 void StockMarket::SellForStock(const std::string& productId, uint32_t quantity)
 {
-	// Get the product by ID
+	// Find the product in our inventory
 	StockProduct* product = GetStockProductById(productId);
 	
 	if (product == nullptr)
 	{
-		// Product not found
 		DebugLog("SellForStock - Product with ID: " + productId + " not found in stock market", DebugType::Warning);
 		return;
 	}
@@ -444,6 +484,9 @@ void StockMarket::SellForStock(const std::string& productId, uint32_t quantity)
 			 "/" + std::to_string(product->m_maxQuantity));
 }
 
+/// @brief Load vendor characters from JSON file
+/// Parses vendor_characters.json and populates the m_stockVendors vector
+/// @param path Full path to the JSON file to load
 void StockMarket::LoadJsonStockVendors(const std::string& path)
 {
 	DebugLog("Loading Stock Vendors from: " + path);
@@ -558,6 +601,9 @@ void StockMarket::LoadJsonStockVendors(const std::string& path)
 	DebugLog("Loaded " + std::to_string(m_stockVendors.size()) + " stock vendors");
 }
 
+/// @brief Load market news from JSON file
+/// Parses news.json, shuffles items randomly, and resets news index
+/// @param path Full path to the JSON file to load
 void StockMarket::LoadJsonNews(const std::string& path)
 {
 	DebugLog("Loading News from: " + path);
@@ -594,16 +640,19 @@ void StockMarket::LoadJsonNews(const std::string& path)
 	DebugLog("Loaded and shuffled " + std::to_string(m_news.size()) + " news items");
 }
 
+/// @brief Get the next news item in cyclical rotation
+/// When all news have been shown, reshuffles and starts over
+/// @return Pointer to next news item, nullptr if no news loaded
 News* StockMarket::GetNextNews()
 {
-	// Check if we have any news items
+	// Safety check: ensure we have news loaded
 	if (m_news.empty())
 	{
 		DebugLog("GetNextNews - No news items available", DebugType::Warning);
 		return nullptr;
 	}
 	
-	// Ensure index is within bounds before accessing
+	// Safety check: ensure index is valid before array access
 	if (m_newsIndex >= m_news.size())
 	{
 		m_newsIndex = 0;
