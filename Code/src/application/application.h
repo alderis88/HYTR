@@ -32,7 +32,7 @@ public:
 	void UI_InitializeGameTimeWidget();
 	void UI_DebugContainers();
 	void SetVideoSettings();
-	void StockMarketSetup();
+
 	void Run();
 	void ApplicationUpdate(sf::Time delta);
 
@@ -51,8 +51,10 @@ public:
 private:
 	void SetDataPath(const char* dataPath);
 	void SetAssetsPath(const char* assetsPath);
-	void InventorySetup();
 
+	void SetupInventory();
+	void SetupStockMarket();
+	
 	void TotalGameTimeUpdate(sf::Time& delta);
 
 	void DisplayHandle();

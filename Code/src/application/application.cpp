@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "application.h" // Own header (already includes needed UI + other headers)
-#include "stockMarket.h" // StockMarket used directly in StockMarketSetup()
-#include "inventory.h"   // Inventory used directly in InventorySetup()
+#include "stockMarket.h" // StockMarket used directly in SetupStockMarket()
+#include "inventory.h"   // Inventory used directly in SetupInventory()
 #include "utilTools.h"   // Utility functions used in this translation unit
 #include <sstream>
 #include <iomanip>
@@ -37,8 +37,8 @@ void Application::Initialize()
 	SetDataPath("../../data/");
 	SetAssetsPath("../../assets/");
 
-	StockMarketSetup();
-	//InventorySetup();
+	SetupStockMarket();
+	SetupInventory();
 
 	if (m_mainWindow = std::make_unique<ui::Window>())
 	{
@@ -54,13 +54,13 @@ void Application::SetVideoSettings()
 	m_renderContext->setFramerateLimit(30);
 }
 
-void Application::StockMarketSetup()
+void Application::SetupStockMarket()
 {
 	m_stockMarket = std::make_unique<StockMarket>();
 	m_stockMarket->InitializeStockMarket();
 }
 
-void Application::InventorySetup()
+void Application::SetupInventory()
 {
 	m_playerInventory = std::make_unique<Inventory>();
 	m_playerInventory->InventoryInitialize();
