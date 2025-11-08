@@ -7,10 +7,12 @@
 
 #include "inventory.h"
 #include "utilTools.h"
+#include "applicationUI.h"
 #include "pch.h"
 
 class Inventory;
 class StockMarket; // forward declaration to avoid circular include
+class ApplicationUI; // forward declaration
 
 namespace ui
 {
@@ -26,9 +28,6 @@ public:
 	void Initialize();
 	void InitializeUI();
 	void InitializeContainersUI();
-	void UI_InitializeRootContainer();
-	void UI_InitializeMainMenuContainer();
-	void UI_InitializeSubMenuContainer();
 	void UI_InitializeGameTimeWidget();
 	void UI_DebugContainers();
 	void SetVideoSettings();
@@ -37,6 +36,7 @@ public:
 	void ApplicationUpdate(sf::Time delta);
 
 	ui::Window* GetMainWindow() const;
+	Inventory* GetPlayerInventory() const;
 
 	static std::string s_dataPath;
 	static std::string s_assetsPath;
@@ -48,6 +48,10 @@ public:
 	// Shared random number generator
 	static std::mt19937& GetRandomGenerator();
 
+	// Public system references for easy access by subsystems
+	std::unique_ptr< Inventory > m_playerInventory;
+	std::unique_ptr< StockMarket > m_stockMarket;
+
 private:
 	void SetDataPath(const char* dataPath);
 	void SetAssetsPath(const char* assetsPath);
@@ -55,7 +59,7 @@ private:
 	void SetupInventory();
 	void SetupStockMarket();
 	void SetupCustomCursor();
-	
+
 	void TotalGameTimeUpdate(sf::Time& delta);
 	void UpdateInputMode();
 	void UpdateGamepadCursor(sf::Time delta);
@@ -65,9 +69,6 @@ private:
 
 	std::unique_ptr< ui::Window > m_mainWindow;
 	std::unique_ptr< RenderContext > m_renderContext;
-
-	std::unique_ptr< Inventory > m_playerInventory;
-	std::unique_ptr< StockMarket > m_stockMarket;
 
 	// Custom cursor
 	sf::Texture m_cursorTexture; // Texture for custom cursor
@@ -82,9 +83,10 @@ private:
 	unsigned int m_gamepadId;                  // ID of the connected gamepad (0-7)
 
 	// Static variables
-	static double s_totalGameTime; // Total game time in seconds (double precision)
+	static float s_totalGameTime; // Total game time in seconds (double precision)
 
 	// UI variables
+	std::unique_ptr<ApplicationUI> m_applicationUI; // UI management class
 	std::unique_ptr<ui::WidgetContainer> m_rootWidgetContainer; // Root container for all widgets
 	ui::WidgetContainer* m_mainMenuContainer; // Pointer to main menu container (owned by root)
 	ui::WidgetContainer* m_subMenuContainer;  // Pointer to sub menu container (owned by root)

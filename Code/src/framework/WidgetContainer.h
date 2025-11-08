@@ -29,15 +29,15 @@ namespace ui
 
     // Layout management
     void SetLayout(LayoutType layout, int spacing = 0);
+    void UpdateLayout(); // Public method to trigger layout update
     LayoutType GetLayout() const { return m_layoutType; }
     int GetSpacing() const { return m_spacing; }
-    void UpdateLayout(); // Recalculate layout after hierarchy changes
 
-    // (Removed local EnableDebugDraw; now inherited from Widget)
+    // Debug drawing of container bounds
+    void EnableDebugDraw(bool enable, sf::Color color = sf::Color(255, 0, 0, 80));
 
   private:
     void ApplyLayout();
-    void RecomputeChildrenAbsolutePositions();
 
     std::vector<WidgetPtr> m_children;
     bool m_debugDraw = false;

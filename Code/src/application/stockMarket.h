@@ -34,11 +34,13 @@ struct News final
 	uint32_t m_currentNewsIndex;    ///< Current index (not used in practice)
 };
 
+class Application; // forward declaration
+
 class StockMarket
 {
 public:
 	// === Core System Functions ===
-	void InitializeStockMarket();
+	void InitializeStockMarket(Application* app);
 	void StockMarketUpdate(sf::Time delta);
 	void StockMarketCycleStep();
 	void CycleTimerUpdate();
@@ -52,6 +54,8 @@ public:
 	// === Product Management Functions ===
 	void InitializeProductValues();
 	void CalculateProductPrice(StockProduct& product);
+	void CalculateOnlyPlayerInfluenceChangePrice(StockProduct& product);
+	void UpdateStockVisual(StockProduct& product);
 	void ReducePlayerImpact(StockProduct& product);
 	void ProductStockReplenishment(StockProduct& product);
 
@@ -66,6 +70,9 @@ public:
 	uint32_t m_cycleCount = 0;           ///< Total number of completed market cycles
 
 private:
+	// === System References ===
+	Application* m_application = nullptr;       ///< Reference to main application instance
+
 	// === Core Data Collections ===
 	std::vector<StockProduct> m_stockProducts;  ///< All available stock products
 	std::vector<StockVendor> m_stockVendors;    ///< All vendor characters

@@ -9,8 +9,13 @@ Inventory::Inventory() = default;
 Inventory::~Inventory() = default;
 
 /// @brief Initialize inventory system with starting values and load products from JSON
-void Inventory::InventoryInitialize()
+/// @param app Reference to the main application instance
+void Inventory::InventoryInitialize(Application* app)
 {
+	// Store application reference
+	m_application = app;
+	DebugLog("Inventory - Application reference set");
+
 	//Starting money
 	m_currentMoney = 10000;
 	
@@ -153,111 +158,6 @@ void Inventory::LoadInventoryProducts(const std::string& path)
 	}
 }
 
-// === Trading Functions ===
-
-/// @brief Buy a product and add it to player inventory
-/// @param productId ID of the product to buy
-/// @param quantity Amount to buy
-/// @param unitPrice Price per unit
-/// @return true if purchase successful, false if insufficient funds or invalid parameters
-bool Inventory::BuyProduct(const std::string& productId, uint32_t quantity, uint32_t unitPrice)
-{
-	if (quantity == 0 || unitPrice == 0)
-	{
-		return false;
-	}
-
-	uint32_t totalCost = quantity * unitPrice;
-	if (totalCost > m_currentMoney)
-	{
-		// Insufficient funds
-		return false;
-	}
-
-	// Check if we need to get product volume from existing inventory or find it another way
-	StockProduct* existingProduct = FindProduct(productId);
-	float productVolume = 0.0f;
-	
-	if (existingProduct)
-	{
-		productVolume = existingProduct->m_volume;
-	}
-	else
-	{
-		// Product not in inventory, need to find volume from loaded products
-		// For now, we'll use a default volume - this should be enhanced to get from stock market
-		productVolume = 1.0f; // Default volume if product not found
-		DebugLog("Warning: Product " + productId + " not found in inventory, using default volume 1.0f", DebugType::Warning);
-	}
-
-	// Calculate volume that would be added
-	float volumeToAdd = quantity * productVolume;
-	
-	// Check if adding this volume would exceed maximum inventory capacity
-	if (m_currentInventoryVolume + volumeToAdd > s_maxInventoryVolume)
-	{
-		// Insufficient inventory space
-		return false;
-	}
-
-	// Deduct money
-	m_currentMoney -= totalCost;
-
-	// Add volume to current inventory
-	m_currentInventoryVolume += volumeToAdd;
-
-	// Add product to inventory
-	AddProduct(productId, quantity);
-
-	return true;
-}
-
-/// @brief Sell a product from player inventory
-/// @param productId ID of the product to sell
-/// @param quantity Amount to sell
-/// @param unitPrice Price per unit
-/// @return true if sale successful, false if insufficient quantity or invalid parameters
-bool Inventory::SellProduct(const std::string& productId, uint32_t quantity, uint32_t unitPrice)
-{
-	if (quantity == 0 || unitPrice == 0)
-	{
-		return false;
-	}
-
-	StockProduct* product = FindProduct(productId);
-	if (!product || product->m_quantity < quantity)
-	{
-		// Product not found or insufficient quantity
-		return false;
-	}
-
-	// Calculate volume that would be removed
-	float volumeToRemove = quantity * product->m_volume;
-
-	// Remove quantity from inventory
-	product->m_quantity -= quantity;
-	
-	// Remove volume from current inventory (ensure it doesn't go below 0)
-	m_currentInventoryVolume = std::max(0.0f, m_currentInventoryVolume - volumeToRemove);
-	
-	// If quantity reaches 0, remove product from inventory
-	if (product->m_quantity == 0)
-	{
-		auto it = std::find_if(m_playerProducts.begin(), m_playerProducts.end(),
-			[&productId](const StockProduct& p) { return p.m_id == productId; });
-		if (it != m_playerProducts.end())
-		{
-			m_playerProducts.erase(it);
-		}
-	}
-
-	// Add money from sale
-	uint32_t totalRevenue = quantity * unitPrice;
-	m_currentMoney += totalRevenue;
-
-	return true;
-}
-
 // === Inventory Management ===
 
 /// @brief Get current player money
@@ -318,6 +218,80 @@ const std::vector<StockProduct>& Inventory::GetPlayerProducts() const
 	return m_playerProducts;
 }
 
+// === Product Management ===
+
+/// @brief Add quantity to a product in inventory and update volume
+/// @param productId ID of the product to add to
+/// @param quantity Amount to add
+void Inventory::AddProduct(const std::string& productId, uint32_t quantity)
+{
+	if (quantity == 0)
+	{
+		return; // Nothing to add
+	}
+
+	// Find product in inventory
+	StockProduct* product = FindProduct(productId);
+	if (product == nullptr)
+	{
+		DebugLog("AddProduct - Product with ID: " + productId + " not found in inventory", DebugType::Warning);
+		return;
+	}
+
+	// Add quantity
+	product->m_quantity += quantity;
+
+	// Update inventory volume
+	float volumeAdded = quantity * product->m_volume;
+	m_currentInventoryVolume += volumeAdded;
+
+	DebugLog("AddProduct - " + product->m_name + " (ID: " + productId + ") - " +
+		"Added: " + std::to_string(quantity) + 
+		", New quantity: " + std::to_string(product->m_quantity) +
+		", Volume added: " + std::to_string(volumeAdded) +
+		", Total volume: " + std::to_string(m_currentInventoryVolume) + "/" + std::to_string(s_maxInventoryVolume));
+}
+
+/// @brief Remove quantity from a product in inventory and update volume
+/// @param productId ID of the product to remove from
+/// @param quantity Amount to remove
+void Inventory::RemoveProduct(const std::string& productId, uint32_t quantity)
+{
+	if (quantity == 0)
+	{
+		return; // Nothing to remove
+	}
+
+	// Find product in inventory
+	StockProduct* product = FindProduct(productId);
+	if (product == nullptr)
+	{
+		DebugLog("RemoveProduct - Product with ID: " + productId + " not found in inventory", DebugType::Warning);
+		return;
+	}
+
+	// Check if we have enough quantity to remove
+	if (product->m_quantity < quantity)
+	{
+		DebugLog("RemoveProduct - Not enough quantity for " + product->m_name + " (ID: " + productId + ") - " +
+			"Requested: " + std::to_string(quantity) + ", Available: " + std::to_string(product->m_quantity), DebugType::Warning);
+		return;
+	}
+
+	// Remove quantity
+	product->m_quantity -= quantity;
+
+	// Update inventory volume
+	float volumeRemoved = quantity * product->m_volume;
+	m_currentInventoryVolume = std::max(0.0f, m_currentInventoryVolume - volumeRemoved);
+
+	DebugLog("RemoveProduct - " + product->m_name + " (ID: " + productId + ") - " +
+		"Removed: " + std::to_string(quantity) + 
+		", New quantity: " + std::to_string(product->m_quantity) +
+		", Volume removed: " + std::to_string(volumeRemoved) +
+		", Total volume: " + std::to_string(m_currentInventoryVolume) + "/" + std::to_string(s_maxInventoryVolume));
+}
+
 // === Private Helper Functions ===
 
 /// @brief Find product in inventory by ID
@@ -331,28 +305,4 @@ StockProduct* Inventory::FindProduct(const std::string& productId)
 	return (it != m_playerProducts.end()) ? &(*it) : nullptr;
 }
 
-/// @brief Add new product to inventory or update existing quantity
-/// @param productId ID of the product
-/// @param quantity Quantity to add
-void Inventory::AddProduct(const std::string& productId, uint32_t quantity)
-{
-	StockProduct* existingProduct = FindProduct(productId);
 	
-	if (existingProduct)
-	{
-		// Product already exists, increase quantity
-		existingProduct->m_quantity += quantity;
-	}
-	else
-	{
-		// Product doesn't exist, need to create new entry
-		// This would require access to the stock market data to get product details
-		// For now, we'll create a minimal entry - this should be enhanced
-		// to get full product data from stock market system
-		StockProduct newProduct{};
-		newProduct.m_id = productId;
-		newProduct.m_quantity = quantity;
-		// TODO: Initialize other product fields from stock market data
-		m_playerProducts.push_back(newProduct);
-	}
-}	

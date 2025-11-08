@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "../framework/window.h"
 #include "application.h" // Own header (already includes needed UI + other headers)
 #include "stockMarket.h" // StockMarket used directly in SetupStockMarket()
 #include "inventory.h"   // Inventory used directly in SetupInventory()
@@ -6,31 +7,33 @@
 #include <sstream>
 #include <iomanip>
 #include <cmath>
+#include <algorithm>
+#include <random>
 
 // Static member definitions
 std::string Application::s_dataPath;
 std::string Application::s_assetsPath;
+float Application::s_totalGameTime = 0.0f;
+float Application::s_globalTimeMultiplier = 1.0f;
+float Application::s_previousTimeMultiplier = 1.0f;
 
 /// @brief Constructor - initializes all member variables to default values
 /// Initializes UI pointers, input mode settings, and gamepad cursor configuration
 Application::Application()
-	: m_mainMenuContainer(nullptr)
-	, m_subMenuContainer(nullptr)
-	, m_gameTimeText(nullptr)
-	, m_currentInputMode(InputMode::Mouse)
-	, m_gamepadCursorPosition(960.0f, 540.0f) // Center of 1920x1080 screen
-	, m_lastMousePosition(0, 0)
-	, m_gamepadCursorSpeed(500.0f) // pixels per second
-	, m_gamepadId(0)
+  : m_applicationUI(nullptr)
+  , m_mainMenuContainer(nullptr)
+  , m_subMenuContainer(nullptr)
+  , m_gameTimeText(nullptr)
+  , m_currentInputMode(InputMode::Mouse)
+  , m_gamepadCursorPosition(960.0f, 540.0f) // Center of 1920x1080 screen
+  , m_lastMousePosition(0, 0)
+  , m_gamepadCursorSpeed(500.0f) // pixels per second
+  , m_gamepadId(0)
 {
 }
 /// @brief Destructor - cleans up resources and releases memory
 /// Uses default destruction for all smart pointers and SFML objects
 Application::~Application() = default;
-
-double Application::s_totalGameTime = 0.0; // Initialize total game time to 0 (double precision)
-float Application::s_globalTimeMultiplier = 1.0f; // Global time multiplier affecting all game systems
-float Application::s_previousTimeMultiplier = 1.0f; // Previous time multiplier for pause/unpause functionality
 
 /// @brief Gets a shared random number generator instance
 /// @return Reference to a static Mersenne Twister random number generator
@@ -62,11 +65,19 @@ void Application::Initialize()
 	// Create main window and initialize UI system
 	if (m_mainWindow = std::make_unique<ui::Window>())
 	{
-		// Initialize UI and add widgets to the root container
-		InitializeUI();
+		// Create and initialize UI management class
+		m_applicationUI = std::make_unique<ApplicationUI>();
+		m_applicationUI->InitializeUI();
+
+		// Get root container from UI manager
+		m_rootWidgetContainer = std::move(m_applicationUI->GetRootContainer());
+
+		// Get UI component pointers for direct access
+		m_mainMenuContainer = m_applicationUI->GetMonitorMenuContainer();
+		m_subMenuContainer = m_applicationUI->GetSubMenuContainer();
+		m_gameTimeText = m_applicationUI->GetGameTimeText();
 	}
 }
-
 
 /// @brief Configures video and rendering settings
 /// Creates the main render context with specified resolution and framerate
@@ -86,8 +97,8 @@ void Application::SetupStockMarket()
 {
 	// Create stock market instance
 	m_stockMarket = std::make_unique<StockMarket>();
-	// Load market data and initialize trading system
-	m_stockMarket->InitializeStockMarket();
+	// Load market data and initialize trading system with application reference
+	m_stockMarket->InitializeStockMarket(this);
 }
 
 /// @brief Initializes the player inventory system
@@ -97,8 +108,8 @@ void Application::SetupInventory()
 {
 	// Create player inventory instance
 	m_playerInventory = std::make_unique<Inventory>();
-	// Initialize inventory with default settings
-	m_playerInventory->InventoryInitialize();
+	// Initialize inventory with default settings and application reference
+	m_playerInventory->InventoryInitialize(this);
 }
 
 /// @brief Sets up custom cursor graphics and input mode initialization
@@ -108,26 +119,26 @@ void Application::SetupCustomCursor()
 {
 	// Load custom cursor texture from assets
 	std::string cursorPath = s_assetsPath + "Cursor2.png";
-	
+
 	if (!m_cursorTexture.loadFromFile(cursorPath))
 	{
 		// Handle error - cursor texture not found
 		//DebugLog("Failed to load cursor texture from: " + cursorPath, DebugType::Error);
 		return;
 	}
-	
+
 	// Setup cursor sprite with loaded texture
 	m_cursorSprite.setTexture(m_cursorTexture);
-	
+
 	// Calculate scale to make cursor exactly 25x25 pixels regardless of source image size
 	sf::Vector2u textureSize = m_cursorTexture.getSize();
 	float scaleX = 25.0f / static_cast<float>(textureSize.x);
 	float scaleY = 25.0f / static_cast<float>(textureSize.y);
 	m_cursorSprite.setScale(scaleX, scaleY);
-	
+
 	// Set cursor origin to top-left corner for precise positioning
 	m_cursorSprite.setOrigin(0, 0);
-	
+
 	// Initialize dual input mode system (mouse/gamepad)
 	if (m_renderContext)
 	{
@@ -135,10 +146,10 @@ void Application::SetupCustomCursor()
 		sf::Vector2u windowSize = m_renderContext->getSize();
 		m_gamepadCursorPosition.x = static_cast<float>(windowSize.x) / 2.0f;
 		m_gamepadCursorPosition.y = static_cast<float>(windowSize.y) / 2.0f;
-		
+
 		// Store initial mouse position for input mode detection
 		m_lastMousePosition = sf::Mouse::getPosition(*m_renderContext);
-		
+
 		// Hide system cursor since we're using custom rendering
 		m_renderContext->setMouseCursorVisible(false);
 	}
@@ -169,7 +180,7 @@ void Application::UpdateInputMode()
 	{
 		float axisX = sf::Joystick::getAxisPosition(m_gamepadId, sf::Joystick::X);
 		float axisY = sf::Joystick::getAxisPosition(m_gamepadId, sf::Joystick::Y);
-		
+
 		// Apply deadzone threshold to prevent noise-triggered mode switches
 		float deadzone = 15.0f; // 15% deadzone to filter out analog stick drift
 		if (std::abs(axisX) > deadzone || std::abs(axisY) > deadzone)
@@ -198,21 +209,21 @@ void Application::UpdateGamepadCursor(sf::Time delta)
 	// Read left analog stick values (X and Y axes)
 	float axisX = sf::Joystick::getAxisPosition(m_gamepadId, sf::Joystick::X);
 	float axisY = sf::Joystick::getAxisPosition(m_gamepadId, sf::Joystick::Y);
-	
+
 	// Apply deadzone to prevent cursor drift from analog stick noise
 	float deadzone = 15.0f; // 15% deadzone threshold
 	if (std::abs(axisX) < deadzone) axisX = 0.0f;
 	if (std::abs(axisY) < deadzone) axisY = 0.0f;
-	
+
 	// Normalize axis values from (-100, 100) to (-1, 1) range
 	float moveX = axisX / 100.0f;
 	float moveY = axisY / 100.0f;
-	
+
 	// Calculate frame-rate independent movement using delta time
 	float speed = m_gamepadCursorSpeed * delta.asSeconds();
 	m_gamepadCursorPosition.x += moveX * speed;
 	m_gamepadCursorPosition.y += moveY * speed;
-	
+
 	// Clamp cursor position to stay within screen boundaries
 	if (m_renderContext)
 	{
@@ -221,8 +232,6 @@ void Application::UpdateGamepadCursor(sf::Time delta)
 		m_gamepadCursorPosition.y = std::max(0.0f, std::min(static_cast<float>(windowSize.y), m_gamepadCursorPosition.y));
 	}
 }
-
-// void Application::InitializeUI() moved to applicationUI.cpp
 
 /// @brief Main application loop - handles timing, updates, input, and rendering
 /// Runs continuously until window is closed, managing frame timing and system updates
@@ -283,8 +292,8 @@ void Application::ApplicationUpdate(sf::Time delta)
 /// Maintains high-precision game time tracking and updates UI display with whole seconds
 void Application::TotalGameTimeUpdate(sf::Time& delta)
 {
-	// Accumulate elapsed time with high precision (double) - already scaled by global multiplier
-	s_totalGameTime += static_cast<double>(delta.asSeconds());
+	// Accumulate elapsed time with high precision (float) - already scaled by global multiplier
+	s_totalGameTime += static_cast<float>(delta.asSeconds());
 
 	// Update UI display if game time widget exists
 	if (m_gameTimeText)
@@ -301,18 +310,18 @@ void Application::DisplayHandle()
 {
 	// Clear previous frame with background color
 	m_renderContext->clear();
-	
+
 	// Render all UI widgets through the root container
 	if (m_rootWidgetContainer)
 	{
 		m_rootWidgetContainer->Draw(*m_renderContext);
 	}
-	
+
 	// Render custom cursor with dual input mode support
 	if (m_cursorTexture.getSize().x > 0) // Ensure cursor texture is loaded
 	{
 		sf::Vector2f cursorPos;
-		
+
 		if (m_currentInputMode == InputMode::Mouse)
 		{
 			// Mouse mode: use real-time mouse position from system
@@ -325,12 +334,12 @@ void Application::DisplayHandle()
 			// Gamepad mode: use virtual cursor position controlled by analog stick
 			cursorPos = m_gamepadCursorPosition;
 		}
-		
+
 		// Position and render custom cursor sprite
 		m_cursorSprite.setPosition(cursorPos.x, cursorPos.y);
 		m_renderContext->draw(m_cursorSprite);
 	}
-	
+
 	// Present completed frame to screen
 	m_renderContext->display();
 }
@@ -344,19 +353,19 @@ void Application::InputHandle()
 	// Poll all pending SFML events from the window
 	while (m_renderContext->pollEvent(event))
 	{
-		if (event.type == InputEvent::Closed || 
+		if (event.type == InputEvent::Closed ||
 		   (event.type == InputEvent::KeyPressed && event.key.code == sf::Keyboard::Escape))
 		{
 			// User clicked window close button or pressed Escape key - initiate application shutdown
 			m_renderContext->close();
 		}
-		else if (event.type == InputEvent::KeyPressed && 
+		else if (event.type == InputEvent::KeyPressed &&
 		         (event.key.code == sf::Keyboard::Add || event.key.code == sf::Keyboard::Subtract))
 		{
 			// Global time multiplier control with predefined intervals
 			static const float timeLevels[] = { 0.1f, 0.5f, 1.0f, 2.0f, 5.0f, 20.0f };
 			static const int maxLevelIndex = sizeof(timeLevels) / sizeof(timeLevels[0]) - 1;
-			
+
 			// Find current time multiplier level index
 			int currentIndex = 0;
 			for (int i = 0; i <= maxLevelIndex; ++i)
@@ -367,7 +376,7 @@ void Application::InputHandle()
 					break;
 				}
 			}
-			
+
 			// Adjust time multiplier based on key pressed
 			if (event.key.code == sf::Keyboard::Add && currentIndex < maxLevelIndex)
 			{
@@ -418,6 +427,14 @@ void Application::InputHandle()
 ui::Window* Application::GetMainWindow() const
 {
 	return m_mainWindow.get();
+}
+
+/// @brief Get access to the player inventory system
+/// @return Pointer to the player inventory object, or nullptr if not initialized
+/// Used by subsystems that need to modify or query player inventory
+Inventory* Application::GetPlayerInventory() const
+{
+	return m_playerInventory.get();
 }
 
 /// @brief Sets the global data directory path for JSON and data file loading

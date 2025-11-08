@@ -2,6 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="application.cpp" />
+    <ClCompile Include="applicationUI.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="inventory.cpp" />
@@ -10,6 +11,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
+    <ClInclude Include="applicationUI.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="inventory.h" />
     <ClInclude Include="utilTools.h" />

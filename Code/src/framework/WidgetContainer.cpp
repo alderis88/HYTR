@@ -30,26 +30,46 @@ namespace ui
   void WidgetContainer::Draw(RenderContext& context) const
   {
     // Draw all children in order (first added = bottom-most)
-    for (const WidgetPtr& child : m_children)
+    for (const auto& child : m_children)
     {
       child->Draw(context);
     }
-    // Draw own debug bounds
-    DrawDebugBounds(context);
+
+    // Draw debug bounds if enabled (after children so it's always visible on top)
+    if (m_debugDraw)
+    {
+      sf::RectangleShape debugRect(sf::Vector2f(static_cast<float>(GetWidth()), static_cast<float>(GetHeight())));
+      debugRect.setPosition(static_cast<float>(GetPosX()), static_cast<float>(GetPosY()));
+      debugRect.setFillColor(sf::Color::Transparent);
+      debugRect.setOutlineColor(m_debugColor);
+      debugRect.setOutlineThickness(1.0f);
+      context.draw(debugRect);
+    }
   }
 
   void WidgetContainer::AddWidget(WidgetPtr widget)
   {
-    if (!widget) return;
-    widget->SetParent(this); // Computes child's absolute position immediately
-    m_children.push_back(std::move(widget));
+    if (widget)
+    {
+      // Convert relative position to absolute position based on container position
+      if (m_layoutType == LayoutType::Native)
+      {
+        widget->SetPosX(widget->GetPosX() + GetPosX());
+        widget->SetPosY(widget->GetPosY() + GetPosY());
+      }
+
+      m_children.push_back(std::move(widget));
+      ApplyLayout();
+    }
   }
 
   void WidgetContainer::RemoveWidget(const Widget* widget)
   {
     if (!widget) return;
+
     auto it = std::find_if(m_children.begin(), m_children.end(),
-      [widget](const WidgetPtr& child) { return child.get() == widget; });
+      [widget](const WidgetPtr& ptr) { return ptr.get() == widget; });
+
     if (it != m_children.end())
     {
       m_children.erase(it);
@@ -62,70 +82,53 @@ namespace ui
     m_children.clear();
   }
 
-  size_t WidgetContainer::GetWidgetCount() const { return m_children.size(); }
+  size_t WidgetContainer::GetWidgetCount() const
+  {
+    return m_children.size();
+  }
 
-  // EnableDebugDraw now inherited
+  void WidgetContainer::EnableDebugDraw(bool enable, sf::Color color)
+  {
+    m_debugDraw = enable;
+    m_debugColor = color;
+  }
 
   void WidgetContainer::SetLayout(LayoutType layout, int spacing)
   {
     m_layoutType = layout;
     m_spacing = spacing;
-    // NOTE: Don't call ApplyLayout here - it will be called by UpdateLayout()
-    // after the hierarchy is complete
+    ApplyLayout();
   }
 
   void WidgetContainer::UpdateLayout()
   {
     ApplyLayout();
-    // Recursively update child containers
-    for (WidgetPtr& child : m_children)
-    {
-      WidgetContainer* childContainer = dynamic_cast<WidgetContainer*>(child.get());
-      if (childContainer)
-      {
-        childContainer->UpdateLayout();
-      }
-    }
   }
 
   void WidgetContainer::ApplyLayout()
   {
-    if (m_children.empty()) return;
-
-    if (m_layoutType == LayoutType::Native)
+    if (m_layoutType == LayoutType::Native || m_children.empty())
     {
-      // Native: children keep their relative positions as provided
-      RecomputeChildrenAbsolutePositions();
+      return; // No layout adjustment needed
     }
-    else if (m_layoutType == LayoutType::Horizontal)
+
+    int currentX = GetPosX();
+    int currentY = GetPosY();
+
+    for (auto& child : m_children)
     {
-      int currentX = 0;
-      for (WidgetPtr& child : m_children)
+      if (m_layoutType == LayoutType::Horizontal)
       {
         child->SetPosX(currentX);
-        child->SetPosY(0);
+        child->SetPosY(GetPosY());
         currentX += child->GetWidth() + m_spacing;
       }
-      RecomputeChildrenAbsolutePositions();
-    }
-    else if (m_layoutType == LayoutType::Vertical)
-    {
-      int currentY = 0;
-      for (WidgetPtr& child : m_children)
+      else if (m_layoutType == LayoutType::Vertical)
       {
-        child->SetPosX(0);
+        child->SetPosX(GetPosX());
         child->SetPosY(currentY);
         currentY += child->GetHeight() + m_spacing;
       }
-      RecomputeChildrenAbsolutePositions();
-    }
-  }
-
-  void WidgetContainer::RecomputeChildrenAbsolutePositions()
-  {
-    for (WidgetPtr& child : m_children)
-    {
-      child->RecomputeAbsolutePosition();
     }
   }
 }

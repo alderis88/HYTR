@@ -104,6 +104,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
+    <ClInclude Include="applicationUI.h" />
     <ClInclude Include="inventory.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="stockMarket.h" />

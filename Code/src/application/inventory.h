@@ -35,17 +35,15 @@ struct StockProduct final
 
 };
 
+class Application; // forward declaration
+
 class Inventory final
 {
 public:
 	Inventory();
 	~Inventory();
 
-	void InventoryInitialize();
-
-	// === Trading Functions ===
-	bool BuyProduct(const std::string& productId, uint32_t quantity, uint32_t unitPrice);
-	bool SellProduct(const std::string& productId, uint32_t quantity, uint32_t unitPrice);
+	void InventoryInitialize(Application* app);
 
 	// === Inventory Management ===
 	uint32_t GetCurrentMoney() const;
@@ -56,10 +54,16 @@ public:
 	float GetMaxInventoryVolume() const;
 	const std::vector<StockProduct>& GetPlayerProducts() const;
 
+	// === Product Management ===
+	void AddProduct(const std::string& productId, uint32_t quantity);
+	void RemoveProduct(const std::string& productId, uint32_t quantity);
+
 private:
 	StockProduct* FindProduct(const std::string& productId);
-	void AddProduct(const std::string& productId, uint32_t quantity);
 	void LoadInventoryProducts(const std::string& path);
+
+	// === System References ===
+	Application* m_application = nullptr;       ///< Reference to main application instance
 
 	uint32_t m_currentMoney;
 	float m_currentInventoryVolume;

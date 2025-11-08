@@ -6,42 +6,39 @@
 
 namespace ui
 {
-	class WidgetButton : public WidgetImage
-	{
-	public:
-		WidgetButton(int posX, int posY, int width, int height);
-		virtual ~WidgetButton();
+  class WidgetButton : public WidgetImage
+  {
+  public:
+    WidgetButton(int posX, int posY, int width, int height);
+    virtual ~WidgetButton();
 
-		// Widget interface implementation
-		virtual InputEventState ProcessInput(const InputEvent& event) override;
-		virtual void Draw(RenderContext& context) const override;
+    // Widget interface implementation
+    virtual InputEventState ProcessInput(const InputEvent& event) override;
+    virtual void Draw(RenderContext& context) const override;
 
-		// Button specific methods
-		void SetText(const std::string& text);
-		void SetFont(const sf::Font& font);
-		void SetTextColor(const sf::Color& color);
+    // Button specific methods
+    void SetText(const std::string& text);
+    void SetFont(const sf::Font& font);
+    void SetTextColor(const sf::Color& color);
 
-		// Button state methods
-		bool IsHovered() const;
-		bool IsPressed() const;
-		void SetOnClickCallback(std::function<void()> callback);
+    // Button state methods
+    bool IsHovered() const;
+    bool IsPressed() const;
+    void SetOnClickCallback(std::function<void()> callback);
 
-	protected:
-		virtual void OnAbsolutePositionChanged() override; // Keep text centered when moved
+  private:
+    sf::Font m_font;
+    sf::Text m_text;
+    bool m_isHovered;
+    bool m_isPressed;
+    sf::Color m_normalColor;
+    sf::Color m_hoverColor;
+    sf::Color m_pressedColor;
+    std::function<void()> m_onClickCallback;
 
-	private:
-		sf::Font m_font;
-		sf::Text m_text;
-		bool m_isHovered;
-		bool m_isPressed;
-		sf::Color m_normalColor;
-		sf::Color m_hoverColor;
-		sf::Color m_pressedColor;
-		std::function<void()> m_onClickCallback;
+    void ApplicationUpdateButtonState();
+    bool IsPointInside(float x, float y) const;
+  };
 
-		void ApplicationUpdateButtonState();
-		bool IsPointInside(float x, float y) const;
-	};
-
-	using WidgetButtonPtr = std::unique_ptr<WidgetButton>;
+  using WidgetButtonPtr = std::unique_ptr<WidgetButton>;
 }

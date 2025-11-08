@@ -2,14 +2,14 @@
 #include "pch.h"
 #include "application.h"
 
-uint32_t main()
+int main()
 {
 
-	if( auto app = std::make_unique<Application>() )
-	{
-		app->Initialize();
-		app->Run();
-	}
+  if( auto app = std::make_unique<Application>() )
+  {
+    app->Initialize();
+    app->Run();
+  }
 
-	return 0;
+  return 0;
 }

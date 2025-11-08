@@ -5,8 +5,13 @@
 
 /// @brief Initialize the entire stock market system
 /// Loads all data files and sets up initial market state
-void StockMarket::InitializeStockMarket()
+/// @param app Reference to the main application instance
+void StockMarket::InitializeStockMarket(Application* app)
 {
+	// Store application reference
+	m_application = app;
+	DebugLog("StockMarket - Application reference set");
+
 	// Reset market timing
 	m_currentCycleTime = 0.0f;
 	m_cycleCount = 0;
@@ -261,6 +266,7 @@ void StockMarket::CalculateProductPrice(StockProduct& product)
 	std::uniform_real_distribution<float> randomInfluence(1.0f - s_randomPriceInfluenceFactor, 1.0f + s_randomPriceInfluenceFactor);
 	float randomInfluenceFactor = randomInfluence(Application::GetRandomGenerator());
 
+	
 	// Apply player impact multiplier
 	float playerImpactMultiplier = 1.0f;
 	if (product.m_currentPlayerImpact > 0.0f)
@@ -274,10 +280,12 @@ void StockMarket::CalculateProductPrice(StockProduct& product)
 		playerImpactMultiplier = std::min(1.5f, 1.0f + std::abs(product.m_currentPlayerImpact));
 	}
 
-	float aggregatedPriceMultiplier = baseTrendPrice * randomInfluenceFactor * playerImpactMultiplier;
+
+	// Calculate and store price without player impact
+	product.m_currentPriceWithoutPlayerImpact = static_cast<uint32_t>(product.m_basePrice * baseTrendPrice * randomInfluenceFactor);
 
 	// Calculate current price: basePrice * aggregated multiplier
-	uint32_t newPrice = static_cast<uint32_t>(product.m_basePrice * aggregatedPriceMultiplier);
+	uint32_t newPrice = static_cast<uint32_t>(playerImpactMultiplier * product.m_currentPriceWithoutPlayerImpact);
 
 	// Compare with current price and set trend direction
 	if (newPrice > product.m_currentPrice)
@@ -299,9 +307,65 @@ void StockMarket::CalculateProductPrice(StockProduct& product)
 		", RIF: " + std::to_string(randomInfluenceFactor) +
 		", CPI: " + std::to_string(product.m_currentPlayerImpact) +
 		", PIM: " + std::to_string(playerImpactMultiplier) +
-		", APM: " + std::to_string(aggregatedPriceMultiplier) +
 		", Final Price: " + std::to_string(product.m_currentPrice) +
 		", Trend Increased: " + (product.m_trendIncreased ? "true" : "false"));
+}
+
+/// @brief Calculate price using only player influence change
+/// Takes m_currentPriceWithoutPlayerImpact and applies only player impact multiplier and trend calculation
+/// @param product Reference to the product to update
+void StockMarket::CalculateOnlyPlayerInfluenceChangePrice(StockProduct& product)
+{
+	// Apply player impact multiplier
+	float playerImpactMultiplier = 1.0f;
+	if (product.m_currentPlayerImpact > 0.0f)
+	{
+		// Positive impact: 1 - m_currentPlayerImpact, but minimum 0.5
+		playerImpactMultiplier = std::max(0.5f, 1.0f - product.m_currentPlayerImpact);
+	}
+	else if (product.m_currentPlayerImpact < 0.0f)
+	{
+		// Negative impact: 1 + |m_currentPlayerImpact|, but maximum 1.5
+		playerImpactMultiplier = std::min(1.5f, 1.0f + std::abs(product.m_currentPlayerImpact));
+	}
+
+	// Calculate new price using the stored price without player impact
+	uint32_t newPrice = static_cast<uint32_t>(playerImpactMultiplier * product.m_currentPriceWithoutPlayerImpact);
+
+	// Compare with current price and set trend direction
+	if (newPrice > product.m_currentPrice)
+	{
+		product.m_trendIncreased = true;
+	}
+	else if (newPrice < product.m_currentPrice)
+	{
+		product.m_trendIncreased = false;
+	}
+	// If prices are equal, keep the previous trend state
+
+	// Update the current price
+	product.m_currentPrice = newPrice;
+
+	// Debug log the price calculation
+	DebugLog("CalculateOnlyPlayerInfluenceChangePrice - Product: " + product.m_name + 
+		" - CPI: " + std::to_string(product.m_currentPlayerImpact) +
+		", PIM: " + std::to_string(playerImpactMultiplier) +
+		", Base Price Without Impact: " + std::to_string(product.m_currentPriceWithoutPlayerImpact) +
+		", Final Price: " + std::to_string(product.m_currentPrice) +
+		", Trend Increased: " + (product.m_trendIncreased ? "true" : "false"));
+}
+
+/// @brief Update visual representation of stock product
+/// Passes through the product that needs visual updates (price, trend arrows, stock amounts)
+/// @param product Reference to the product that needs visual update
+void StockMarket::UpdateStockVisual(StockProduct& product)
+{
+	// TODO: Implement visual update logic
+	// This function should update:
+	// - Price text display
+	// - Trend arrows (up/down based on m_trendIncreased)
+	// - Stock quantity display
+	// - Price color (green for increase, red for decrease)
 }
 
 /// @brief Reduce player impact on product price over time
@@ -436,14 +500,40 @@ bool StockMarket::BuyFromStock(const std::string& productId, uint32_t quantity)
 	// Store old quantity for logging
 	uint32_t oldQuantity = product->m_quantity;
 
+	// Calculate total cost (quantity * current price)
+	uint32_t totalCost = quantity * product->m_currentPrice;
+
+	// Check if player has enough money
+	if (m_application && m_application->GetPlayerInventory())
+	{
+		uint32_t currentMoney = m_application->GetPlayerInventory()->GetCurrentMoney();
+		if (currentMoney < totalCost)
+		{
+			DebugLog("BuyFromStock - Not enough money for product: " + product->m_name +
+				" (ID: " + productId + ") - Cost: " + std::to_string(totalCost) +
+				", Available money: " + std::to_string(currentMoney), DebugType::Warning);
+			return false;
+		}
+
+		// Deduct the cost from player's money
+		m_application->GetPlayerInventory()->SetCurrentMoney(currentMoney - totalCost);
+		
+		// Add the purchased product to player's inventory
+		m_application->GetPlayerInventory()->AddProduct(productId, quantity);
+	}
+
 	// Reduce stock quantity exactly by the requested amount
 	product->m_quantity -= quantity;
 
 	// Debug log the purchase
 	DebugLog("BuyFromStock - Product: " + product->m_name + " (ID: " + productId + ") - " +
 		"Bought: " + std::to_string(quantity) +
+		", Cost: " + std::to_string(totalCost) + " (price: " + std::to_string(product->m_currentPrice) + ")" +
 		", Quantity: " + std::to_string(oldQuantity) + " -> " + std::to_string(product->m_quantity) +
 		"/" + std::to_string(product->m_maxQuantity));
+
+	// Update price based on player impact after purchase
+	CalculateOnlyPlayerInfluenceChangePrice(*product);
 
 	return true;
 }
@@ -466,6 +556,16 @@ void StockMarket::SellForStock(const std::string& productId, uint32_t quantity)
 	// Store old quantity for logging
 	uint32_t oldQuantity = product->m_quantity;
 
+	// Calculate total earnings (quantity * current price)
+	uint32_t totalEarnings = quantity * product->m_currentPrice;
+
+	// Add the earnings to player's money
+	if (m_application && m_application->GetPlayerInventory())
+	{
+		uint32_t currentMoney = m_application->GetPlayerInventory()->GetCurrentMoney();
+		m_application->GetPlayerInventory()->SetCurrentMoney(currentMoney + totalEarnings);
+	}
+
 	// Calculate the actual stock increase using sellStackRatio
 	uint32_t stockIncrease = static_cast<uint32_t>(quantity * product->m_sellStackRatio);
 
@@ -475,10 +575,25 @@ void StockMarket::SellForStock(const std::string& productId, uint32_t quantity)
 	// Debug log the sale
 	DebugLog("SellForStock - Product: " + product->m_name + " (ID: " + productId + ") - " +
 		"Sold: " + std::to_string(quantity) +
+		", Earnings: " + std::to_string(totalEarnings) + " (price: " + std::to_string(product->m_currentPrice) + ")" +
 		", Stock increase: " + std::to_string(stockIncrease) +
 		" (ratio: " + std::to_string(product->m_sellStackRatio) + "), " +
 		"Quantity: " + std::to_string(oldQuantity) + " -> " + std::to_string(product->m_quantity) +
 		"/" + std::to_string(product->m_maxQuantity));
+
+	// Remove the sold products from player inventory
+	if (m_application != nullptr && m_application->m_playerInventory != nullptr)
+	{
+		m_application->m_playerInventory->RemoveProduct(productId, quantity);
+
+	}
+	else
+	{
+		DebugLog("SellForStock - Warning: No application or inventory reference available, cannot remove products from inventory", DebugType::Warning);
+	}
+
+	// Update price based on player impact after sale
+	CalculateOnlyPlayerInfluenceChangePrice(*product);
 }
 
 /// @brief Load vendor characters from JSON file
