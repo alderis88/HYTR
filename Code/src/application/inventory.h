@@ -28,6 +28,7 @@ struct StockProduct final
 	//Inventory defined members
 	uint32_t m_quantity;
 	uint32_t m_trendPointer;
+	uint32_t m_currentPriceWithoutPlayerImpact;
 	uint32_t m_currentPrice;
 	float m_currentPlayerImpact;
 	bool m_trendIncreased;
@@ -42,8 +43,27 @@ public:
 
 	void InventoryInitialize();
 
+	// === Trading Functions ===
+	bool BuyProduct(const std::string& productId, uint32_t quantity, uint32_t unitPrice);
+	bool SellProduct(const std::string& productId, uint32_t quantity, uint32_t unitPrice);
+
+	// === Inventory Management ===
+	uint32_t GetCurrentMoney() const;
+	void SetCurrentMoney(uint32_t money);
+	uint32_t GetProductQuantity(const std::string& productId) const;
+	uint32_t GetTotalInventoryValue() const;
+	float GetCurrentInventoryVolume() const;
+	float GetMaxInventoryVolume() const;
+	const std::vector<StockProduct>& GetPlayerProducts() const;
+
 private:
+	StockProduct* FindProduct(const std::string& productId);
+	void AddProduct(const std::string& productId, uint32_t quantity);
+	void LoadInventoryProducts(const std::string& path);
 
 	uint32_t m_currentMoney;
+	float m_currentInventoryVolume;
 	std::vector<StockProduct> m_playerProducts;
+	
+	static constexpr float s_maxInventoryVolume = 1000.0f;
 };
