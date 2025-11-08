@@ -79,11 +79,6 @@ void StockMarket::StockMarketCycleStep()
 		CalculateProductPrice(product);
 	}
 
-	// refresh the 5 stock product to new price.
-
-	// refresh the prize text color and arrows based on change
-	// refresh the avalible stock amounts
-
 }
 
 /// @brief Update cycle timer (mainly for debugging purposes)
@@ -302,13 +297,16 @@ void StockMarket::CalculateProductPrice(StockProduct& product)
 	product.m_currentPrice = newPrice;
 
 	// Debug log the price calculation
-	DebugLog("Product: " + product.m_name + " - TV at " + std::to_string(product.m_trendPointer) + ": " + std::to_string(trendValue) +
-		", BTP: " + std::to_string(baseTrendPrice) +
-		", RIF: " + std::to_string(randomInfluenceFactor) +
-		", CPI: " + std::to_string(product.m_currentPlayerImpact) +
-		", PIM: " + std::to_string(playerImpactMultiplier) +
-		", Final Price: " + std::to_string(product.m_currentPrice) +
-		", Trend Increased: " + (product.m_trendIncreased ? "true" : "false"));
+	// DebugLog("Product: " + product.m_name + " - TV at " + std::to_string(product.m_trendPointer) + ": " + std::to_string(trendValue) +
+	// 	", BTP: " + std::to_string(baseTrendPrice) +
+	// 	", RIF: " + std::to_string(randomInfluenceFactor) +
+	// 	", CPI: " + std::to_string(product.m_currentPlayerImpact) +
+	// 	", PIM: " + std::to_string(playerImpactMultiplier) +
+	// 	", Final Price: " + std::to_string(product.m_currentPrice) +
+	// 	", Trend Increased: " + (product.m_trendIncreased ? "true" : "false"));
+
+	UpdateStockVisual(product);
+	
 }
 
 /// @brief Calculate price using only player influence change
@@ -347,12 +345,14 @@ void StockMarket::CalculateOnlyPlayerInfluenceChangePrice(StockProduct& product)
 	product.m_currentPrice = newPrice;
 
 	// Debug log the price calculation
-	DebugLog("CalculateOnlyPlayerInfluenceChangePrice - Product: " + product.m_name + 
-		" - CPI: " + std::to_string(product.m_currentPlayerImpact) +
-		", PIM: " + std::to_string(playerImpactMultiplier) +
-		", Base Price Without Impact: " + std::to_string(product.m_currentPriceWithoutPlayerImpact) +
-		", Final Price: " + std::to_string(product.m_currentPrice) +
-		", Trend Increased: " + (product.m_trendIncreased ? "true" : "false"));
+	// DebugLog("CalculateOnlyPlayerInfluenceChangePrice - Product: " + product.m_name + 
+	// 	" - CPI: " + std::to_string(product.m_currentPlayerImpact) +
+	// 	", PIM: " + std::to_string(playerImpactMultiplier) +
+	// 	", Base Price Without Impact: " + std::to_string(product.m_currentPriceWithoutPlayerImpact) +
+	// 	", Final Price: " + std::to_string(product.m_currentPrice) +
+	// 	", Trend Increased: " + (product.m_trendIncreased ? "true" : "false"));
+
+	UpdateStockVisual(product);
 }
 
 /// @brief Update visual representation of stock product
