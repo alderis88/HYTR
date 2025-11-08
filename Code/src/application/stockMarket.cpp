@@ -5,8 +5,8 @@
 
 void StockMarket::InitializeStockMarket()
 {
-	currentCyleTime = 0.0f;
-	cycleCount = 0;
+	m_currentCycleTime = 0.0f;
+	m_cycleCount = 0;
 
 	std::ostringstream pathBuilder;
 	pathBuilder << Application::s_dataPath << "item_products.json";
@@ -27,16 +27,16 @@ void StockMarket::StockMarketUpdate(sf::Time delta)
 {
 	if (!Application::s_pauseGame)
 	{
-		currentCyleTime += delta.asSeconds() /* * Application::s_stockGameSpeed */;
+		m_currentCycleTime += delta.asSeconds() /* * Application::s_stockGameSpeed */;
 
-		if (currentCyleTime >= stockCycleTime)
+		if (m_currentCycleTime >= s_stockCycleTime)
 		{
 			// Perform stock market ApplicationUpdate logic here
 			// For example, adjust stock prices, notify players, etc.
 			// Reset the cycle timer
 
-			currentCyleTime = 0.0f;
-			cycleCount++;
+			m_currentCycleTime = 0.0f;
+			m_cycleCount++;
 			StockMarketCycleStep();
 		}
 
@@ -47,7 +47,7 @@ void StockMarket::StockMarketUpdate(sf::Time delta)
 
 void StockMarket::StockMarketCycleStep()
 {
-	DebugLog("Cycle:" + std::to_string(cycleCount));
+	DebugLog("Cycle:" + std::to_string(m_cycleCount));
 
 	// Update trend pointers for all stock products
 	for (auto& product : m_stockProducts)
@@ -77,7 +77,7 @@ void StockMarket::StockMarketCycleStep()
 
 void StockMarket::CycleTimerUpdate()
 {
-	//DebugLog("CycleTime:" + std::to_string(currentCyleTime));
+	//DebugLog("CycleTime:" + std::to_string(m_currentCycleTime));
 }
 
 void StockMarket::LoadJsonStockProducts(const std::string& path)

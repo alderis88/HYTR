@@ -31,7 +31,7 @@ struct StockVendor final
 struct News final
 {
 	std::string m_newsContent;
-	uint32_t currentNewsIndex;
+	uint32_t m_currentNewsIndex;
 };
 
 class StockMarket
@@ -57,8 +57,8 @@ public:
 	bool BuyFromStock(const std::string& productId, uint32_t quantity);
 	void SellForStock(const std::string& productId, uint32_t quantity);
 
-	float currentCyleTime = 0.0f;
-	uint32_t cycleCount = 0;
+	float m_currentCycleTime = 0.0f;
+	uint32_t m_cycleCount = 0;
 
 private:
 	std::vector<StockProduct> m_stockProducts;
@@ -67,5 +67,5 @@ private:
 	uint32_t m_newsIndex = 0;
 	
 	static constexpr float s_randomPriceInfluenceFactor = 0.025f;
-	static constexpr float stockCycleTime = 5.0f;
+	static constexpr float s_stockCycleTime = 5.0f;
 };
