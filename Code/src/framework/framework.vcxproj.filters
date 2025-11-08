@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="widget.cpp" />
+    <ClCompile Include="window.cpp" />
+    <ClCompile Include="WidgetImage.cpp" />
+    <ClCompile Include="WidgetButton.cpp" />
+    <ClCompile Include="WidgetText.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="widget.h" />
+    <ClInclude Include="window.h" />
+    <ClInclude Include="WidgetImage.h" />
+    <ClInclude Include="WidgetButton.h" />
+    <ClInclude Include="WidgetText.h" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,95 @@
+{
+  "characters": [
+    {
+      "id": "TRI_CEO",
+      "name": "Boros Kane",
+      "company": "Triton Dynamics",
+      "role": "CEO",
+      "profile": "Veteran of deep-space mining and industrial material development. A blunt, honest man who trusts metal more than words.",
+      "appearance": "Worn exosuit armor, face smudged with grease, a glowing blue cyber-implant behind his left eye, rugged build.",
+      "mood": "Reliable, technocratic",
+      "colorTheme": ["#3B6EA5", "#D6A23D"],
+      "quote": "I don’t believe in promises — only in metal.",
+      "personality": {
+        "discipline": 8,
+        "riskTaking": 6,
+        "greed": 5,
+        "honor": 9
+      },
+      "style": "Industrial miner, blue-gold tones, sparks and welding lights."
+    },
+    {
+      "id": "NFX_AI",
+      "name": "FLX-9",
+      "alias": "The Whisper",
+      "company": "Flux Neural Systems",
+      "role": "AI Construct",
+      "profile": "A hybrid organic-digital intelligence that manages human-mind network interfaces and consciousness links.",
+      "appearance": "Suspended in a fluid capsule, transparent skull with visible optical fibers glowing pink and violet, mechanical neural implants.",
+      "mood": "Futuristic, organic",
+      "colorTheme": ["#E04DD2", "#A25AF8"],
+      "quote": "Data never lies — humans just refuse to read it.",
+      "personality": {
+        "discipline": 10,
+        "riskTaking": 9,
+        "greed": 2,
+        "honor": 3
+      },
+      "style": "Encased AI core, neon tubes, synthetic consciousness with shifting voices."
+    },
+    {
+      "id": "ZER_SCI",
+      "name": "Dr. Nyra Voss",
+      "company": "Zeromass Labs",
+      "role": "Lead Quantum Scientist",
+      "profile": "Leading researcher in quantum energetics, a cold and logical mind who sees the universe as an equation.",
+      "appearance": "Tall, elegant figure wearing black and violet scientific robes, slim frame, calm precision in her gaze.",
+      "mood": "Mysterious, elegant",
+      "colorTheme": ["#4A148C", "#000000"],
+      "quote": "The universe doesn’t ask for permission.",
+      "personality": {
+        "discipline": 10,
+        "riskTaking": 4,
+        "greed": 6,
+        "honor": 7
+      },
+      "style": "Elite scientist, quantum lab ambience, deep violet lighting and holographic formulas."
+    },
+    {
+      "id": "NAN_YAK",
+      "name": "Riku Tanaka",
+      "company": "Nanodyne Industries",
+      "role": "Corporate Enforcer / CEO",
+      "profile": "A precise, cold-blooded businessman with Yakuza roots, known for smiling while raising prices.",
+      "appearance": "Dark tailored suit with faint glowing magenta tattoos underneath, steel gaze, mirrored cyber-lenses reflecting neon light.",
+      "mood": "Precise, technological",
+      "colorTheme": [ "#FF007F", "#555B6E" ],
+      "quote": "Precision is not mercy — it’s dominance.",
+      "personality": {
+        "discipline": 9,
+        "riskTaking": 7,
+        "greed": 8,
+        "honor": 5
+      },
+      "style": "Yakuza-style executive, magenta glow, rain-soaked urban skyline."
+    },
+    {
+      "id": "LUM_CEO",
+      "name": "Elara Sunvale",
+      "company": "LumaCore Energy",
+      "role": "Founder & CEO",
+      "profile": "Ambassador of light and energy — an idealist leader who literally illuminates the future.",
+      "appearance": "White and gold attire surrounded by a soft luminescent aura, her eyes radiate pure light instead of lenses.",
+      "mood": "Radiant, optimistic",
+      "colorTheme": ["#FFD54F", "#FFB74D", "#FFFFFF"],
+      "quote": "Light not only reveals — it guides.",
+      "personality": {
+        "discipline": 8,
+        "riskTaking": 5,
+        "greed": 4,
+        "honor": 10
+      },
+      "style": "High-tech visionary, gold-white holographic light, luminous environment."
+    }
+  ]
+}

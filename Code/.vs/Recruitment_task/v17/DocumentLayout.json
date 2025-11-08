@@ -1,0 +1,105 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\_YIGSOFT\\Project\\UiProgrammerTest\\Code\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A434C585-3BDE-480C-8B65-40497BBC6EE2}|src\\application\\application.vcxproj|D:\\_YIGSOFT\\Project\\UiProgrammerTest\\Code\\src\\application\\application.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A434C585-3BDE-480C-8B65-40497BBC6EE2}|src\\application\\application.vcxproj|solutionrelative:src\\application\\application.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A434C585-3BDE-480C-8B65-40497BBC6EE2}|src\\application\\application.vcxproj|D:\\_YIGSOFT\\Project\\UiProgrammerTest\\Code\\src\\application\\inventory.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A434C585-3BDE-480C-8B65-40497BBC6EE2}|src\\application\\application.vcxproj|solutionrelative:src\\application\\inventory.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A434C585-3BDE-480C-8B65-40497BBC6EE2}|src\\application\\application.vcxproj|D:\\_YIGSOFT\\Project\\UiProgrammerTest\\Code\\src\\application\\stockMarket.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A434C585-3BDE-480C-8B65-40497BBC6EE2}|src\\application\\application.vcxproj|solutionrelative:src\\application\\stockMarket.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A434C585-3BDE-480C-8B65-40497BBC6EE2}|src\\application\\application.vcxproj|D:\\_YIGSOFT\\Project\\UiProgrammerTest\\Code\\src\\application\\stockMarket.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A434C585-3BDE-480C-8B65-40497BBC6EE2}|src\\application\\application.vcxproj|solutionrelative:src\\application\\stockMarket.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 1070,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "inventory.h",
+              "DocumentMoniker": "D:\\_YIGSOFT\\Project\\UiProgrammerTest\\Code\\src\\application\\inventory.h",
+              "RelativeDocumentMoniker": "src\\application\\inventory.h",
+              "ToolTip": "D:\\_YIGSOFT\\Project\\UiProgrammerTest\\Code\\src\\application\\inventory.h",
+              "RelativeToolTip": "src\\application\\inventory.h",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAAB4AAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-11-06T21:20:56.444Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "stockMarket.h",
+              "DocumentMoniker": "D:\\_YIGSOFT\\Project\\UiProgrammerTest\\Code\\src\\application\\stockMarket.h",
+              "RelativeDocumentMoniker": "src\\application\\stockMarket.h",
+              "ToolTip": "D:\\_YIGSOFT\\Project\\UiProgrammerTest\\Code\\src\\application\\stockMarket.h",
+              "RelativeToolTip": "src\\application\\stockMarket.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-11-06T21:20:50.922Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "stockMarket.cpp",
+              "DocumentMoniker": "D:\\_YIGSOFT\\Project\\UiProgrammerTest\\Code\\src\\application\\stockMarket.cpp",
+              "RelativeDocumentMoniker": "src\\application\\stockMarket.cpp",
+              "ToolTip": "D:\\_YIGSOFT\\Project\\UiProgrammerTest\\Code\\src\\application\\stockMarket.cpp",
+              "RelativeToolTip": "src\\application\\stockMarket.cpp",
+              "ViewState": "AgIAAB0AAAAAAAAAAADwvzYAAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-11-06T20:29:55.471Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "application.cpp",
+              "DocumentMoniker": "D:\\_YIGSOFT\\Project\\UiProgrammerTest\\Code\\src\\application\\application.cpp",
+              "RelativeDocumentMoniker": "src\\application\\application.cpp",
+              "ToolTip": "D:\\_YIGSOFT\\Project\\UiProgrammerTest\\Code\\src\\application\\application.cpp",
+              "RelativeToolTip": "src\\application\\application.cpp",
+              "ViewState": "AgIAAI0AAAAAAAAAAAAiwJUAAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-11-06T11:05:58.273Z",
+              "EditorCaption": ""
+            }
+          ]
+        },
+        {
+          "DockedWidth": 536,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 1179,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

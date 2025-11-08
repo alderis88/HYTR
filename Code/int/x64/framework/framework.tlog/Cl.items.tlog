@@ -1,0 +1,6 @@
+D:\_YIGSOFT\Project\UiProgrammerTest\Code\src\framework\pch.cpp;D:\_YIGSOFT\Project\UiProgrammerTest\Code\int\x64\framework\pch.obj
+D:\_YIGSOFT\Project\UiProgrammerTest\Code\src\framework\widget.cpp;D:\_YIGSOFT\Project\UiProgrammerTest\Code\int\x64\framework\widget.obj
+D:\_YIGSOFT\Project\UiProgrammerTest\Code\src\framework\WidgetButton.cpp;D:\_YIGSOFT\Project\UiProgrammerTest\Code\int\x64\framework\WidgetButton.obj
+D:\_YIGSOFT\Project\UiProgrammerTest\Code\src\framework\WidgetImage.cpp;D:\_YIGSOFT\Project\UiProgrammerTest\Code\int\x64\framework\WidgetImage.obj
+D:\_YIGSOFT\Project\UiProgrammerTest\Code\src\framework\WidgetText.cpp;D:\_YIGSOFT\Project\UiProgrammerTest\Code\int\x64\framework\WidgetText.obj
+D:\_YIGSOFT\Project\UiProgrammerTest\Code\src\framework\window.cpp;D:\_YIGSOFT\Project\UiProgrammerTest\Code\int\x64\framework\window.obj
