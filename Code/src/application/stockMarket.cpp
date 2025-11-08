@@ -25,9 +25,7 @@ void StockMarket::InitializeStockMarket()
 
 void StockMarket::StockMarketUpdate(sf::Time delta)
 {
-	if (!Application::s_pauseGame)
-	{
-		currentCyleTime += delta.asSeconds() /* * Application::s_stockGameSpeed */;
+		currentCyleTime += delta.asSeconds() ;
 
 		if (currentCyleTime >= stockCycleTime)
 		{
@@ -42,7 +40,6 @@ void StockMarket::StockMarketUpdate(sf::Time delta)
 
 		// Always Update the cycle timer, even if no cycle step occurred
 		CycleTimerUpdate();
-	}
 }
 
 void StockMarket::StockMarketCycleStep()

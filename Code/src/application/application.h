@@ -42,8 +42,8 @@ public:
 	static std::string s_assetsPath;
 
 	// Public control flags / speed used by systems (made public)
-	static bool s_pauseGame;
-	static float s_stockGameSpeed;
+	static float s_globalTimeMultiplier; // Global time multiplier for all game systems
+	static float s_previousTimeMultiplier; // Previous time multiplier for pause/unpause functionality
 
 	// Shared random number generator
 	static std::mt19937& GetRandomGenerator();
@@ -54,8 +54,11 @@ private:
 
 	void SetupInventory();
 	void SetupStockMarket();
+	void SetupCustomCursor();
 	
 	void TotalGameTimeUpdate(sf::Time& delta);
+	void UpdateInputMode();
+	void UpdateGamepadCursor(sf::Time delta);
 
 	void DisplayHandle();
 	void InputHandle();
@@ -65,6 +68,18 @@ private:
 
 	std::unique_ptr< Inventory > m_playerInventory;
 	std::unique_ptr< StockMarket > m_stockMarket;
+
+	// Custom cursor
+	sf::Texture m_cursorTexture; // Texture for custom cursor
+	sf::Sprite m_cursorSprite;   // Sprite for custom cursor
+
+	// Input mode handling
+	enum class InputMode { Mouse, Gamepad };
+	InputMode m_currentInputMode;              // Current input mode
+	sf::Vector2f m_gamepadCursorPosition;      // Virtual cursor position for gamepad
+	sf::Vector2i m_lastMousePosition;          // Last recorded mouse position
+	float m_gamepadCursorSpeed;                // Speed multiplier for gamepad cursor movement
+	unsigned int m_gamepadId;                  // ID of the connected gamepad (0-7)
 
 	// Static variables
 	static double s_totalGameTime; // Total game time in seconds (double precision)
