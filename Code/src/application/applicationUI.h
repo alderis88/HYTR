@@ -72,7 +72,7 @@ public:
   ui::WidgetText* GettxtProdPrice(int monitorIndex) const { return (monitorIndex >= 0 && monitorIndex < 5) ? m_txtProdPrice[monitorIndex] : nullptr; }
 
   // Getters for Progress Bars
-  ui::WidgetProgressBar* GetHealthProgressBar() const { return m_healthProgressBar; }
+  ui::WidgetProgressBar* GetCycleProgressBar() const { return m_cycleProgressBar; }
   ui::WidgetProgressBar* GetEnergyProgressBar() const { return m_energyProgressBar; }
 
   // Getters for Inventory Container Widgets
@@ -131,7 +131,7 @@ private:
   ui::WidgetText* m_txtProdPrice[5];         // Trend text for each monitor
 
   // Progress Bars
-  ui::WidgetProgressBar* m_healthProgressBar;  // Health/HP progress bar
+  ui::WidgetProgressBar* m_cycleProgressBar;   // Cycle progress bar (top center)
   ui::WidgetProgressBar* m_energyProgressBar;  // Energy/Mana progress bar
 
   // Inventory container widgets

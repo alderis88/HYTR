@@ -31,7 +31,7 @@ ApplicationUI::ApplicationUI()
   , m_iconMaterialNeuro(nullptr)
   , m_iconMaterialTritanium(nullptr)
   , m_iconMaterialZeromass(nullptr)
-  , m_healthProgressBar(nullptr)
+  , m_cycleProgressBar(nullptr)
   , m_energyProgressBar(nullptr)
   , m_volumeText(nullptr)
   , m_volumeProgressBar(nullptr)
@@ -629,25 +629,25 @@ void ApplicationUI::UI_DebugContainers()
     m_infoContainer->EnableDebugDraw(true, sf::Color(0, 255, 255, 255)); // Cyan opaque
 }
 
-// Initialize progress bars for health, energy, etc.
+// Initialize progress bars for cycle, etc.
 void ApplicationUI::UI_InitializeProgressBars()
 {
-  // Create Health Progress Bar (red theme) with "HP" suffix
-  auto healthProgressBar = std::make_unique<ui::WidgetProgressBar>(50, 50, 300, 25, " HP");
-  healthProgressBar->SetForegroundColor(sf::Color(220, 20, 20));  // Red
-  healthProgressBar->SetBackgroundColor(sf::Color(64, 64, 64));   // Dark gray
-  healthProgressBar->SetBorderColor(sf::Color::White);
-  healthProgressBar->SetBorderThickness(2.0f);
-  healthProgressBar->SetProgress(0.75f);  // 75% health
-  healthProgressBar->SetShowPercentage(true);
-  healthProgressBar->SetTextSize(12); // Smaller text
+  // Create Cycle Progress Bar (orange theme) with "CYCLE" suffix - positioned at top center (2x size)
+  auto cycleProgressBar = std::make_unique<ui::WidgetProgressBar>(660, 150, 600, 50, " CYCLE");
+  cycleProgressBar->SetForegroundColor(sf::Color(255, 165, 0));  // Orange
+  cycleProgressBar->SetBackgroundColor(sf::Color(64, 64, 64));   // Dark gray
+  cycleProgressBar->SetBorderColor(sf::Color::White);
+  cycleProgressBar->SetBorderThickness(2.0f);
+  cycleProgressBar->SetProgress(0.60f);  // 60% cycle progress
+  cycleProgressBar->SetShowPercentage(true);
+  cycleProgressBar->SetTextSize(12); // Smaller text
 
   // Set font if available
   if (m_digitalFont.getInfo().family != "")
   {
-    healthProgressBar->SetFont(m_digitalFont);
-  }  m_healthProgressBar = healthProgressBar.get();
-  m_rootContainer->AddWidget(std::move(healthProgressBar));
+    cycleProgressBar->SetFont(m_digitalFont);
+  }  m_cycleProgressBar = cycleProgressBar.get();
+  m_rootContainer->AddWidget(std::move(cycleProgressBar));
 }
 
 /// @brief Update all product displays with current stock market data
