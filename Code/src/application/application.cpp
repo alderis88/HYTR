@@ -425,46 +425,7 @@ void Application::InputHandle()
 				DebugLog("Game unpaused - time multiplier restored to: " + std::to_string(s_globalTimeMultiplier), DebugType::Message);
 			}
 		}
-		else if (event.type == InputEvent::KeyPressed && event.key.code == sf::Keyboard::H)
-		{
-			// H key pressed - toggle monitor 1 visibility
-			DebugLog("H key pressed", DebugType::Message);
-			if (m_monitor1Container)
-			{
-				// Check parent container visibility
-				if (m_monitorMenuContainer)
-				{
-					bool parentVisible = m_monitorMenuContainer->IsVisible();
-					DebugLog(std::string("Parent m_monitorMenuContainer visibility: ") + (parentVisible ? "true" : "false"), DebugType::Message);
-				}
-
-				bool isVisible = m_monitor1Container->IsVisible();
-				DebugLog(std::string("m_monitor1Container current visibility: ") + (isVisible ? "true" : "false"), DebugType::Message);
-				m_monitor1Container->SetVisible(!isVisible);
-				bool newVisibility = m_monitor1Container->IsVisible();
-				DebugLog(std::string("m_monitor1Container new visibility: ") + (newVisibility ? "true" : "false"), DebugType::Message);
-				DebugLog(std::string("m_monitor1Container ") + (isVisible ? "hidden" : "shown"), DebugType::Message);
-			}
-		}
-		else if (event.type == InputEvent::KeyPressed && event.key.code == sf::Keyboard::S)
-		{
-			// S key pressed - toggle inventory sort mode
-			DebugLog("S key pressed - toggling inventory sort mode", DebugType::Message);
-			if (m_applicationUI)
-			{
-				// Get current sort type and toggle to the other one
-				InventorySortType currentSort = m_applicationUI->GetSelectedSortType();
-				InventorySortType newSort = (currentSort == InventorySortType::Volume) ? 
-					InventorySortType::Quantity : InventorySortType::Volume;
-				
-				// Apply the new sort type
-				m_applicationUI->SelectInventorySort(newSort);
-				
-				// Log the change
-				std::string sortName = (newSort == InventorySortType::Volume) ? "Volume" : "Quantity";
-				DebugLog(std::string("Inventory sort changed to: ") + sortName, DebugType::Message);
-			}
-		}
+		
 		else if (event.type == InputEvent::KeyPressed)
 		{
 			// Test trading hotkeys: 1-5 to buy, Shift+1-5 to sell
@@ -491,6 +452,48 @@ void Application::InputHandle()
 				m_rootWidgetContainer->ProcessInput(event);
 			}
 		}
+	}
+	
+	// Handle gamepad A button press to simulate mouse click
+	if (sf::Joystick::isConnected(m_gamepadId))
+	{
+		static bool wasAButtonPressed = false;
+		bool isAButtonPressed = sf::Joystick::isButtonPressed(m_gamepadId, 0); // Button 0 is typically A button
+		
+		// Detect button press (rising edge)
+		if (isAButtonPressed && !wasAButtonPressed)
+		{
+			// Create synthetic mouse click event at current gamepad cursor position
+			InputEvent clickEvent;
+			clickEvent.type = InputEvent::MouseButtonPressed;
+			clickEvent.mouseButton.button = sf::Mouse::Left;
+			clickEvent.mouseButton.x = static_cast<int>(m_gamepadCursorPosition.x);
+			clickEvent.mouseButton.y = static_cast<int>(m_gamepadCursorPosition.y);
+			
+			// Forward the synthetic click to UI system
+			if (m_rootWidgetContainer)
+			{
+				m_rootWidgetContainer->ProcessInput(clickEvent);
+			}
+		}
+		// Detect button release (falling edge)
+		else if (!isAButtonPressed && wasAButtonPressed)
+		{
+			// Create synthetic mouse release event
+			InputEvent releaseEvent;
+			releaseEvent.type = InputEvent::MouseButtonReleased;
+			releaseEvent.mouseButton.button = sf::Mouse::Left;
+			releaseEvent.mouseButton.x = static_cast<int>(m_gamepadCursorPosition.x);
+			releaseEvent.mouseButton.y = static_cast<int>(m_gamepadCursorPosition.y);
+			
+			// Forward the synthetic release to UI system
+			if (m_rootWidgetContainer)
+			{
+				m_rootWidgetContainer->ProcessInput(releaseEvent);
+			}
+		}
+		
+		wasAButtonPressed = isAButtonPressed;
 	}
 }
 
