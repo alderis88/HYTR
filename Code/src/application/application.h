@@ -67,6 +67,7 @@ private:
 
 	void DisplayHandle();
 	void InputHandle();
+	void HandleTestTrading(sf::Keyboard::Key key, bool isShiftPressed);
 
 	std::unique_ptr< ui::Window > m_mainWindow;
 	std::unique_ptr< RenderContext > m_renderContext;

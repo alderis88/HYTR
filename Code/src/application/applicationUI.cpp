@@ -40,6 +40,32 @@ ApplicationUI::ApplicationUI()
 	, m_energyProgressBar(nullptr)
 	, m_volumeText(nullptr)
 	, m_volumeProgressBar(nullptr)
+	, m_inventoryProductsContainer(nullptr)
+	, m_triInvContainer(nullptr)
+	, m_nfxInvContainer(nullptr)
+	, m_zerInvContainer(nullptr)
+	, m_lumInvContainer(nullptr)
+	, m_nanInvContainer(nullptr)
+	, m_triInvButton(nullptr)
+	, m_nfxInvButton(nullptr)
+	, m_zerInvButton(nullptr)
+	, m_lumInvButton(nullptr)
+	, m_nanInvButton(nullptr)
+	, m_triInvIcon(nullptr)
+	, m_nfxInvIcon(nullptr)
+	, m_zerInvIcon(nullptr)
+	, m_lumInvIcon(nullptr)
+	, m_nanInvIcon(nullptr)
+	, m_triInvQuantityText(nullptr)
+	, m_nfxInvQuantityText(nullptr)
+	, m_zerInvQuantityText(nullptr)
+	, m_lumInvQuantityText(nullptr)
+	, m_nanInvQuantityText(nullptr)
+	, m_triInvVolumeText(nullptr)
+	, m_nfxInvVolumeText(nullptr)
+	, m_zerInvVolumeText(nullptr)
+	, m_lumInvVolumeText(nullptr)
+	, m_nanInvVolumeText(nullptr)
 	, m_productInfoImage(nullptr)
 	, m_productInfoText(nullptr)
 	, m_productVolumeText(nullptr)
@@ -54,6 +80,7 @@ ApplicationUI::ApplicationUI()
 	, m_productNameText(nullptr)
 	, m_confirmTradeButton(nullptr)
 	, m_cancelTradeButton(nullptr)
+	, m_currentMoneyText(nullptr)
 	, m_infoPanelSelectorContainer(nullptr)
 	, m_productInfoSelectorButton(nullptr)
 	, m_companyInfoSelectorButton(nullptr)
@@ -61,7 +88,6 @@ ApplicationUI::ApplicationUI()
 	, m_selectedInfoPanel(0) // Default to Product info panel
 	, m_inventorySortSelectorContainer(nullptr)
 	, m_volumeSortButton(nullptr)
-	, m_valueSortButton(nullptr)
 	, m_quantitySortButton(nullptr)
 	, m_selectedSortType(InventorySortType::Volume) // Default to Volume sort
 	, m_rollingText1Position(1920.0f) // Start off-screen to the right
@@ -99,6 +125,9 @@ void ApplicationUI::InitializeUI(Application* app)
 
 	// Load and display initial stock market data on all product monitors
 	UpdateProductDisplays();
+
+	// Update current money display
+	UpdateCurrentMoneyDisplay();
 
 	// Perform final layout calculations now that all widgets are created and positioned
 	m_rootContainer->UpdateLayout();
@@ -364,6 +393,21 @@ void ApplicationUI::UI_InitializeTradeContainer()
 	m_cancelTradeButton = cancelTradeButton.get();
 	m_tradeContainer->AddWidget(std::move(cancelTradeButton));
 
+	// === Current Money Display ===
+	auto currentMoneyText = std::make_unique<ui::WidgetText>(360, 150, "Money: $0");
+	currentMoneyText->SetCharacterSize(24);
+	currentMoneyText->SetStyle(sf::Text::Bold);
+	currentMoneyText->SetAlignment(ui::WidgetText::Alignment::Center);
+	currentMoneyText->SetTextColor(sf::Color::Yellow);
+	
+	// Set font if available
+	if (m_digitalFont.getInfo().family != "") {
+		currentMoneyText->SetFont(m_digitalFont);
+	}
+	
+	m_currentMoneyText = currentMoneyText.get();
+	m_tradeContainer->AddWidget(std::move(currentMoneyText));
+
 	// Initially hide trade container until a monitor is selected
 	m_tradeContainer->SetVisible(false);
 }
@@ -394,6 +438,192 @@ void ApplicationUI::UI_InitializeInventoryContainer()
 	inventoryTitle->SetTextColor(sf::Color::White);
 	m_inventoryContainer->AddWidget(std::move(inventoryTitle));
 
+	// Create vertical container for inventory products (5 product buttons)
+	auto inventoryProductsContainer = std::make_unique<ui::WidgetContainer>(10, 70, 530, 250);
+	inventoryProductsContainer->SetLayout(ui::LayoutType::Vertical, 5); // Vertical layout with 5px spacing
+	m_inventoryProductsContainer = inventoryProductsContainer.get();
+	m_inventoryContainer->AddWidget(std::move(inventoryProductsContainer));
+
+	// === Tritanium Inventory Button Container ===
+	auto triInvContainer = std::make_unique<ui::WidgetContainer>(0, 0, 530, 45);
+	triInvContainer->SetLayout(ui::LayoutType::Native); // Manual positioning for precise control
+	m_triInvContainer = triInvContainer.get();
+	m_inventoryProductsContainer->AddWidget(std::move(triInvContainer));
+
+	// Tritanium inventory button (full width)
+	auto triInvButton = std::make_unique<ui::WidgetButton>(0, 0, 530, 45);
+	triInvButton->LoadImage("ButtonMain2.png");
+	triInvButton->SetOnClickCallback([this]() {
+		// TODO: Handle Tritanium inventory action
+		});
+	m_triInvButton = triInvButton.get();
+	m_triInvContainer->AddWidget(std::move(triInvButton));
+
+	// Tritanium icon
+	auto triInvIcon = std::make_unique<ui::WidgetImage>(5, 7, 30, 30, "IconMaterialTritanium.png");
+	m_triInvIcon = triInvIcon.get();
+	m_triInvContainer->AddWidget(std::move(triInvIcon));
+
+	// Tritanium quantity text
+	auto triInvQuantityText = std::make_unique<ui::WidgetText>(45, 12, "Qty: 0");
+	triInvQuantityText->SetCharacterSize(14);
+	triInvQuantityText->SetTextColor(sf::Color::Yellow);
+	triInvQuantityText->SetStyle(sf::Text::Bold);
+	m_triInvQuantityText = triInvQuantityText.get();
+	m_triInvContainer->AddWidget(std::move(triInvQuantityText));
+
+	// Tritanium volume text
+	auto triInvVolumeText = std::make_unique<ui::WidgetText>(150, 12, "Volume: 0");
+	triInvVolumeText->SetCharacterSize(14);
+	triInvVolumeText->SetTextColor(sf::Color::Cyan);
+	triInvVolumeText->SetStyle(sf::Text::Bold);
+	m_triInvVolumeText = triInvVolumeText.get();
+	m_triInvContainer->AddWidget(std::move(triInvVolumeText));
+
+	// === Neuroflux Inventory Button Container ===
+	auto nfxInvContainer = std::make_unique<ui::WidgetContainer>(0, 0, 530, 45);
+	nfxInvContainer->SetLayout(ui::LayoutType::Native);
+	m_nfxInvContainer = nfxInvContainer.get();
+	m_inventoryProductsContainer->AddWidget(std::move(nfxInvContainer));
+
+	// Neuroflux inventory button
+	auto nfxInvButton = std::make_unique<ui::WidgetButton>(0, 0, 530, 45);
+	nfxInvButton->LoadImage("ButtonMain2.png");
+	nfxInvButton->SetOnClickCallback([this]() {
+		// TODO: Handle Neuroflux inventory action
+		});
+	m_nfxInvButton = nfxInvButton.get();
+	m_nfxInvContainer->AddWidget(std::move(nfxInvButton));
+
+	// Neuroflux icon
+	auto nfxInvIcon = std::make_unique<ui::WidgetImage>(5, 7, 30, 30, "IconMaterialNeuro.png");
+	m_nfxInvIcon = nfxInvIcon.get();
+	m_nfxInvContainer->AddWidget(std::move(nfxInvIcon));
+
+	// Neuroflux quantity text
+	auto nfxInvQuantityText = std::make_unique<ui::WidgetText>(45, 12, "Qty: 0");
+	nfxInvQuantityText->SetCharacterSize(14);
+	nfxInvQuantityText->SetTextColor(sf::Color::Yellow);
+	nfxInvQuantityText->SetStyle(sf::Text::Bold);
+	m_nfxInvQuantityText = nfxInvQuantityText.get();
+	m_nfxInvContainer->AddWidget(std::move(nfxInvQuantityText));
+
+	// Neuroflux volume text
+	auto nfxInvVolumeText = std::make_unique<ui::WidgetText>(150, 12, "Volume: 0");
+	nfxInvVolumeText->SetCharacterSize(14);
+	nfxInvVolumeText->SetTextColor(sf::Color::Cyan);
+	nfxInvVolumeText->SetStyle(sf::Text::Bold);
+	m_nfxInvVolumeText = nfxInvVolumeText.get();
+	m_nfxInvContainer->AddWidget(std::move(nfxInvVolumeText));
+
+	// === Zeromass Inventory Button Container ===
+	auto zerInvContainer = std::make_unique<ui::WidgetContainer>(0, 0, 530, 45);
+	zerInvContainer->SetLayout(ui::LayoutType::Native);
+	m_zerInvContainer = zerInvContainer.get();
+	m_inventoryProductsContainer->AddWidget(std::move(zerInvContainer));
+
+	// Zeromass inventory button
+	auto zerInvButton = std::make_unique<ui::WidgetButton>(0, 0, 530, 45);
+	zerInvButton->LoadImage("ButtonMain2.png");
+	zerInvButton->SetOnClickCallback([this]() {
+		// TODO: Handle Zeromass inventory action
+		});
+	m_zerInvButton = zerInvButton.get();
+	m_zerInvContainer->AddWidget(std::move(zerInvButton));
+
+	// Zeromass icon
+	auto zerInvIcon = std::make_unique<ui::WidgetImage>(5, 7, 30, 30, "IconMaterialZeromass.png");
+	m_zerInvIcon = zerInvIcon.get();
+	m_zerInvContainer->AddWidget(std::move(zerInvIcon));
+
+	// Zeromass quantity text
+	auto zerInvQuantityText = std::make_unique<ui::WidgetText>(45, 12, "Qty: 0");
+	zerInvQuantityText->SetCharacterSize(14);
+	zerInvQuantityText->SetTextColor(sf::Color::Yellow);
+	zerInvQuantityText->SetStyle(sf::Text::Bold);
+	m_zerInvQuantityText = zerInvQuantityText.get();
+	m_zerInvContainer->AddWidget(std::move(zerInvQuantityText));
+
+	// Zeromass volume text
+	auto zerInvVolumeText = std::make_unique<ui::WidgetText>(150, 12, "Volume: 0");
+	zerInvVolumeText->SetCharacterSize(14);
+	zerInvVolumeText->SetTextColor(sf::Color::Cyan);
+	zerInvVolumeText->SetStyle(sf::Text::Bold);
+	m_zerInvVolumeText = zerInvVolumeText.get();
+	m_zerInvContainer->AddWidget(std::move(zerInvVolumeText));
+
+	// === Lumirite Inventory Button Container ===
+	auto lumInvContainer = std::make_unique<ui::WidgetContainer>(0, 0, 530, 45);
+	lumInvContainer->SetLayout(ui::LayoutType::Native);
+	m_lumInvContainer = lumInvContainer.get();
+	m_inventoryProductsContainer->AddWidget(std::move(lumInvContainer));
+
+	// Lumirite inventory button
+	auto lumInvButton = std::make_unique<ui::WidgetButton>(0, 0, 530, 45);
+	lumInvButton->LoadImage("ButtonMain2.png");
+	lumInvButton->SetOnClickCallback([this]() {
+		// TODO: Handle Lumirite inventory action
+		});
+	m_lumInvButton = lumInvButton.get();
+	m_lumInvContainer->AddWidget(std::move(lumInvButton));
+
+	// Lumirite icon
+	auto lumInvIcon = std::make_unique<ui::WidgetImage>(5, 7, 30, 30, "IconMaterialLumi.png");
+	m_lumInvIcon = lumInvIcon.get();
+	m_lumInvContainer->AddWidget(std::move(lumInvIcon));
+
+	// Lumirite quantity text
+	auto lumInvQuantityText = std::make_unique<ui::WidgetText>(45, 12, "Qty: 0");
+	lumInvQuantityText->SetCharacterSize(14);
+	lumInvQuantityText->SetTextColor(sf::Color::Yellow);
+	lumInvQuantityText->SetStyle(sf::Text::Bold);
+	m_lumInvQuantityText = lumInvQuantityText.get();
+	m_lumInvContainer->AddWidget(std::move(lumInvQuantityText));
+
+	// Lumirite volume text
+	auto lumInvVolumeText = std::make_unique<ui::WidgetText>(150, 12, "Volume: 0");
+	lumInvVolumeText->SetCharacterSize(14);
+	lumInvVolumeText->SetTextColor(sf::Color::Cyan);
+	lumInvVolumeText->SetStyle(sf::Text::Bold);
+	m_lumInvVolumeText = lumInvVolumeText.get();
+	m_lumInvContainer->AddWidget(std::move(lumInvVolumeText));
+
+	// === Nanochip Inventory Button Container ===
+	auto nanInvContainer = std::make_unique<ui::WidgetContainer>(0, 0, 530, 45);
+	nanInvContainer->SetLayout(ui::LayoutType::Native);
+	m_nanInvContainer = nanInvContainer.get();
+	m_inventoryProductsContainer->AddWidget(std::move(nanInvContainer));
+
+	// Nanochip inventory button
+	auto nanInvButton = std::make_unique<ui::WidgetButton>(0, 0, 530, 45);
+	nanInvButton->LoadImage("ButtonMain2.png");
+	nanInvButton->SetOnClickCallback([this]() {
+		// TODO: Handle Nanochip inventory action
+		});
+	m_nanInvButton = nanInvButton.get();
+	m_nanInvContainer->AddWidget(std::move(nanInvButton));
+
+	// Nanochip icon
+	auto nanInvIcon = std::make_unique<ui::WidgetImage>(5, 7, 30, 30, "IconMaterialNano.png");
+	m_nanInvIcon = nanInvIcon.get();
+	m_nanInvContainer->AddWidget(std::move(nanInvIcon));
+
+	// Nanochip quantity text
+	auto nanInvQuantityText = std::make_unique<ui::WidgetText>(45, 12, "Qty: 0");
+	nanInvQuantityText->SetCharacterSize(14);
+	nanInvQuantityText->SetTextColor(sf::Color::Yellow);
+	nanInvQuantityText->SetStyle(sf::Text::Bold);
+	m_nanInvQuantityText = nanInvQuantityText.get();
+	m_nanInvContainer->AddWidget(std::move(nanInvQuantityText));
+
+	// Nanochip volume text
+	auto nanInvVolumeText = std::make_unique<ui::WidgetText>(150, 12, "Volume: 0");
+	nanInvVolumeText->SetCharacterSize(14);
+	nanInvVolumeText->SetTextColor(sf::Color::Cyan);
+	nanInvVolumeText->SetStyle(sf::Text::Bold);
+	m_nanInvVolumeText = nanInvVolumeText.get();
+	m_nanInvContainer->AddWidget(std::move(nanInvVolumeText));
+
 	// Add volume text
 	auto volumeText = std::make_unique<ui::WidgetText>(270, 330, "Volume");
 	volumeText->SetCharacterSize(18);
@@ -422,21 +652,21 @@ void ApplicationUI::UI_InitializeInventoryContainer()
 	m_inventoryContainer->AddWidget(std::move(volumeProgressBar));
 }
 
-/// @brief Initialize the inventory sort selector with 3 toggle buttons
-/// @details Creates a horizontal container with Volume, Value, and Quantity buttons
+/// @brief Initialize the inventory sort selector with 2 toggle buttons
+/// @details Creates a horizontal container with Volume and Quantity buttons
 ///          that switch between different inventory sorting modes. Only one button
 ///          can be selected at a time, with the selected button showing a different background.
 ///          Position: Above the inventory container (bottom left area)
 void ApplicationUI::UI_InitializeInventorySortSelector()
 {
 	// Create inventory sort selector container (small horizontal container above inventory)
-	auto inventorySortSelectorContainer = std::make_unique<ui::WidgetContainer>(30, 550, 550, 50);
+	auto inventorySortSelectorContainer = std::make_unique<ui::WidgetContainer>(30, 550, 370, 50);
 	inventorySortSelectorContainer->SetLayout(ui::LayoutType::Native); // Manual positioning for precise control
 	m_inventorySortSelectorContainer = inventorySortSelectorContainer.get(); // Store raw pointer for later access
 	m_rootContainer->AddWidget(std::move(inventorySortSelectorContainer));
 
 	// === Volume Sort Button ===
-	auto volumeSortButton = std::make_unique<ui::WidgetButton>(0, 0, 180, 50);
+	auto volumeSortButton = std::make_unique<ui::WidgetButton>(0, 0, 270, 50);
 	volumeSortButton->LoadImage("ButtonMain2.png"); // Default button background
 	volumeSortButton->SetText("VOLUME");
 	volumeSortButton->SetTextColor(sf::Color::White);
@@ -446,19 +676,8 @@ void ApplicationUI::UI_InitializeInventorySortSelector()
 	m_volumeSortButton = volumeSortButton.get();
 	m_inventorySortSelectorContainer->AddWidget(std::move(volumeSortButton));
 
-	// === Value Sort Button ===
-	auto valueSortButton = std::make_unique<ui::WidgetButton>(185, 0, 180, 50);
-	valueSortButton->LoadImage("ButtonMain2.png"); // Default button background
-	valueSortButton->SetText("VALUE");
-	valueSortButton->SetTextColor(sf::Color::White);
-	valueSortButton->SetOnClickCallback([this]() {
-		SelectInventorySort(InventorySortType::Value); // Select Value sort
-		});
-	m_valueSortButton = valueSortButton.get();
-	m_inventorySortSelectorContainer->AddWidget(std::move(valueSortButton));
-
 	// === Quantity Sort Button ===
-	auto quantitySortButton = std::make_unique<ui::WidgetButton>(370, 0, 180, 50);
+	auto quantitySortButton = std::make_unique<ui::WidgetButton>(271, 0, 270, 50);
 	quantitySortButton->LoadImage("ButtonMain2.png"); // Default button background
 	quantitySortButton->SetText("QUANTITY");
 	quantitySortButton->SetTextColor(sf::Color::White);
@@ -1097,6 +1316,120 @@ void ApplicationUI::UpdateCycleProgressBar()
 	m_cycleProgressBar->SetCustomText(countdownText.str());
 }
 
+/// @brief Update all inventory buttons with current quantity and volume values
+/// Updates the 5 inventory product buttons to show current player inventory data
+void ApplicationUI::UpdateInventoryButtons()
+{
+	// Check if we have the necessary components
+	if (!m_application || !m_application->GetPlayerInventory() || !m_application->m_stockMarket)
+	{
+		return;
+	}
+
+	// Get player inventory reference
+	Inventory* inventory = m_application->GetPlayerInventory();
+
+	// Product IDs corresponding to each inventory button
+	std::string productIds[5] = { "TRI", "NFX", "ZER", "LUM", "NAN" };
+
+	// Update Tritanium (index 0)
+	if (m_triInvQuantityText && m_triInvVolumeText)
+	{
+		uint32_t quantity = inventory->GetProductQuantity(productIds[0]);
+		
+		// Get product data for volume calculation
+		StockProduct* product = m_application->m_stockMarket->GetStockProductById(productIds[0]);
+		float totalVolume = 0.0f;
+		if (product)
+		{
+			totalVolume = quantity * product->m_volume;
+		}
+
+		// Update text widgets
+		m_triInvQuantityText->SetText("Qty: " + std::to_string(quantity));
+		
+		std::ostringstream volumeStream;
+		volumeStream << "Volume: " << std::fixed << std::setprecision(1) << totalVolume;
+		m_triInvVolumeText->SetText(volumeStream.str());
+	}
+
+	// Update Neuroflux (index 1)
+	if (m_nfxInvQuantityText && m_nfxInvVolumeText)
+	{
+		uint32_t quantity = inventory->GetProductQuantity(productIds[1]);
+		
+		StockProduct* product = m_application->m_stockMarket->GetStockProductById(productIds[1]);
+		float totalVolume = 0.0f;
+		if (product)
+		{
+			totalVolume = quantity * product->m_volume;
+		}
+
+		m_nfxInvQuantityText->SetText("Qty: " + std::to_string(quantity));
+		
+		std::ostringstream volumeStream;
+		volumeStream << "Volume: " << std::fixed << std::setprecision(1) << totalVolume;
+		m_nfxInvVolumeText->SetText(volumeStream.str());
+	}
+
+	// Update Zeromass (index 2)
+	if (m_zerInvQuantityText && m_zerInvVolumeText)
+	{
+		uint32_t quantity = inventory->GetProductQuantity(productIds[2]);
+		
+		StockProduct* product = m_application->m_stockMarket->GetStockProductById(productIds[2]);
+		float totalVolume = 0.0f;
+		if (product)
+		{
+			totalVolume = quantity * product->m_volume;
+		}
+
+		m_zerInvQuantityText->SetText("Qty: " + std::to_string(quantity));
+		
+		std::ostringstream volumeStream;
+		volumeStream << "Volume: " << std::fixed << std::setprecision(1) << totalVolume;
+		m_zerInvVolumeText->SetText(volumeStream.str());
+	}
+
+	// Update Lumirite (index 3)
+	if (m_lumInvQuantityText && m_lumInvVolumeText)
+	{
+		uint32_t quantity = inventory->GetProductQuantity(productIds[3]);
+		
+		StockProduct* product = m_application->m_stockMarket->GetStockProductById(productIds[3]);
+		float totalVolume = 0.0f;
+		if (product)
+		{
+			totalVolume = quantity * product->m_volume;
+		}
+
+		m_lumInvQuantityText->SetText("Qty: " + std::to_string(quantity));
+		
+		std::ostringstream volumeStream;
+		volumeStream << "Volume: " << std::fixed << std::setprecision(1) << totalVolume;
+		m_lumInvVolumeText->SetText(volumeStream.str());
+	}
+
+	// Update Nanochip (index 4)
+	if (m_nanInvQuantityText && m_nanInvVolumeText)
+	{
+		uint32_t quantity = inventory->GetProductQuantity(productIds[4]);
+		
+		StockProduct* product = m_application->m_stockMarket->GetStockProductById(productIds[4]);
+		float totalVolume = 0.0f;
+		if (product)
+		{
+			totalVolume = quantity * product->m_volume;
+		}
+
+		m_nanInvQuantityText->SetText("Qty: " + std::to_string(quantity));
+		
+		std::ostringstream volumeStream;
+		volumeStream << "Volume: " << std::fixed << std::setprecision(1) << totalVolume;
+		m_nanInvVolumeText->SetText(volumeStream.str());
+	}
+}
+
 /// @brief Select a monitor button and apply purple highlighting
 /// @param monitorIndex Index of the monitor button to select (0-4)
 void ApplicationUI::SelectMonitor(int monitorIndex) {
@@ -1382,9 +1715,6 @@ void ApplicationUI::SelectInventorySort(InventorySortType sortType) {
 	if (m_volumeSortButton) {
 		m_volumeSortButton->LoadImage("ButtonMain2.png");
 	}
-	if (m_valueSortButton) {
-		m_valueSortButton->LoadImage("ButtonMain2.png");
-	}
 	if (m_quantitySortButton) {
 		m_quantitySortButton->LoadImage("ButtonMain2.png");
 	}
@@ -1394,11 +1724,6 @@ void ApplicationUI::SelectInventorySort(InventorySortType sortType) {
 	case InventorySortType::Volume:
 		if (m_volumeSortButton) {
 			m_volumeSortButton->LoadImage("BgInventory.png");
-		}
-		break;
-	case InventorySortType::Value:
-		if (m_valueSortButton) {
-			m_valueSortButton->LoadImage("BgInventory.png");
 		}
 		break;
 	case InventorySortType::Quantity:
@@ -1441,4 +1766,23 @@ void ApplicationUI::LoadingNewText(bool first)
 			m_rollingText2->SetText(secondNews->m_newsContent);
 		}
 	}
+}
+
+/// @brief Update current money display with latest player money amount
+/// @details Updates the money text widget in trade container to show current player money.
+///          Should be called whenever money changes (buy/sell transactions, etc.)
+void ApplicationUI::UpdateCurrentMoneyDisplay()
+{
+	// Safety check: ensure we have valid application, inventory, and money text widget
+	if (!m_application || !m_application->GetPlayerInventory() || !m_currentMoneyText)
+		return;
+
+	// Get current player money from inventory
+	uint32_t currentMoney = m_application->GetPlayerInventory()->GetCurrentMoney();
+	
+	// Format money display with $ symbol and comma separators for readability
+	std::string moneyText = "Money: $" + std::to_string(currentMoney);
+	
+	// Update the text widget
+	m_currentMoneyText->SetText(moneyText);
 }

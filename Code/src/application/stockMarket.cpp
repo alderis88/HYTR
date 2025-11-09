@@ -383,6 +383,11 @@ void StockMarket::CalculateOnlyPlayerInfluenceChangePrice(StockProduct& product)
 	// 	", Base Price Without Impact: " + std::to_string(product.m_currentPriceWithoutPlayerImpact) +
 	// 	", Final Price: " + std::to_string(product.m_currentPrice) +
 	// 	", Trend Increased: " + (product.m_trendIncreased ? "true" : "false"));
+
+	if (m_application && m_application->GetApplicationUI())
+	{
+		m_application->GetApplicationUI()->UpdateProductDisplays();
+	}
 }
 
 /// @brief Reduce player impact on product price over time
@@ -479,10 +484,10 @@ StockVendor* StockMarket::GetStockVendorByProductId(const std::string& productId
 }
 
 /// @brief Validate if a buy transaction is possible
-/// Checks if sufficient stock is available without actually executing the trade
+/// Checks if sufficient stock is available, player has enough money, and inventory has space
 /// @param productId ID of the product to check
 /// @param desiredQuantity Amount the player wants to buy
-/// @return true if transaction is valid, false if insufficient stock or product not found
+/// @return true if transaction is valid, false if insufficient stock, money, or inventory space
 bool StockMarket::ValidateBuyFromStock(const std::string& productId, uint32_t desiredQuantity)
 {
 	// Get the product by ID
@@ -491,20 +496,106 @@ bool StockMarket::ValidateBuyFromStock(const std::string& productId, uint32_t de
 	if (product == nullptr)
 	{
 		// Product not found
-		DebugLog("Product with ID: " + productId + " not found in stock market", DebugType::Warning);
+		DebugLog("ValidateBuyFromStock - Product with ID: " + productId + " not found in stock market", DebugType::Warning);
 		return false;
 	}
 
-	// Check if desired quantity is available
-	bool isValidTrade = product->m_quantity >= desiredQuantity;
+	// Check if desired quantity is available in stock
+	if (product->m_quantity < desiredQuantity)
+	{
+		DebugLog("ValidateBuyFromStock - Not enough stock for product: " + product->m_name + 
+			" (ID: " + productId + ") - Requested: " + std::to_string(desiredQuantity) +
+			", Available: " + std::to_string(product->m_quantity), DebugType::Warning);
+		return false;
+	}
 
-	// Debug log the validation result
-	DebugLog("Product: " + product->m_name + " (ID: " + productId + ") - " +
-		"Desired quantity: " + std::to_string(desiredQuantity) +
-		", Available: " + std::to_string(product->m_quantity) +
-		", Valid trade: " + (isValidTrade ? "true" : "false"));
+	// Check if application and inventory references are available
+	if (!m_application || !m_application->GetPlayerInventory())
+	{
+		DebugLog("ValidateBuyFromStock - No application or inventory reference available", DebugType::Warning);
+		return false;
+	}
 
-	return isValidTrade;
+	// Calculate total cost
+	uint32_t totalCost = desiredQuantity * product->m_currentPrice;
+
+	// Check if player has enough money
+	uint32_t currentMoney = m_application->GetPlayerInventory()->GetCurrentMoney();
+	if (currentMoney < totalCost)
+	{
+		DebugLog("ValidateBuyFromStock - Not enough money for product: " + product->m_name +
+			" (ID: " + productId + ") - Cost: " + std::to_string(totalCost) +
+			", Available money: " + std::to_string(currentMoney), DebugType::Warning);
+		return false;
+	}
+
+	// Check if inventory has enough space (volume-based)
+	float requiredVolume = desiredQuantity * product->m_volume;
+	float currentVolume = m_application->GetPlayerInventory()->GetCurrentInventoryVolume();
+	float maxVolume = m_application->GetPlayerInventory()->GetMaxInventoryVolume();
+	float availableSpace = maxVolume - currentVolume;
+
+	if (requiredVolume > availableSpace)
+	{
+		DebugLog("ValidateBuyFromStock - Not enough inventory space for product: " + product->m_name +
+			" (ID: " + productId + ") - Required: " + std::to_string(requiredVolume) +
+			", Available space: " + std::to_string(availableSpace), DebugType::Warning);
+		return false;
+	}
+
+	// All checks passed - transaction is valid
+	DebugLog("ValidateBuyFromStock - Product: " + product->m_name + " (ID: " + productId + ") - " +
+		"Quantity: " + std::to_string(desiredQuantity) + 
+		", Cost: " + std::to_string(totalCost) +
+		", Volume required: " + std::to_string(requiredVolume) + 
+		" - Transaction VALID");
+
+	return true;
+}
+
+/// @brief Validate if a sell transaction is possible
+/// Checks if the player has the specified quantity of the product in their inventory
+/// @param productId ID of the product to check
+/// @param desiredQuantity Amount the player wants to sell
+/// @return true if transaction is valid, false if insufficient quantity in inventory
+bool StockMarket::ValidateSellForStock(const std::string& productId, uint32_t desiredQuantity)
+{
+	// Get the product by ID to verify it exists
+	StockProduct* product = GetStockProductById(productId);
+
+	if (product == nullptr)
+	{
+		// Product not found in stock market
+		DebugLog("ValidateSellForStock - Product with ID: " + productId + " not found in stock market", DebugType::Warning);
+		return false;
+	}
+
+	// Check if application and inventory references are available
+	if (!m_application || !m_application->GetPlayerInventory())
+	{
+		DebugLog("ValidateSellForStock - No application or inventory reference available", DebugType::Warning);
+		return false;
+	}
+
+	// Get player's current quantity of this product in inventory
+	uint32_t playerQuantity = m_application->GetPlayerInventory()->GetProductQuantity(productId);
+
+	// Check if player has enough quantity to sell
+	if (playerQuantity < desiredQuantity)
+	{
+		DebugLog("ValidateSellForStock - Not enough quantity in inventory for product: " + product->m_name +
+			" (ID: " + productId + ") - Requested to sell: " + std::to_string(desiredQuantity) +
+			", Available in inventory: " + std::to_string(playerQuantity), DebugType::Warning);
+		return false;
+	}
+
+	// All checks passed - transaction is valid
+	DebugLog("ValidateSellForStock - Product: " + product->m_name + " (ID: " + productId + ") - " +
+		"Quantity to sell: " + std::to_string(desiredQuantity) + 
+		", Available in inventory: " + std::to_string(playerQuantity) + 
+		" - Transaction VALID");
+
+	return true;
 }
 
 /// @brief Execute a buy transaction from stock market
@@ -514,23 +605,15 @@ bool StockMarket::ValidateBuyFromStock(const std::string& productId, uint32_t de
 /// @return true if successful, false if insufficient stock or product not found
 bool StockMarket::BuyFromStock(const std::string& productId, uint32_t quantity)
 {
-	// Find the product in our inventory
+	// Use validation function to check all prerequisites (stock, money, inventory space)
+	if (!ValidateBuyFromStock(productId, quantity))
+	{
+		// ValidateBuyFromStock already logs specific error messages
+		return false;
+	}
+
+	// Get the product (we know it exists because validation passed)
 	StockProduct* product = GetStockProductById(productId);
-
-	if (product == nullptr)
-	{
-		DebugLog("BuyFromStock - Product with ID: " + productId + " not found in stock market", DebugType::Warning);
-		return false;
-	}
-
-	// Check if we have enough stock
-	if (product->m_quantity < quantity)
-	{
-		DebugLog("BuyFromStock - Not enough stock for product: " + product->m_name +
-			" (ID: " + productId + ") - Requested: " + std::to_string(quantity) +
-			", Available: " + std::to_string(product->m_quantity), DebugType::Warning);
-		return false;
-	}
 
 	// Store old quantity for logging
 	uint32_t oldQuantity = product->m_quantity;
@@ -538,24 +621,14 @@ bool StockMarket::BuyFromStock(const std::string& productId, uint32_t quantity)
 	// Calculate total cost (quantity * current price)
 	uint32_t totalCost = quantity * product->m_currentPrice;
 
-	// Check if player has enough money
-	if (m_application && m_application->GetPlayerInventory())
-	{
-		uint32_t currentMoney = m_application->GetPlayerInventory()->GetCurrentMoney();
-		if (currentMoney < totalCost)
-		{
-			DebugLog("BuyFromStock - Not enough money for product: " + product->m_name +
-				" (ID: " + productId + ") - Cost: " + std::to_string(totalCost) +
-				", Available money: " + std::to_string(currentMoney), DebugType::Warning);
-			return false;
-		}
+	// Execute the transaction (we know all conditions are met)
+	uint32_t currentMoney = m_application->GetPlayerInventory()->GetCurrentMoney();
+	
+	// Deduct the cost from player's money
+	m_application->GetPlayerInventory()->SetCurrentMoney(currentMoney - totalCost);
 
-		// Deduct the cost from player's money
-		m_application->GetPlayerInventory()->SetCurrentMoney(currentMoney - totalCost);
-
-		// Add the purchased product to player's inventory
-		m_application->GetPlayerInventory()->AddProduct(productId, quantity);
-	}
+	// Add the purchased product to player's inventory
+	m_application->GetPlayerInventory()->AddProduct(productId, quantity);
 
 	// Reduce stock quantity exactly by the requested amount
 	product->m_quantity -= quantity;
@@ -570,6 +643,13 @@ bool StockMarket::BuyFromStock(const std::string& productId, uint32_t quantity)
 	// Update price based on player impact after purchase
 	CalculateOnlyPlayerInfluenceChangePrice(*product);
 
+	// Update money display and inventory buttons in UI
+	if (m_application && m_application->GetApplicationUI())
+	{
+		m_application->GetApplicationUI()->UpdateCurrentMoneyDisplay();
+		m_application->GetApplicationUI()->UpdateInventoryButtons();
+	}
+
 	return true;
 }
 
@@ -577,16 +657,18 @@ bool StockMarket::BuyFromStock(const std::string& productId, uint32_t quantity)
 /// Increases available stock by quantity * sellStackRatio (not 1:1 ratio)
 /// @param productId ID of the product to sell
 /// @param quantity Amount player is selling
-void StockMarket::SellForStock(const std::string& productId, uint32_t quantity)
+/// @return true if successful, false if insufficient quantity in inventory or product not found
+bool StockMarket::SellForStock(const std::string& productId, uint32_t quantity)
 {
-	// Find the product in our inventory
-	StockProduct* product = GetStockProductById(productId);
-
-	if (product == nullptr)
+	// Use validation function to check if player has enough quantity in inventory
+	if (!ValidateSellForStock(productId, quantity))
 	{
-		DebugLog("SellForStock - Product with ID: " + productId + " not found in stock market", DebugType::Warning);
-		return;
+		// ValidateSellForStock already logs specific error messages
+		return false;
 	}
+
+	// Get the product (we know it exists because validation passed)
+	StockProduct* product = GetStockProductById(productId);
 
 	// Store old quantity for logging
 	uint32_t oldQuantity = product->m_quantity;
@@ -594,12 +676,14 @@ void StockMarket::SellForStock(const std::string& productId, uint32_t quantity)
 	// Calculate total earnings (quantity * current price)
 	uint32_t totalEarnings = quantity * product->m_currentPrice;
 
+	// Execute the transaction (we know all conditions are met)
+	uint32_t currentMoney = m_application->GetPlayerInventory()->GetCurrentMoney();
+	
 	// Add the earnings to player's money
-	if (m_application && m_application->GetPlayerInventory())
-	{
-		uint32_t currentMoney = m_application->GetPlayerInventory()->GetCurrentMoney();
-		m_application->GetPlayerInventory()->SetCurrentMoney(currentMoney + totalEarnings);
-	}
+	m_application->GetPlayerInventory()->SetCurrentMoney(currentMoney + totalEarnings);
+
+	// Remove the sold products from player inventory
+	m_application->GetPlayerInventory()->RemoveProduct(productId, quantity);
 
 	// Calculate the actual stock increase using sellStackRatio
 	uint32_t stockIncrease = static_cast<uint32_t>(quantity * product->m_sellStackRatio);
@@ -616,19 +700,17 @@ void StockMarket::SellForStock(const std::string& productId, uint32_t quantity)
 		"Quantity: " + std::to_string(oldQuantity) + " -> " + std::to_string(product->m_quantity) +
 		"/" + std::to_string(product->m_maxQuantity));
 
-	// Remove the sold products from player inventory
-	if (m_application != nullptr && m_application->m_playerInventory != nullptr)
-	{
-		m_application->m_playerInventory->RemoveProduct(productId, quantity);
-
-	}
-	else
-	{
-		DebugLog("SellForStock - Warning: No application or inventory reference available, cannot remove products from inventory", DebugType::Warning);
-	}
-
 	// Update price based on player impact after sale
 	CalculateOnlyPlayerInfluenceChangePrice(*product);
+
+	// Update money display and inventory buttons in UI
+	if (m_application && m_application->GetApplicationUI())
+	{
+		m_application->GetApplicationUI()->UpdateCurrentMoneyDisplay();
+		m_application->GetApplicationUI()->UpdateInventoryButtons();
+	}
+
+	return true;
 }
 
 /// @brief Load vendor characters from JSON file

@@ -62,8 +62,9 @@ public:
 	// === Product Access Functions ===
 	StockProduct* GetStockProductById(const std::string& productId);
 	bool ValidateBuyFromStock(const std::string& productId, uint32_t desiredQuantity);
+	bool ValidateSellForStock(const std::string& productId, uint32_t desiredQuantity);
 	bool BuyFromStock(const std::string& productId, uint32_t quantity);
-	void SellForStock(const std::string& productId, uint32_t quantity);
+	bool SellForStock(const std::string& productId, uint32_t quantity);
 
 	// === Vendor Access Functions ===
 	StockVendor* GetStockVendorByProductId(const std::string& productId);

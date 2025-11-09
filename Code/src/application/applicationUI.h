@@ -17,7 +17,6 @@ class Application; // Forward declaration
 enum class InventorySortType
 {
   Volume,   // Sort by item volume
-  Value,    // Sort by item value
   Quantity  // Sort by item quantity
 };
 
@@ -55,6 +54,8 @@ public:
   // Update functions
   void UpdateProductDisplays();
   void UpdateCycleProgressBar();
+  void UpdateCurrentMoneyDisplay();
+  void UpdateInventoryButtons();
   void UpdateApplicationUI( sf::Time delta);
   
   // Monitor selection functions
@@ -144,9 +145,10 @@ private:
   ui::WidgetImage* m_monitorHighlights[5];  // Array of purple highlight overlays for selected monitors
   int m_selectedMonitorIndex;               // Currently selected monitor (-1 if none)
 
-  // Trade container buttons
+  // Trade container buttons and text
   ui::WidgetButton* m_confirmTradeButton;   // Confirm trade action button
   ui::WidgetButton* m_cancelTradeButton;    // Cancel trade action button
+  ui::WidgetText* m_currentMoneyText;       // Current money display text
 
   // Info panel selector container and buttons
   ui::WidgetContainer* m_infoPanelSelectorContainer; // Container for info panel selector buttons
@@ -158,7 +160,6 @@ private:
   // Inventory sort selector container and buttons
   ui::WidgetContainer* m_inventorySortSelectorContainer; // Container for inventory sort selector buttons
   ui::WidgetButton* m_volumeSortButton;                  // Volume sort selector button
-  ui::WidgetButton* m_valueSortButton;                   // Value sort selector button
   ui::WidgetButton* m_quantitySortButton;                // Quantity sort selector button
   InventorySortType m_selectedSortType;                  // Currently selected sort type
 
@@ -188,6 +189,34 @@ private:
   // Inventory container widgets
   ui::WidgetText* m_volumeText;              // Volume text in inventory container
   ui::WidgetProgressBar* m_volumeProgressBar; // Volume progress bar in inventory container
+  
+  // Inventory product containers and buttons
+  ui::WidgetContainer* m_inventoryProductsContainer;     // Vertical container for inventory products
+  ui::WidgetContainer* m_triInvContainer;                // Container for Tritanium inventory button
+  ui::WidgetContainer* m_nfxInvContainer;                // Container for Neuroflux inventory button
+  ui::WidgetContainer* m_zerInvContainer;                // Container for Zeromass inventory button
+  ui::WidgetContainer* m_lumInvContainer;                // Container for Lumirite inventory button
+  ui::WidgetContainer* m_nanInvContainer;                // Container for Nanochip inventory button
+  ui::WidgetButton* m_triInvButton;                      // Tritanium inventory button
+  ui::WidgetButton* m_nfxInvButton;                      // Neuroflux inventory button
+  ui::WidgetButton* m_zerInvButton;                      // Zeromass inventory button
+  ui::WidgetButton* m_lumInvButton;                      // Lumirite inventory button
+  ui::WidgetButton* m_nanInvButton;                      // Nanochip inventory button
+  ui::WidgetImage* m_triInvIcon;                         // Tritanium inventory icon
+  ui::WidgetImage* m_nfxInvIcon;                         // Neuroflux inventory icon
+  ui::WidgetImage* m_zerInvIcon;                         // Zeromass inventory icon
+  ui::WidgetImage* m_lumInvIcon;                         // Lumirite inventory icon
+  ui::WidgetImage* m_nanInvIcon;                         // Nanochip inventory icon
+  ui::WidgetText* m_triInvQuantityText;                  // Tritanium inventory quantity text
+  ui::WidgetText* m_nfxInvQuantityText;                  // Neuroflux inventory quantity text
+  ui::WidgetText* m_zerInvQuantityText;                  // Zeromass inventory quantity text
+  ui::WidgetText* m_lumInvQuantityText;                  // Lumirite inventory quantity text
+  ui::WidgetText* m_nanInvQuantityText;                  // Nanochip inventory quantity text
+  ui::WidgetText* m_triInvVolumeText;                    // Tritanium inventory volume text
+  ui::WidgetText* m_nfxInvVolumeText;                    // Neuroflux inventory volume text
+  ui::WidgetText* m_zerInvVolumeText;                    // Zeromass inventory volume text
+  ui::WidgetText* m_lumInvVolumeText;                    // Lumirite inventory volume text
+  ui::WidgetText* m_nanInvVolumeText;                    // Nanochip inventory volume text
 
   // Product Info container widgets
   ui::WidgetImage* m_productInfoImage;       // Product info image in product info container
