@@ -33,6 +33,7 @@ public:
   void UI_InitializeGameTimeWidget();
   void UI_InitializeImageWidgets();
   void UI_InitializeProgressBars();
+  void UI_InitializeLogo();
   void UI_DebugContainers();
   void LoadingNewText(bool first);
 
@@ -128,6 +129,9 @@ private:
   ui::WidgetImage* m_iconMaterialNeuro;
   ui::WidgetImage* m_iconMaterialTritanium;
   ui::WidgetImage* m_iconMaterialZeromass;
+
+  // Logo
+  ui::WidgetImage* m_logoImage;
 
   // Trend Images - Arrays for multiple monitors
   ui::WidgetImage* m_imageTrendArrowDown[5]; // One for each monitor

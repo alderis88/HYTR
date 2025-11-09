@@ -34,6 +34,7 @@ ApplicationUI::ApplicationUI()
   , m_iconMaterialNeuro(nullptr)
   , m_iconMaterialTritanium(nullptr)
   , m_iconMaterialZeromass(nullptr)
+  , m_logoImage(nullptr)
   , m_cycleProgressBar(nullptr)
   , m_energyProgressBar(nullptr)
   , m_volumeText(nullptr)
@@ -99,6 +100,7 @@ void ApplicationUI::InitializeContainersUI()
   // Create the main UI hierarchy in proper dependency order
   UI_InitializeRootContainer();          // Full-screen root container with background
   UI_InitializeGameTimeWidget();         // Digital time display with custom font (loads fonts first)
+  UI_InitializeLogo();                   // Logo in top left corner
   UI_InitializeMonitorMenuContainer();   // 5 trading monitor displays with click handlers
   UI_InitializeTradeContainer();         // Trade confirm/cancel buttons
   UI_InitializeInventoryContainer();     // Inventory container (bottom left)
@@ -532,6 +534,22 @@ void ApplicationUI::UI_InitializeGameTimeWidget()
     m_gameTimeText = gameTimeText.get();
     m_rootContainer->AddWidget(std::move(gameTimeText));
   }
+}
+
+/// @brief Initialize the logo image in the top left corner
+/// @details Creates a logo image widget positioned in the top left corner of the screen.
+///          The logo provides branding and visual identity for the application.
+///          Position: (20, 20) - top left corner with small margin
+void ApplicationUI::UI_InitializeLogo()
+{
+  // Create logo image widget in top left corner
+  auto logoImage = std::make_unique<ui::WidgetImage>(20, -20, 300, 300, "Logo.png");
+  
+  // Store pointer for later access
+  m_logoImage = logoImage.get();
+  
+  // Add to root container
+  m_rootContainer->AddWidget(std::move(logoImage));
 }
 
 /// @brief Initialize all image widgets including material icons and trend arrows
