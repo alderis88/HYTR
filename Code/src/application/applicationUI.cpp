@@ -16,6 +16,7 @@
 ApplicationUI::ApplicationUI()
   : m_monitorMenuContainer(nullptr)
   , m_subMenuContainer(nullptr)
+  , m_tradeContainer(nullptr)
   , m_gameTimeText(nullptr)
   , m_rollingText1(nullptr)
   , m_rollingText2(nullptr)
@@ -31,6 +32,8 @@ ApplicationUI::ApplicationUI()
   , m_iconMaterialZeromass(nullptr)
   , m_healthProgressBar(nullptr)
   , m_energyProgressBar(nullptr)
+  , m_confirmTradeButton(nullptr)
+  , m_cancelTradeButton(nullptr)
   , m_rollingText1Position(1920.0f) // Start off-screen to the right
   , m_rollingText2Position(3940.0f) // Start off-screen with offset (1920 + 960)
   , m_rollingSpeed(100.0f) // 100 pixels per second
@@ -84,9 +87,10 @@ void ApplicationUI::InitializeContainersUI()
 {
   // Create the main UI hierarchy in proper dependency order
   UI_InitializeRootContainer();          // Full-screen root container with background
+  UI_InitializeGameTimeWidget();         // Digital time display with custom font (loads fonts first)
   UI_InitializeMonitorMenuContainer();   // 5 trading monitor displays with click handlers
   UI_InitializeSubMenuContainer();       // Additional menu buttons (expandable)
-  UI_InitializeGameTimeWidget();         // Digital time display with custom font
+  UI_InitializeTradeContainer();         // Trade confirm/cancel buttons
   UI_InitializeImageWidgets();           // Material icons and trend arrows for each monitor
   UI_InitializeProgressBars();           // Player health and energy indicators
 
@@ -305,6 +309,60 @@ void ApplicationUI::UI_InitializeSubMenuContainer()
   m_subMenuContainer->AddWidget(std::move(subMenuButton3));
 }
 
+/// @brief Initialize the trade container with confirm and cancel trade buttons
+/// @details Creates a horizontal container in the center of the screen with two trading action buttons.
+///          Used for confirming or canceling trading operations when a monitor is selected.
+///          Position: center of screen with horizontal layout
+void ApplicationUI::UI_InitializeTradeContainer()
+{
+  // Create trade container for action buttons (positioned in middle of screen)
+  auto tradeContainer = std::make_unique<ui::WidgetContainer>(600, 600, 720,720);
+  tradeContainer->SetLayout(ui::LayoutType::Native, 20); // Horizontal layout with 20px spacing
+  m_tradeContainer = tradeContainer.get();
+  m_rootContainer->AddWidget(std::move(tradeContainer));
+
+  // === Confirm Trade Button ===
+  auto confirmTradeButton = std::make_unique<ui::WidgetButton>(220, 200, 300, 100);
+  confirmTradeButton->LoadImage("ButtonMain2.png");
+  
+  // Set font for button text BEFORE setting text (use digital font if available)
+  if (m_digitalFont.getInfo().family != "") {
+    confirmTradeButton->SetFont(m_digitalFont);
+  }
+  
+  confirmTradeButton->SetText("CONFIRM");
+  confirmTradeButton->SetTextColor(sf::Color::White);
+  
+  confirmTradeButton->SetOnClickCallback([this](){
+    // TODO: Handle confirm trade action based on current selection
+    if (m_selectedMonitorIndex >= 0) {
+      // Confirm the selected monitor trading action
+      // Implementation depends on specific game logic requirements
+    }
+  });
+  m_confirmTradeButton = confirmTradeButton.get();
+  m_tradeContainer->AddWidget(std::move(confirmTradeButton));
+
+  // === Cancel Trade Button ===
+  auto cancelTradeButton = std::make_unique<ui::WidgetButton>(220, 300, 300, 100);
+  cancelTradeButton->LoadImage("ButtonMain2.png");
+  
+  // Set font for button text BEFORE setting text (use digital font if available)
+  if (m_digitalFont.getInfo().family != "") {
+    cancelTradeButton->SetFont(m_digitalFont);
+  }
+  
+  cancelTradeButton->SetText("CANCEL");
+  cancelTradeButton->SetTextColor(sf::Color::White);
+  
+  cancelTradeButton->SetOnClickCallback([this](){
+    // Cancel current trade selection and return to default state
+    CancelSelection();
+  });
+  m_cancelTradeButton = cancelTradeButton.get();
+  m_tradeContainer->AddWidget(std::move(cancelTradeButton));
+}
+
 /// @brief Initialize the game time display widget with digital font
 /// @details Creates a digital clock display in the top-right corner showing elapsed game time.
 ///          Attempts to load a custom digital font for authentic look, falls back to default
@@ -457,8 +515,7 @@ void ApplicationUI::UI_InitializeImageWidgets()
 ///          Currently disabled by early return - enable for development by commenting out the return statement
 void ApplicationUI::UI_DebugContainers()
 {
-  return; // Disable debug drawing for now - remove this line to enable debug borders
-
+ // return; // DEBUG DISABLED - comment out this line to enable debug borders
   // Enable debug borders for layout visualization (development only)
 
   // Root container debug (red border)
@@ -487,6 +544,10 @@ void ApplicationUI::UI_DebugContainers()
 
   // Sub menu container debug (blue border)
   m_subMenuContainer->EnableDebugDraw(true, sf::Color(0, 0, 255, 128)); // Blue semi-transparent
+  
+  // Trade container debug (yellow border)
+  if (m_tradeContainer)
+    m_tradeContainer->EnableDebugDraw(true, sf::Color(255, 255, 0, 255)); // Yellow opaque
 }
 
 // Initialize progress bars for health, energy, etc.

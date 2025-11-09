@@ -27,6 +27,7 @@ public:
   void UI_InitializeRootContainer();
   void UI_InitializeMonitorMenuContainer();
   void UI_InitializeSubMenuContainer();
+  void UI_InitializeTradeContainer();
   void UI_InitializeGameTimeWidget();
   void UI_InitializeImageWidgets();
   void UI_InitializeProgressBars();
@@ -45,6 +46,7 @@ public:
   std::unique_ptr<ui::WidgetContainer>& GetRootContainer() { return m_rootContainer; }
   ui::WidgetContainer* GetMonitorMenuContainer() const { return m_monitorMenuContainer; }
   ui::WidgetContainer* GetSubMenuContainer() const { return m_subMenuContainer; }
+  ui::WidgetContainer* GetTradeContainer() const { return m_tradeContainer; }
   ui::WidgetText* GetGameTimeText() const { return m_gameTimeText; }
   ui::WidgetText* GetRollingText1() const { return m_rollingText1; }
   ui::WidgetText* GetRollingText2() const { return m_rollingText2; }
@@ -59,6 +61,8 @@ public:
   ui::WidgetImage* GetImageTrendArrowUp(int monitorIndex) const { return (monitorIndex >= 0 && monitorIndex < 5) ? m_imageTrendArrowUp[monitorIndex] : nullptr; }
   ui::WidgetButton* GetMonitorButton(int monitorIndex) const { return (monitorIndex >= 0 && monitorIndex < 5) ? m_monitorButtons[monitorIndex] : nullptr; }
   ui::WidgetImage* GetMonitorHighlight(int monitorIndex) const { return (monitorIndex >= 0 && monitorIndex < 5) ? m_monitorHighlights[monitorIndex] : nullptr; }
+  ui::WidgetButton* GetConfirmTradeButton() const { return m_confirmTradeButton; }
+  ui::WidgetButton* GetCancelTradeButton() const { return m_cancelTradeButton; }
 
   // Getters for Text Widgets
   ui::WidgetText* GettxtProd(int monitorIndex) const { return (monitorIndex >= 0 && monitorIndex < 5) ? m_txtProd[monitorIndex] : nullptr; }
@@ -77,6 +81,7 @@ private:
   std::unique_ptr<ui::WidgetContainer> m_rootContainer; // Root container for all widgets
   ui::WidgetContainer* m_monitorMenuContainer; // Pointer to monitor menu container (owned by root container)
   ui::WidgetContainer* m_subMenuContainer;  // Pointer to sub menu container (owned by root container)
+  ui::WidgetContainer* m_tradeContainer; // Pointer to trade container with confirm/cancel buttons
   ui::WidgetText* m_gameTimeText; // Pointer to game time text widget (owned by container)
   ui::WidgetText* m_rollingText1; // Rolling text widget 1 at top of screen
   ui::WidgetText* m_rollingText2; // Rolling text widget 2 at top of screen
@@ -92,6 +97,10 @@ private:
   ui::WidgetButton* m_monitorButtons[5];     // Array of monitor buttons for selection
   ui::WidgetImage* m_monitorHighlights[5];  // Array of purple highlight overlays for selected monitors
   int m_selectedMonitorIndex;               // Currently selected monitor (-1 if none)
+
+  // Trade container buttons
+  ui::WidgetButton* m_confirmTradeButton;   // Confirm trade action button
+  ui::WidgetButton* m_cancelTradeButton;    // Cancel trade action button
 
   // Material Icons
   ui::WidgetImage* m_iconMaterialLumi;
