@@ -54,6 +54,11 @@ ApplicationUI::ApplicationUI()
 	, m_productNameText(nullptr)
 	, m_confirmTradeButton(nullptr)
 	, m_cancelTradeButton(nullptr)
+	, m_infoPanelSelectorContainer(nullptr)
+	, m_productInfoSelectorButton(nullptr)
+	, m_companyInfoSelectorButton(nullptr)
+	, m_vendorInfoSelectorButton(nullptr)
+	, m_selectedInfoPanel(0) // Default to Product info panel
 	, m_rollingText1Position(1920.0f) // Start off-screen to the right
 	, m_rollingText2Position(3940.0f) // Start off-screen with offset (1920 + 960)
 	, m_rollingSpeed(100.0f) // 100 pixels per second
@@ -115,6 +120,7 @@ void ApplicationUI::InitializeContainersUI()
 	UI_InitializeProductInfoContainer();   // Product info container (bottom right)
 	UI_InitializeCompanyInfoContainer();   // Company info container (bottom right)
 	UI_InitializeVendorInfoContainer();    // Vendor info container (bottom right)
+	UI_InitializeInfoPanelSelector();      // Info panel selector buttons (above info containers)
 	UI_InitializeImageWidgets();           // Material icons and trend arrows for each monitor
 	UI_InitializeProgressBars();           // Player health and energy indicators
 
@@ -586,6 +592,59 @@ void ApplicationUI::UI_InitializeVendorInfoContainer()
 	  m_vendorInfoContainer->SetVisible(false);
 }
 
+/// @brief Initialize the info panel selector with 3 toggle buttons
+/// @details Creates a horizontal container with Product, Company, and Vendor buttons
+///          that switch between the corresponding info containers. Only one button
+///          can be selected at a time, with the selected button showing a different background.
+///          Position: Above the info containers (bottom right area)
+void ApplicationUI::UI_InitializeInfoPanelSelector()
+{
+	// Create info panel selector container (small horizontal container above info panels)
+	auto infoPanelSelectorContainer = std::make_unique<ui::WidgetContainer>(1340, 550, 550, 50);
+	infoPanelSelectorContainer->SetLayout(ui::LayoutType::Native); // Manual positioning for precise control
+	m_infoPanelSelectorContainer = infoPanelSelectorContainer.get(); // Store raw pointer for later access
+	m_rootContainer->AddWidget(std::move(infoPanelSelectorContainer));
+
+	// === Product Info Selector Button ===
+	auto productInfoSelectorButton = std::make_unique<ui::WidgetButton>(0, 0, 180, 50);
+	productInfoSelectorButton->LoadImage("ButtonMain2.png"); // Default button background
+	productInfoSelectorButton->SetText("PRODUCT");
+	productInfoSelectorButton->SetTextColor(sf::Color::White);
+	productInfoSelectorButton->SetOnClickCallback([this]() {
+		SelectInfoPanel(0); // Select Product info panel
+		});
+	m_productInfoSelectorButton = productInfoSelectorButton.get();
+	m_infoPanelSelectorContainer->AddWidget(std::move(productInfoSelectorButton));
+
+	// === Company Info Selector Button ===
+	auto companyInfoSelectorButton = std::make_unique<ui::WidgetButton>(185, 0, 180, 50);
+	companyInfoSelectorButton->LoadImage("ButtonMain2.png"); // Default button background
+	companyInfoSelectorButton->SetText("COMPANY");
+	companyInfoSelectorButton->SetTextColor(sf::Color::White);
+	companyInfoSelectorButton->SetOnClickCallback([this]() {
+		SelectInfoPanel(1); // Select Company info panel
+		});
+	m_companyInfoSelectorButton = companyInfoSelectorButton.get();
+	m_infoPanelSelectorContainer->AddWidget(std::move(companyInfoSelectorButton));
+
+	// === Vendor Info Selector Button ===
+	auto vendorInfoSelectorButton = std::make_unique<ui::WidgetButton>(370, 0, 180, 50);
+	vendorInfoSelectorButton->LoadImage("ButtonMain2.png"); // Default button background
+	vendorInfoSelectorButton->SetText("VENDOR");
+	vendorInfoSelectorButton->SetTextColor(sf::Color::White);
+	vendorInfoSelectorButton->SetOnClickCallback([this]() {
+		SelectInfoPanel(2); // Select Vendor info panel
+		});
+	m_vendorInfoSelectorButton = vendorInfoSelectorButton.get();
+	m_infoPanelSelectorContainer->AddWidget(std::move(vendorInfoSelectorButton));
+
+	// Set initial selection to Product (index 0)
+	SelectInfoPanel(0);
+	
+	// Initially hide info panel selector until a monitor is selected
+	m_infoPanelSelectorContainer->SetVisible(false);
+}
+
 /// @brief Initialize the game time display widget with digital font
 /// @details Creates a digital clock display in the top-right corner showing elapsed game time.
 ///          Attempts to load a custom digital font for authentic look, falls back to default
@@ -1005,19 +1064,16 @@ void ApplicationUI::SelectMonitor(int monitorIndex) {
 		m_monitorHighlights[monitorIndex]->SetVisible(true);
 	}
 
-	// Show trade and info containers when a monitor is selected
+	// Show trade container and info panel selector when a monitor is selected
 	if (m_tradeContainer) {
 		m_tradeContainer->SetVisible(true);
 	}
-	if (m_productInfoContainer) {
-		m_productInfoContainer->SetVisible(true);
+	if (m_infoPanelSelectorContainer) {
+		m_infoPanelSelectorContainer->SetVisible(true);
 	}
-	if (m_companyInfoContainer) {
-		m_companyInfoContainer->SetVisible(true);
-	}
-	if (m_vendorInfoContainer) {
-		m_vendorInfoContainer->SetVisible(true);
-	}
+
+	// Show the currently selected info container based on selector state
+	SelectInfoPanel(m_selectedInfoPanel);
 
 	// Set the current product ID based on monitor index and update info containers
 	if (m_application && m_application->m_stockMarket) {
@@ -1179,9 +1235,12 @@ void ApplicationUI::CancelSelection() {
 		}
 	}
 
-	// Hide trade and info containers when selection is cancelled
+	// Hide trade container, info panel selector, and all info containers when selection is cancelled
 	if (m_tradeContainer) {
 		m_tradeContainer->SetVisible(false);
+	}
+	if (m_infoPanelSelectorContainer) {
+		m_infoPanelSelectorContainer->SetVisible(false);
 	}
 	if (m_productInfoContainer) {
 		m_productInfoContainer->SetVisible(false);
@@ -1194,6 +1253,64 @@ void ApplicationUI::CancelSelection() {
 	}
 
 	m_selectedMonitorIndex = -1;
+}
+
+/// @brief Select an info panel and update button states
+/// @param panelIndex Index of the info panel to select (0=Product, 1=Company, 2=Vendor)
+/// @details This function switches between the three info containers and updates the
+///          selector button states. The selected button gets a different background
+///          (BgInventory.png) and the corresponding info container is shown while others are hidden.
+void ApplicationUI::SelectInfoPanel(int panelIndex) {
+	if (panelIndex < 0 || panelIndex > 2) {
+		return;
+	}
+
+	// Update selected panel index
+	m_selectedInfoPanel = panelIndex;
+
+	// Reset all selector buttons to default state (ButtonMain2.png)
+	if (m_productInfoSelectorButton) {
+		m_productInfoSelectorButton->LoadImage("ButtonMain2.png");
+	}
+	if (m_companyInfoSelectorButton) {
+		m_companyInfoSelectorButton->LoadImage("ButtonMain2.png");
+	}
+	if (m_vendorInfoSelectorButton) {
+		m_vendorInfoSelectorButton->LoadImage("ButtonMain2.png");
+	}
+
+	// Set selected button to pressed state (BgInventory.png)
+	switch (panelIndex) {
+	case 0: // Product
+		if (m_productInfoSelectorButton) {
+			m_productInfoSelectorButton->LoadImage("BgInventory.png");
+		}
+		break;
+	case 1: // Company
+		if (m_companyInfoSelectorButton) {
+			m_companyInfoSelectorButton->LoadImage("BgInventory.png");
+		}
+		break;
+	case 2: // Vendor
+		if (m_vendorInfoSelectorButton) {
+			m_vendorInfoSelectorButton->LoadImage("BgInventory.png");
+		}
+		break;
+	}
+
+	// Show/hide info containers based on selection
+	// Only show containers if a monitor is currently selected
+	bool monitorSelected = (m_selectedMonitorIndex >= 0);
+
+	if (m_productInfoContainer) {
+		m_productInfoContainer->SetVisible(monitorSelected && panelIndex == 0);
+	}
+	if (m_companyInfoContainer) {
+		m_companyInfoContainer->SetVisible(monitorSelected && panelIndex == 1);
+	}
+	if (m_vendorInfoContainer) {
+		m_vendorInfoContainer->SetVisible(monitorSelected && panelIndex == 2);
+	}
 }
 
 /// @brief Load initial news content into rolling text widgets

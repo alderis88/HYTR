@@ -31,6 +31,7 @@ public:
   void UI_InitializeProductInfoContainer();
   void UI_InitializeCompanyInfoContainer();
   void UI_InitializeVendorInfoContainer();
+  void UI_InitializeInfoPanelSelector();
   void UI_InitializeGameTimeWidget();
   void UI_InitializeImageWidgets();
   void UI_InitializeProgressBars();
@@ -46,6 +47,9 @@ public:
   // Monitor selection functions
   void SelectMonitor(int monitorIndex);
   void CancelSelection();
+
+  // Info panel selection functions
+  void SelectInfoPanel(int panelIndex);
 
   // Getters for UI components
   std::unique_ptr<ui::WidgetContainer>& GetRootContainer() { return m_rootContainer; }
@@ -127,6 +131,13 @@ private:
   // Trade container buttons
   ui::WidgetButton* m_confirmTradeButton;   // Confirm trade action button
   ui::WidgetButton* m_cancelTradeButton;    // Cancel trade action button
+
+  // Info panel selector container and buttons
+  ui::WidgetContainer* m_infoPanelSelectorContainer; // Container for info panel selector buttons
+  ui::WidgetButton* m_productInfoSelectorButton;     // Product info selector button
+  ui::WidgetButton* m_companyInfoSelectorButton;     // Company info selector button  
+  ui::WidgetButton* m_vendorInfoSelectorButton;      // Vendor info selector button
+  int m_selectedInfoPanel;                           // Currently selected info panel (0=Product, 1=Company, 2=Vendor)
 
   // Material Icons
   ui::WidgetImage* m_iconMaterialLumi;
