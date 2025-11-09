@@ -88,6 +88,6 @@ private:
 	uint32_t m_newsIndex = 0;                   ///< Current news index for rotation
 
 	// === Market Constants ===
-	static constexpr float s_randomPriceInfluenceFactor = 0.025f;  ///< Max random price variation (±2.5%)
+	static constexpr float s_randomPriceInfluenceFactor = 0.015f;  ///< Max random price variation (±2.5%)
 	static constexpr float s_stockCycleTime = 5.0f;                ///< Time between market cycles (seconds)
 };

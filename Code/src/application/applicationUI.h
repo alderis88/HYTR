@@ -16,9 +16,11 @@ class Application; // Forward declaration
 /// @brief Inventory sort types for sorting inventory items
 enum class InventorySortType
 {
-  Volume,   // Sort by item volume
-  Quantity  // Sort by item quantity
+  Volume,   // Sort by total volume (quantity * volume per item)
+  Quantity  // Sort by quantity
 };
+
+
 
 //==============================================================================
 // ApplicationUI Class - Handles all UI initialization and management
@@ -44,6 +46,7 @@ public:
   void UI_InitializeVendorInfoContainer();
   void UI_InitializeInfoPanelSelector();
   void UI_InitializeInventorySortSelector();
+
   void UI_InitializeGameTimeWidget();
   void UI_InitializeImageWidgets();
   void UI_InitializeProgressBars();
@@ -55,18 +58,21 @@ public:
   void UpdateProductDisplays();
   void UpdateCycleProgressBar();
   void UpdateCurrentMoneyDisplay();
-  void UpdateInventoryButtons();
+  void UpdateInventoryVerticalButtons();
+
   void UpdateApplicationUI( sf::Time delta);
   
   // Monitor selection functions
   void SelectMonitor(int monitorIndex);
   void CancelSelection();
+  void SelectInventoryItemMonitor(int inventoryIndex);
 
   // Info panel selection functions
   void SelectInfoPanel(int panelIndex);
 
   // Inventory sort selection functions
   void SelectInventorySort(InventorySortType sortType);
+
 
   // Getters for UI components
   std::unique_ptr<ui::WidgetContainer>& GetRootContainer() { return m_rootContainer; }
@@ -158,10 +164,7 @@ private:
   int m_selectedInfoPanel;                           // Currently selected info panel (0=Product, 1=Company, 2=Vendor)
 
   // Inventory sort selector container and buttons
-  ui::WidgetContainer* m_inventorySortSelectorContainer; // Container for inventory sort selector buttons
-  ui::WidgetButton* m_volumeSortButton;                  // Volume sort selector button
-  ui::WidgetButton* m_quantitySortButton;                // Quantity sort selector button
-  InventorySortType m_selectedSortType;                  // Currently selected sort type
+
 
   // Material Icons
   ui::WidgetImage* m_iconMaterialLumi;
@@ -189,34 +192,40 @@ private:
   // Inventory container widgets
   ui::WidgetText* m_volumeText;              // Volume text in inventory container
   ui::WidgetProgressBar* m_volumeProgressBar; // Volume progress bar in inventory container
+  ui::WidgetContainer* m_inventoryProductsContainer; // Vertical container for inventory products
   
-  // Inventory product containers and buttons
-  ui::WidgetContainer* m_inventoryProductsContainer;     // Vertical container for inventory products
-  ui::WidgetContainer* m_triInvContainer;                // Container for Tritanium inventory button
-  ui::WidgetContainer* m_nfxInvContainer;                // Container for Neuroflux inventory button
-  ui::WidgetContainer* m_zerInvContainer;                // Container for Zeromass inventory button
-  ui::WidgetContainer* m_lumInvContainer;                // Container for Lumirite inventory button
-  ui::WidgetContainer* m_nanInvContainer;                // Container for Nanochip inventory button
-  ui::WidgetButton* m_triInvButton;                      // Tritanium inventory button
-  ui::WidgetButton* m_nfxInvButton;                      // Neuroflux inventory button
-  ui::WidgetButton* m_zerInvButton;                      // Zeromass inventory button
-  ui::WidgetButton* m_lumInvButton;                      // Lumirite inventory button
-  ui::WidgetButton* m_nanInvButton;                      // Nanochip inventory button
-  ui::WidgetImage* m_triInvIcon;                         // Tritanium inventory icon
-  ui::WidgetImage* m_nfxInvIcon;                         // Neuroflux inventory icon
-  ui::WidgetImage* m_zerInvIcon;                         // Zeromass inventory icon
-  ui::WidgetImage* m_lumInvIcon;                         // Lumirite inventory icon
-  ui::WidgetImage* m_nanInvIcon;                         // Nanochip inventory icon
-  ui::WidgetText* m_triInvQuantityText;                  // Tritanium inventory quantity text
-  ui::WidgetText* m_nfxInvQuantityText;                  // Neuroflux inventory quantity text
-  ui::WidgetText* m_zerInvQuantityText;                  // Zeromass inventory quantity text
-  ui::WidgetText* m_lumInvQuantityText;                  // Lumirite inventory quantity text
-  ui::WidgetText* m_nanInvQuantityText;                  // Nanochip inventory quantity text
-  ui::WidgetText* m_triInvVolumeText;                    // Tritanium inventory volume text
-  ui::WidgetText* m_nfxInvVolumeText;                    // Neuroflux inventory volume text
-  ui::WidgetText* m_zerInvVolumeText;                    // Zeromass inventory volume text
-  ui::WidgetText* m_lumInvVolumeText;                    // Lumirite inventory volume text
-  ui::WidgetText* m_nanInvVolumeText;                    // Nanochip inventory volume text
+  // Inventory button containers (1-5)
+  ui::WidgetContainer* m_inventoryButton1Container;  // Container for inventory button 1
+  ui::WidgetContainer* m_inventoryButton2Container;  // Container for inventory button 2
+  ui::WidgetContainer* m_inventoryButton3Container;  // Container for inventory button 3
+  ui::WidgetContainer* m_inventoryButton4Container;  // Container for inventory button 4
+  ui::WidgetContainer* m_inventoryButton5Container;  // Container for inventory button 5
+  ui::WidgetButton* m_inventoryButton1;              // Inventory button 1
+  ui::WidgetButton* m_inventoryButton2;              // Inventory button 2
+  ui::WidgetButton* m_inventoryButton3;              // Inventory button 3
+  ui::WidgetButton* m_inventoryButton4;              // Inventory button 4
+  ui::WidgetButton* m_inventoryButton5;              // Inventory button 5
+  ui::WidgetImage* m_inventoryButton1ProductImage;   // Product image for button 1
+  ui::WidgetImage* m_inventoryButton2ProductImage;   // Product image for button 2
+  ui::WidgetImage* m_inventoryButton3ProductImage;   // Product image for button 3
+  ui::WidgetImage* m_inventoryButton4ProductImage;   // Product image for button 4
+  ui::WidgetImage* m_inventoryButton5ProductImage;   // Product image for button 5
+  ui::WidgetText* m_inventoryButton1VolumeText;      // Volume text for button 1
+  ui::WidgetText* m_inventoryButton2VolumeText;      // Volume text for button 2
+  ui::WidgetText* m_inventoryButton3VolumeText;      // Volume text for button 3
+  ui::WidgetText* m_inventoryButton4VolumeText;      // Volume text for button 4
+  ui::WidgetText* m_inventoryButton5VolumeText;      // Volume text for button 5
+  ui::WidgetText* m_inventoryButton1QuantityText;    // Quantity text for button 1
+  ui::WidgetText* m_inventoryButton2QuantityText;    // Quantity text for button 2
+  ui::WidgetText* m_inventoryButton3QuantityText;    // Quantity text for button 3
+  ui::WidgetText* m_inventoryButton4QuantityText;    // Quantity text for button 4
+  ui::WidgetText* m_inventoryButton5QuantityText;    // Quantity text for button 5
+
+  // Inventory sort selector widgets
+  ui::WidgetContainer* m_inventorySortSelectorContainer; // Container for inventory sort selector buttons
+  ui::WidgetButton* m_volumeSortButton;                  // Volume sort selector button
+  ui::WidgetButton* m_quantitySortButton;                // Quantity sort selector button
+  InventorySortType m_selectedSortType;                  // Currently selected sort type
 
   // Product Info container widgets
   ui::WidgetImage* m_productInfoImage;       // Product info image in product info container

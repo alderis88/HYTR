@@ -633,6 +633,12 @@ bool StockMarket::BuyFromStock(const std::string& productId, uint32_t quantity)
 	// Reduce stock quantity exactly by the requested amount
 	product->m_quantity -= quantity;
 
+	// Update current player impact for purchase (increases demand pressure)
+	product->m_currentPlayerImpact -= product->m_playerImpact * quantity;
+	
+	// Clamp current player impact between -0.5 and 0.5
+	product->m_currentPlayerImpact = std::max(-0.5f, std::min(0.5f, product->m_currentPlayerImpact));
+	
 	// Debug log the purchase
 	DebugLog("BuyFromStock - Product: " + product->m_name + " (ID: " + productId + ") - " +
 		"Bought: " + std::to_string(quantity) +
@@ -647,7 +653,7 @@ bool StockMarket::BuyFromStock(const std::string& productId, uint32_t quantity)
 	if (m_application && m_application->GetApplicationUI())
 	{
 		m_application->GetApplicationUI()->UpdateCurrentMoneyDisplay();
-		m_application->GetApplicationUI()->UpdateInventoryButtons();
+		m_application->GetApplicationUI()->UpdateInventoryVerticalButtons();
 	}
 
 	return true;
@@ -691,6 +697,12 @@ bool StockMarket::SellForStock(const std::string& productId, uint32_t quantity)
 	// Ensure we don't exceed max quantity
 	product->m_quantity = std::min(product->m_maxQuantity, product->m_quantity + stockIncrease);
 
+	// Update current player impact for sale (decreases demand pressure)
+	product->m_currentPlayerImpact += product->m_playerImpact * quantity;
+	
+	// Clamp current player impact between -0.5 and 0.5
+	product->m_currentPlayerImpact = std::max(-0.5f, std::min(0.5f, product->m_currentPlayerImpact));
+
 	// Debug log the sale
 	DebugLog("SellForStock - Product: " + product->m_name + " (ID: " + productId + ") - " +
 		"Sold: " + std::to_string(quantity) +
@@ -707,7 +719,7 @@ bool StockMarket::SellForStock(const std::string& productId, uint32_t quantity)
 	if (m_application && m_application->GetApplicationUI())
 	{
 		m_application->GetApplicationUI()->UpdateCurrentMoneyDisplay();
-		m_application->GetApplicationUI()->UpdateInventoryButtons();
+		m_application->GetApplicationUI()->UpdateInventoryVerticalButtons();
 	}
 
 	return true;

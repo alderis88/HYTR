@@ -75,6 +75,12 @@ void Application::Initialize()
 		m_gameTimeText = m_applicationUI->GetGameTimeText();
 	}
 	SetupInventory();
+	
+	// Initialize inventory buttons after setup
+	if (m_applicationUI)
+	{
+		m_applicationUI->UpdateInventoryVerticalButtons();
+	}
 }
 
 /// @brief Configures video and rendering settings
@@ -524,11 +530,7 @@ void Application::HandleTestTrading(sf::Keyboard::Key key, bool isShiftPressed)
 		}
 	}
 	
-	// Update inventory UI if available
-	if (m_applicationUI)
-	{
-		m_applicationUI->UpdateInventoryButtons();
-	}
+
 }
 
 /// @brief Sets the global data directory path for JSON and data file loading
