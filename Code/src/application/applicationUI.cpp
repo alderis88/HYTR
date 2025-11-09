@@ -57,6 +57,7 @@ ApplicationUI::ApplicationUI()
 	, m_productNameText(nullptr)
 	, m_confirmTradeButton(nullptr)
 	, m_cancelTradeButton(nullptr)
+	, m_tradeErrorText(nullptr)
 	, m_currentMoneyText(nullptr)
 	, m_predictedMoneyChangeText(nullptr)
 	, m_predictedVolumeText(nullptr)
@@ -353,8 +354,8 @@ void ApplicationUI::UI_InitializeTradeContainer()
 	m_tradeContainer = tradeContainer.get();
 	m_rootContainer->AddWidget(std::move(tradeContainer));
 
-	// === Confirm Trade Button ===
-	auto confirmTradeButton = std::make_unique<ui::WidgetButton>(220, 200, 300, 100);
+	// === Confirm Trade Button (smaller size) ===
+	auto confirmTradeButton = std::make_unique<ui::WidgetButton>(170, 200, 400, 70);
 	confirmTradeButton->LoadImage("ButtonMain2.png");
 
 	// Set font for button text BEFORE setting text (use digital font if available)
@@ -366,22 +367,70 @@ void ApplicationUI::UI_InitializeTradeContainer()
 	confirmTradeButton->SetTextColor(sf::Color::White);
 
 	confirmTradeButton->SetOnClickCallback([this]() {
-		// TODO: Handle confirm trade action based on current selection
-		if (m_selectedMonitorIndex >= 0) {
-			// Confirm the selected monitor trading action
-			// Implementation depends on specific game logic requirements
-		}
-		
-		// Exit trade pause mode after confirming trade
-		if (m_application) {
-			m_application->m_inTradePause = false;
+		// Check if trade is valid before executing
+		if (m_selectedMonitorIndex >= 0 && m_selectedMonitorIndex < 5 && m_currentTradedQuantity != 0 && m_application && m_application->m_stockMarket) {
+			std::string productIds[5] = { "TRI", "NFX", "ZER", "LUM", "NAN" };
+			std::string productId = productIds[m_selectedMonitorIndex];
+			
+			bool isTradeValid = false;
+			if (m_currentTradedQuantity > 0) // Buying (positive = buy)
+			{
+				isTradeValid = m_application->m_stockMarket->ValidateBuyFromStock(productId, (uint32_t)m_currentTradedQuantity);
+			}
+			else if (m_currentTradedQuantity < 0) // Selling (negative = sell)
+			{
+				isTradeValid = m_application->m_stockMarket->ValidateSellForStock(productId, (uint32_t)(-m_currentTradedQuantity));
+			}
+			
+			// Only execute trade if valid
+			if (isTradeValid) {
+				// Execute the actual buy or sell operation
+				bool tradeSuccess = false;
+				if (m_currentTradedQuantity > 0) // Buying (positive quantity means we're buying)
+				{
+					tradeSuccess = m_application->m_stockMarket->BuyFromStock(productId, (uint32_t)m_currentTradedQuantity);
+				}
+				else if (m_currentTradedQuantity < 0) // Selling (negative quantity means we're selling)
+				{
+					tradeSuccess = m_application->m_stockMarket->SellForStock(productId, (uint32_t)(-m_currentTradedQuantity));
+				}
+				
+				// Reset trade quantity after successful trade
+				if (tradeSuccess) {
+					m_currentTradedQuantity = 0;
+					UpdateTradeDisplay(); // Update UI to reflect the reset
+				}
+				
+				// Exit trade completely - clear selection and restart timer
+				CancelSelection(); // This will clear the monitor selection and reset UI state
+				
+				// Exit trade pause mode after confirming trade (restart timer)
+				if (m_application) {
+					m_application->m_inTradePause = false;
+				}
+			}
 		}
 		});
 	m_confirmTradeButton = confirmTradeButton.get();
 	m_tradeContainer->AddWidget(std::move(confirmTradeButton));
 
-	// === Cancel Trade Button ===
-	auto cancelTradeButton = std::make_unique<ui::WidgetButton>(220, 300, 300, 100);
+	// === Trade Error/Validation Text ===
+	auto tradeErrorText = std::make_unique<ui::WidgetText>(360, 285, "Valid Trade");
+	tradeErrorText->SetCharacterSize(18);
+	tradeErrorText->SetStyle(sf::Text::Bold);
+	tradeErrorText->SetAlignment(ui::WidgetText::Alignment::Center);
+	tradeErrorText->SetTextColor(sf::Color::Green);
+
+	// Set font if available
+	if (m_digitalFont.getInfo().family != "") {
+		tradeErrorText->SetFont(m_digitalFont);
+	}
+
+	m_tradeErrorText = tradeErrorText.get();
+	m_tradeContainer->AddWidget(std::move(tradeErrorText));
+
+	// === Cancel Trade Button (smaller size) ===
+	auto cancelTradeButton = std::make_unique<ui::WidgetButton>(170, 320, 400, 70);
 	cancelTradeButton->LoadImage("ButtonMain2.png");
 
 	// Set font for button text BEFORE setting text (use digital font if available)
@@ -1987,11 +2036,79 @@ void ApplicationUI::SelectInventoryItemMonitor(int inventoryIndex)
 void ApplicationUI::UpdateTradeDisplay()
 {
 	// Safety checks
-	if (!m_application || !m_application->m_stockMarket || !m_predictedVolumeText || !m_predictedMoneyChangeText)
+	if (!m_application || !m_application->m_stockMarket || !m_predictedVolumeText || !m_predictedMoneyChangeText || !m_tradeErrorText || !m_confirmTradeButton)
 		return;
 
 	// Update traded quantity text
 	m_predictedVolumeText->SetText(std::to_string(m_currentTradedQuantity));
+
+	// Validate trade and update trade error text and confirm button state
+	bool isTradeValid = false;
+	std::string errorMessage = "Valid Trade";
+
+	if (m_selectedMonitorIndex >= 0 && m_selectedMonitorIndex < 5 && m_currentTradedQuantity != 0)
+	{
+		// Get the selected product
+		std::string productIds[5] = { "TRI", "NFX", "ZER", "LUM", "NAN" };
+		std::string productId = productIds[m_selectedMonitorIndex];
+
+		if (m_currentTradedQuantity > 0) // Buying (positive = buy)
+		{
+			isTradeValid = m_application->m_stockMarket->ValidateBuyFromStock(productId, (uint32_t)m_currentTradedQuantity);
+			if (!isTradeValid)
+				errorMessage = "Cannot Buy";
+		}
+		else if (m_currentTradedQuantity < 0) // Selling (negative = sell)
+		{
+			isTradeValid = m_application->m_stockMarket->ValidateSellForStock(productId, (uint32_t)(-m_currentTradedQuantity));
+			if (!isTradeValid)
+				errorMessage = "Cannot Sell";
+		}
+	}
+	else if (m_currentTradedQuantity == 0)
+	{
+		errorMessage = "Zero Quantity";
+	}
+	else
+	{
+		errorMessage = "No Product";
+	}
+
+	// Update trade error text
+	if (isTradeValid)
+	{
+		m_tradeErrorText->SetText("Valid Trade");
+		m_tradeErrorText->SetTextColor(sf::Color::Green);
+	}
+	else
+	{
+		m_tradeErrorText->SetText(errorMessage);
+		m_tradeErrorText->SetTextColor(sf::Color::Red);
+	}
+
+	// Update confirm button state and text
+	if (isTradeValid)
+	{
+		m_confirmTradeButton->LoadImage("ButtonMain2.png"); // Normal button image
+	}
+	else
+	{
+		m_confirmTradeButton->LoadImage("BgInventory.png"); // Disabled button image
+	}
+
+	// Update button text based on trade type
+	if (m_currentTradedQuantity > 0)
+	{
+		m_confirmTradeButton->SetText("BUY");
+	}
+	else if (m_currentTradedQuantity < 0)
+	{
+		m_confirmTradeButton->SetText("SELL");
+	}
+	else
+	{
+		m_confirmTradeButton->SetText("CONFIRM");
+	}
 
 	// Calculate predicted money change if a monitor is selected
 	if (m_selectedMonitorIndex >= 0 && m_selectedMonitorIndex < 5)

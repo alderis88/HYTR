@@ -101,6 +101,7 @@ public:
   ui::WidgetImage* GetMonitorHighlight(int monitorIndex) const { return (monitorIndex >= 0 && monitorIndex < 5) ? m_monitorHighlights[monitorIndex] : nullptr; }
   ui::WidgetButton* GetConfirmTradeButton() const { return m_confirmTradeButton; }
   ui::WidgetButton* GetCancelTradeButton() const { return m_cancelTradeButton; }
+  ui::WidgetText* GetTradeErrorText() const { return m_tradeErrorText; }
 
   // Getters for Text Widgets
   ui::WidgetText* GettxtProd(int monitorIndex) const { return (monitorIndex >= 0 && monitorIndex < 5) ? m_txtProd[monitorIndex] : nullptr; }
@@ -157,6 +158,7 @@ private:
   // Trade container buttons and text
   ui::WidgetButton* m_confirmTradeButton;   // Confirm trade action button
   ui::WidgetButton* m_cancelTradeButton;    // Cancel trade action button
+  ui::WidgetText* m_tradeErrorText;         // Trade error/validation text between buttons
   ui::WidgetText* m_currentMoneyText;       // Current money display text
   ui::WidgetText* m_predictedMoneyChangeText; // Predicted money change display text
   ui::WidgetText* m_predictedVolumeText;    // Traded quantity display text (former predicted volume)

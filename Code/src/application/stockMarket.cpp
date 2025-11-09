@@ -300,17 +300,18 @@ void StockMarket::CalculateProductPrice(StockProduct& product)
 	float randomInfluenceFactor = randomInfluence(Application::GetRandomGenerator());
 
 
-	// Apply player impact multiplier
+	// Apply player impact multiplier (reduced to 1/5th of original effect)
 	float playerImpactMultiplier = 1.0f;
-	if (product.m_currentPlayerImpact > 0.0f)
+	float reducedPlayerImpact = product.m_currentPlayerImpact * 0.2f; // Reduce impact to 1/5th
+	if (reducedPlayerImpact > 0.0f)
 	{
-		// Positive impact: 1 - m_currentPlayerImpact, but minimum 0.5
-		playerImpactMultiplier = std::max(0.5f, 1.0f - product.m_currentPlayerImpact);
+		// Positive impact: 1 - reducedPlayerImpact, but minimum 0.9 (less extreme than before)
+		playerImpactMultiplier = std::max(0.9f, 1.0f - reducedPlayerImpact);
 	}
-	else if (product.m_currentPlayerImpact < 0.0f)
+	else if (reducedPlayerImpact < 0.0f)
 	{
-		// Negative impact: 1 + |m_currentPlayerImpact|, but maximum 1.5
-		playerImpactMultiplier = std::min(1.5f, 1.0f + std::abs(product.m_currentPlayerImpact));
+		// Negative impact: 1 + |reducedPlayerImpact|, but maximum 1.1 (less extreme than before)
+		playerImpactMultiplier = std::min(1.1f, 1.0f + std::abs(reducedPlayerImpact));
 	}
 
 
@@ -637,8 +638,8 @@ bool StockMarket::BuyFromStock(const std::string& productId, uint32_t quantity)
 	// Reduce stock quantity exactly by the requested amount
 	product->m_quantity -= quantity;
 
-	// Update current player impact for purchase (increases demand pressure)
-	product->m_currentPlayerImpact -= product->m_playerImpact * quantity;
+	// Update current player impact for purchase (increases demand pressure) - REVERSED EFFECT
+	product->m_currentPlayerImpact += product->m_playerImpact * quantity;
 	
 	// Clamp current player impact between -0.5 and 0.5
 	product->m_currentPlayerImpact = std::max(-0.5f, std::min(0.5f, product->m_currentPlayerImpact));
@@ -701,8 +702,8 @@ bool StockMarket::SellForStock(const std::string& productId, uint32_t quantity)
 	// Ensure we don't exceed max quantity
 	product->m_quantity = std::min(product->m_maxQuantity, product->m_quantity + stockIncrease);
 
-	// Update current player impact for sale (decreases demand pressure)
-	product->m_currentPlayerImpact += product->m_playerImpact * quantity;
+	// Update current player impact for sale (decreases demand pressure) - REVERSED EFFECT
+	product->m_currentPlayerImpact -= product->m_playerImpact * quantity;
 	
 	// Clamp current player impact between -0.5 and 0.5
 	product->m_currentPlayerImpact = std::max(-0.5f, std::min(0.5f, product->m_currentPlayerImpact));
