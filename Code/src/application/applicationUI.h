@@ -157,6 +157,9 @@ private:
   ui::WidgetButton* m_confirmTradeButton;   // Confirm trade action button
   ui::WidgetButton* m_cancelTradeButton;    // Cancel trade action button
   ui::WidgetText* m_currentMoneyText;       // Current money display text
+  ui::WidgetText* m_predictedMoneyChangeText; // Predicted money change display text
+  ui::WidgetText* m_predictedVolumeText;    // Traded quantity display text (former predicted volume)
+  ui::WidgetText* m_tradePredictedVolumeText; // New predicted volume display text
 
   // Info panel selector container and buttons
   ui::WidgetContainer* m_infoPanelSelectorContainer; // Container for info panel selector buttons

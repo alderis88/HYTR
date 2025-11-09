@@ -184,6 +184,12 @@ uint32_t Inventory::GetCurrentMoney() const
 void Inventory::SetCurrentMoney(uint32_t money)
 {
 	m_currentMoney = money;
+	
+	// Update money display immediately
+	if (m_application && m_application->GetApplicationUI())
+	{
+		m_application->GetApplicationUI()->UpdateCurrentMoneyDisplay();
+	}
 }
 
 /// @brief Get quantity of a specific product in inventory
@@ -347,6 +353,9 @@ void Inventory::UpdateInventoryVisual()
 
 	// Set the custom text (this will override the default percentage display)
 	volumeProgressBar->SetCustomText(volumeText.str());
+
+	// Update money display as well
+	m_application->GetApplicationUI()->UpdateCurrentMoneyDisplay();
 
 	DebugLog("UpdateInventoryVisual - Volume updated: " + volumeText.str() + 
 	         " (Progress: " + std::to_string(progressRatio * 100.0f) + "%)");

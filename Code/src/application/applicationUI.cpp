@@ -57,11 +57,18 @@ ApplicationUI::ApplicationUI()
 	, m_confirmTradeButton(nullptr)
 	, m_cancelTradeButton(nullptr)
 	, m_currentMoneyText(nullptr)
+	, m_predictedMoneyChangeText(nullptr)
+	, m_predictedVolumeText(nullptr)
+	, m_tradePredictedVolumeText(nullptr)
 	, m_infoPanelSelectorContainer(nullptr)
 	, m_productInfoSelectorButton(nullptr)
 	, m_companyInfoSelectorButton(nullptr)
 	, m_vendorInfoSelectorButton(nullptr)
 	, m_selectedInfoPanel(0) // Default to Product info panel
+	, m_inventorySortSelectorContainer(nullptr)
+	, m_volumeSortButton(nullptr)
+	, m_quantitySortButton(nullptr)
+	, m_selectedSortType(InventorySortType::Volume) // Default to Volume sort
 	, m_rollingText1Position(1920.0f) // Start off-screen to the right
 	, m_rollingText2Position(3940.0f) // Start off-screen with offset (1920 + 960)
 	, m_rollingSpeed(100.0f) // 100 pixels per second
@@ -133,7 +140,7 @@ void ApplicationUI::InitializeContainersUI()
 	UI_InitializeProgressBars();           // Player health and energy indicators
 
 	// Enable visual debugging aids for development (container borders)
-	UI_DebugContainers();
+	// UI_DebugContainers(); // Debug disabled
 }
 
 /// @brief Initialize the root container that serves as the base for all UI elements
@@ -188,6 +195,21 @@ void ApplicationUI::UI_InitializeRootContainer()
 	// Load initial news content for rolling text
 	LoadingNewText(true);
 	LoadingNewText(false);
+
+	// === Current Money Display (positioned below monitors) ===
+	auto currentMoneyText = std::make_unique<ui::WidgetText>(960, 580, "Money: $0");
+	currentMoneyText->SetCharacterSize(28);
+	currentMoneyText->SetStyle(sf::Text::Bold);
+	currentMoneyText->SetAlignment(ui::WidgetText::Alignment::Center);
+	currentMoneyText->SetTextColor(sf::Color::Yellow);
+
+	// Set font if available
+	if (m_digitalFont.getInfo().family != "") {
+		currentMoneyText->SetFont(m_digitalFont);
+	}
+
+	m_currentMoneyText = currentMoneyText.get();
+	m_rootContainer->AddWidget(std::move(currentMoneyText));
 }
 
 /// @brief Initialize the monitor menu container with 5 trading product displays
@@ -366,20 +388,50 @@ void ApplicationUI::UI_InitializeTradeContainer()
 	m_cancelTradeButton = cancelTradeButton.get();
 	m_tradeContainer->AddWidget(std::move(cancelTradeButton));
 
-	// === Current Money Display ===
-	auto currentMoneyText = std::make_unique<ui::WidgetText>(360, 150, "Money: $0");
-	currentMoneyText->SetCharacterSize(24);
-	currentMoneyText->SetStyle(sf::Text::Bold);
-	currentMoneyText->SetAlignment(ui::WidgetText::Alignment::Center);
-	currentMoneyText->SetTextColor(sf::Color::Yellow);
+	// === Predicted Money Change Display ===
+	auto predictedMoneyChangeText = std::make_unique<ui::WidgetText>(360, 50, "$0");
+	predictedMoneyChangeText->SetCharacterSize(22);
+	predictedMoneyChangeText->SetStyle(sf::Text::Bold);
+	predictedMoneyChangeText->SetAlignment(ui::WidgetText::Alignment::Center);
+	predictedMoneyChangeText->SetTextColor(sf::Color::Green);
 
 	// Set font if available
 	if (m_digitalFont.getInfo().family != "") {
-		currentMoneyText->SetFont(m_digitalFont);
+		predictedMoneyChangeText->SetFont(m_digitalFont);
 	}
 
-	m_currentMoneyText = currentMoneyText.get();
-	m_tradeContainer->AddWidget(std::move(currentMoneyText));
+	m_predictedMoneyChangeText = predictedMoneyChangeText.get();
+	m_tradeContainer->AddWidget(std::move(predictedMoneyChangeText));
+
+	// === Traded Quantity Display ===
+	auto tradedQuantityText = std::make_unique<ui::WidgetText>(360, 130, "0");
+	tradedQuantityText->SetCharacterSize(22);
+	tradedQuantityText->SetStyle(sf::Text::Bold);
+	tradedQuantityText->SetAlignment(ui::WidgetText::Alignment::Center);
+	tradedQuantityText->SetTextColor(sf::Color::Cyan);
+
+	// Set font if available
+	if (m_digitalFont.getInfo().family != "") {
+		tradedQuantityText->SetFont(m_digitalFont);
+	}
+
+	m_predictedVolumeText = tradedQuantityText.get();
+	m_tradeContainer->AddWidget(std::move(tradedQuantityText));
+
+	// === Predicted Volume Display (positioned left, near inventory volume bar) ===
+	auto tradePredictedVolumeText = std::make_unique<ui::WidgetText>(50, 360, "0");
+	tradePredictedVolumeText->SetCharacterSize(30);
+	tradePredictedVolumeText->SetStyle(sf::Text::Bold);
+	tradePredictedVolumeText->SetAlignment(ui::WidgetText::Alignment::Left);
+	tradePredictedVolumeText->SetTextColor(sf::Color::Magenta);
+
+	// Set font if available
+	if (m_digitalFont.getInfo().family != "") {
+		tradePredictedVolumeText->SetFont(m_digitalFont);
+	}
+
+	m_tradePredictedVolumeText = tradePredictedVolumeText.get();
+	m_tradeContainer->AddWidget(std::move(tradePredictedVolumeText));
 
 	// Initially hide trade container until a monitor is selected
 	m_tradeContainer->SetVisible(false);
