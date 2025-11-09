@@ -28,7 +28,8 @@ public:
   void UI_InitializeMonitorMenuContainer();
   void UI_InitializeTradeContainer();
   void UI_InitializeInventoryContainer();
-  void UI_InitializeInfoContainer();
+  void UI_InitializeProductInfoContainer();
+  void UI_InitializeCompanyInfoContainer();
   void UI_InitializeGameTimeWidget();
   void UI_InitializeImageWidgets();
   void UI_InitializeProgressBars();
@@ -48,7 +49,8 @@ public:
   ui::WidgetContainer* GetMonitorMenuContainer() const { return m_monitorMenuContainer; }
   ui::WidgetContainer* GetTradeContainer() const { return m_tradeContainer; }
   ui::WidgetContainer* GetInventoryContainer() const { return m_inventoryContainer; }
-  ui::WidgetContainer* GetInfoContainer() const { return m_infoContainer; }
+  ui::WidgetContainer* GetProductInfoContainer() const { return m_productInfoContainer; }
+  ui::WidgetContainer* GetCompanyInfoContainer() const { return m_companyInfoContainer; }
   ui::WidgetText* GetGameTimeText() const { return m_gameTimeText; }
   ui::WidgetText* GetRollingText1() const { return m_rollingText1; }
   ui::WidgetText* GetRollingText2() const { return m_rollingText2; }
@@ -79,10 +81,14 @@ public:
   ui::WidgetText* GetVolumeText() const { return m_volumeText; }
   ui::WidgetProgressBar* GetVolumeProgressBar() const { return m_volumeProgressBar; }
 
-  // Getters for Info Container Widgets
+  // Getters for Product Info Container Widgets
   ui::WidgetImage* GetCompanyInfoImage() const { return m_companyInfoImage; }
   ui::WidgetText* GetProductInfoText() const { return m_productInfoText; }
   ui::WidgetText* GetProductVolumeText() const { return m_productVolumeText; }
+
+  // Getters for Company Info Container Widgets
+  ui::WidgetText* GetCompanyInfoText() const { return m_companyInfoText; }
+  ui::WidgetText* GetCompanyStatusText() const { return m_companyStatusText; }
 
 private:
   // Application reference
@@ -93,7 +99,8 @@ private:
   ui::WidgetContainer* m_monitorMenuContainer; // Pointer to monitor menu container (owned by root container)
   ui::WidgetContainer* m_tradeContainer; // Pointer to trade container with confirm/cancel buttons
   ui::WidgetContainer* m_inventoryContainer; // Pointer to inventory container (bottom left)
-  ui::WidgetContainer* m_infoContainer; // Pointer to info container (bottom right)
+  ui::WidgetContainer* m_productInfoContainer; // Pointer to product info container (bottom right)
+  ui::WidgetContainer* m_companyInfoContainer; // Pointer to company info container (bottom right)
   ui::WidgetText* m_gameTimeText; // Pointer to game time text widget (owned by container)
   ui::WidgetText* m_rollingText1; // Rolling text widget 1 at top of screen
   ui::WidgetText* m_rollingText2; // Rolling text widget 2 at top of screen
@@ -138,10 +145,14 @@ private:
   ui::WidgetText* m_volumeText;              // Volume text in inventory container
   ui::WidgetProgressBar* m_volumeProgressBar; // Volume progress bar in inventory container
 
-  // Info container widgets
-  ui::WidgetImage* m_companyInfoImage;       // Company info image in info container
-  ui::WidgetText* m_productInfoText;         // Product info text in info container
-  ui::WidgetText* m_productVolumeText;       // Product volume text in info container
+  // Product Info container widgets
+  ui::WidgetImage* m_companyInfoImage;       // Company info image in product info container
+  ui::WidgetText* m_productInfoText;         // Product info text in product info container
+  ui::WidgetText* m_productVolumeText;       // Product volume text in product info container
+
+  // Company Info container widgets
+  ui::WidgetText* m_companyInfoText;         // Company info text in company info container
+  ui::WidgetText* m_companyStatusText;       // Company status text in company info container
 
   // Fonts
   sf::Font m_digitalFont; // Font for game time display

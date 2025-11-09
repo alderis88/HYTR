@@ -144,6 +144,11 @@ void Inventory::LoadInventoryProducts(const std::string& path)
 		assert(arrayObject[i]["maxQuantity"].IsInt());
 		newProduct.m_maxQuantity = static_cast<uint32_t>(arrayObject[i]["maxQuantity"].GetInt());
 
+		//productInfo
+		assert(arrayObject[i].HasMember("productInfo"));
+		assert(arrayObject[i]["productInfo"].IsString());
+		newProduct.m_productInfo = arrayObject[i]["productInfo"].GetString();
+
 		// Initialize inventory-specific values (different from stock market)
 		newProduct.m_quantity = 1; // Each player product starts with quantity 1
 		newProduct.m_trendPointer = 0;

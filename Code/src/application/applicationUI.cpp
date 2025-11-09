@@ -17,7 +17,8 @@ ApplicationUI::ApplicationUI()
   : m_monitorMenuContainer(nullptr)
   , m_tradeContainer(nullptr)
   , m_inventoryContainer(nullptr)
-  , m_infoContainer(nullptr)
+  , m_productInfoContainer(nullptr)
+  , m_companyInfoContainer(nullptr)
   , m_gameTimeText(nullptr)
   , m_rollingText1(nullptr)
   , m_rollingText2(nullptr)
@@ -38,6 +39,8 @@ ApplicationUI::ApplicationUI()
   , m_companyInfoImage(nullptr)
   , m_productInfoText(nullptr)
   , m_productVolumeText(nullptr)
+  , m_companyInfoText(nullptr)
+  , m_companyStatusText(nullptr)
   , m_confirmTradeButton(nullptr)
   , m_cancelTradeButton(nullptr)
   , m_rollingText1Position(1920.0f) // Start off-screen to the right
@@ -97,7 +100,8 @@ void ApplicationUI::InitializeContainersUI()
   UI_InitializeMonitorMenuContainer();   // 5 trading monitor displays with click handlers
   UI_InitializeTradeContainer();         // Trade confirm/cancel buttons
   UI_InitializeInventoryContainer();     // Inventory container (bottom left)
-  UI_InitializeInfoContainer();          // Info container (bottom right)
+  UI_InitializeProductInfoContainer();   // Product info container (bottom right)
+  UI_InitializeCompanyInfoContainer();   // Company info container (bottom right)
   UI_InitializeImageWidgets();           // Material icons and trend arrows for each monitor
   UI_InitializeProgressBars();           // Player health and energy indicators
 
@@ -334,6 +338,9 @@ void ApplicationUI::UI_InitializeTradeContainer()
   });
   m_cancelTradeButton = cancelTradeButton.get();
   m_tradeContainer->AddWidget(std::move(cancelTradeButton));
+  
+  // Initially hide trade container until a monitor is selected
+  m_tradeContainer->SetVisible(false);
 }
 
 /// @brief Initialize the inventory container in the bottom left corner
@@ -389,36 +396,36 @@ void ApplicationUI::UI_InitializeInventoryContainer()
   m_inventoryContainer->AddWidget(std::move(volumeProgressBar));
 }
 
-/// @brief Initialize the info container in the bottom right corner
-/// @details Creates a container for displaying game information such as:
+/// @brief Initialize the product info container in the bottom right corner
+/// @details Creates a container for displaying product information such as:
 ///          - Current product details when selected
 ///          - Trading statistics and market trends
-///          - Player status and notifications
+///          - Product status and notifications
 ///          Position: bottom right corner of the screen
-void ApplicationUI::UI_InitializeInfoContainer()
+void ApplicationUI::UI_InitializeProductInfoContainer()
 {
-  // Create info container in bottom right corner (500x300 pixels)
-  auto infoContainer = std::make_unique<ui::WidgetContainer>(1340, 600, 550, 450); //(30, 600, 550, 400);
-  infoContainer->SetLayout(ui::LayoutType::Native); // Manual positioning for precise control
-  m_infoContainer = infoContainer.get(); // Store raw pointer for later access
-  m_rootContainer->AddWidget(std::move(infoContainer));
+  // Create product info container in bottom right corner (550x450 pixels)
+  auto productInfoContainer = std::make_unique<ui::WidgetContainer>(1340, 600, 550, 450);
+  productInfoContainer->SetLayout(ui::LayoutType::Native); // Manual positioning for precise control
+  m_productInfoContainer = productInfoContainer.get(); // Store raw pointer for later access
+  m_rootContainer->AddWidget(std::move(productInfoContainer));
 
-  // Add background for info container
-  auto infoBackground = std::make_unique<ui::WidgetImage>(0, 0, 550, 450, "BgInventory.png");
-  m_infoContainer->AddWidget(std::move(infoBackground));
+  // Add background for product info container
+  auto productInfoBackground = std::make_unique<ui::WidgetImage>(0, 0, 550, 450, "BgInventory.png");
+  m_productInfoContainer->AddWidget(std::move(productInfoBackground));
 
-  // Add info title text
-  auto infoTitle = std::make_unique<ui::WidgetText>(300, 300, "INFORMATION");
-  infoTitle->SetCharacterSize(24);
-  infoTitle->SetStyle(sf::Text::Bold);
-  infoTitle->SetAlignment(ui::WidgetText::Alignment::Center);
-  infoTitle->SetTextColor(sf::Color::White);
-  m_infoContainer->AddWidget(std::move(infoTitle));
+  // Add product info title text
+  auto productInfoTitle = std::make_unique<ui::WidgetText>(275, 20, "PRODUCT INFO");
+  productInfoTitle->SetCharacterSize(24);
+  productInfoTitle->SetStyle(sf::Text::Bold);
+  productInfoTitle->SetAlignment(ui::WidgetText::Alignment::Center);
+  productInfoTitle->SetTextColor(sf::Color::White);
+  m_productInfoContainer->AddWidget(std::move(productInfoTitle));
 
   // Add company info image
   auto companyInfoImage = std::make_unique<ui::WidgetImage>(300, 60, 200, 150, "NanodyneIndustries.png");
   m_companyInfoImage = companyInfoImage.get();
-  m_infoContainer->AddWidget(std::move(companyInfoImage));
+  m_productInfoContainer->AddWidget(std::move(companyInfoImage));
 
   // Add product info text
   auto productInfoText = std::make_unique<ui::WidgetText>(50, 80, "PI: None ");
@@ -426,7 +433,7 @@ void ApplicationUI::UI_InitializeInfoContainer()
   productInfoText->SetTextColor(sf::Color::Yellow);
   productInfoText->SetStyle(sf::Text::Bold);
   m_productInfoText = productInfoText.get();
-  m_infoContainer->AddWidget(std::move(productInfoText));
+  m_productInfoContainer->AddWidget(std::move(productInfoText));
 
   // Add product volume text
   auto productVolumeText = std::make_unique<ui::WidgetText>(50, 120, "Volume: 0");
@@ -434,7 +441,60 @@ void ApplicationUI::UI_InitializeInfoContainer()
   productVolumeText->SetTextColor(sf::Color::Cyan);
   productVolumeText->SetStyle(sf::Text::Bold);
   m_productVolumeText = productVolumeText.get();
-  m_infoContainer->AddWidget(std::move(productVolumeText));
+  m_productInfoContainer->AddWidget(std::move(productVolumeText));
+  
+  // Initially hide product info container until a monitor is selected
+  m_productInfoContainer->SetVisible(false);
+}
+
+/// @brief Initialize the company info container in the bottom right corner
+/// @details Creates a container for displaying company information such as:
+///          - Current company details when selected
+///          - Company statistics and information
+///          - Company status and notifications
+///          Position: bottom right corner of the screen (same as product info)
+void ApplicationUI::UI_InitializeCompanyInfoContainer()
+{
+  // Create company info container in bottom right corner (550x450 pixels)
+  auto companyInfoContainer = std::make_unique<ui::WidgetContainer>(1340, 600, 550, 450);
+  companyInfoContainer->SetLayout(ui::LayoutType::Native); // Manual positioning for precise control
+  m_companyInfoContainer = companyInfoContainer.get(); // Store raw pointer for later access
+  m_rootContainer->AddWidget(std::move(companyInfoContainer));
+
+  // Add background for company info container
+  auto companyInfoBackground = std::make_unique<ui::WidgetImage>(0, 0, 550, 450, "BgInventory.png");
+  m_companyInfoContainer->AddWidget(std::move(companyInfoBackground));
+
+  // Add company info title text
+  auto companyInfoTitle = std::make_unique<ui::WidgetText>(275, 20, "COMPANY INFO");
+  companyInfoTitle->SetCharacterSize(24);
+  companyInfoTitle->SetStyle(sf::Text::Bold);
+  companyInfoTitle->SetAlignment(ui::WidgetText::Alignment::Center);
+  companyInfoTitle->SetTextColor(sf::Color::White);
+  m_companyInfoContainer->AddWidget(std::move(companyInfoTitle));
+
+  // Add company info image (duplicate)
+  auto companyInfoImage2 = std::make_unique<ui::WidgetImage>(300, 60, 200, 150, "NanodyneIndustries.png");
+  m_companyInfoContainer->AddWidget(std::move(companyInfoImage2));
+
+  // Add company info text
+  auto companyInfoText = std::make_unique<ui::WidgetText>(50, 80, "Company: None ");
+  companyInfoText->SetCharacterSize(18);
+  companyInfoText->SetTextColor(sf::Color::Yellow);
+  companyInfoText->SetStyle(sf::Text::Bold);
+  m_companyInfoText = companyInfoText.get();
+  m_companyInfoContainer->AddWidget(std::move(companyInfoText));
+
+  // Add company status text
+  auto companyStatusText = std::make_unique<ui::WidgetText>(50, 120, "Status: Active");
+  companyStatusText->SetCharacterSize(18);
+  companyStatusText->SetTextColor(sf::Color::Cyan);
+  companyStatusText->SetStyle(sf::Text::Bold);
+  m_companyStatusText = companyStatusText.get();
+  m_companyInfoContainer->AddWidget(std::move(companyStatusText));
+  
+  // Initially hide company info container until a monitor is selected
+  m_companyInfoContainer->SetVisible(false);
 }
 
 /// @brief Initialize the game time display widget with digital font
@@ -624,9 +684,13 @@ void ApplicationUI::UI_DebugContainers()
   if (m_inventoryContainer)
     m_inventoryContainer->EnableDebugDraw(true, sf::Color(255, 0, 255, 255)); // Magenta opaque
   
-  // Info container debug (cyan border)
-  if (m_infoContainer)
-    m_infoContainer->EnableDebugDraw(true, sf::Color(0, 255, 255, 255)); // Cyan opaque
+  // Product Info container debug (cyan border)
+  if (m_productInfoContainer)
+    m_productInfoContainer->EnableDebugDraw(true, sf::Color(0, 255, 255, 255)); // Cyan opaque
+  
+  // Company Info container debug (yellow border)
+  if (m_companyInfoContainer)
+    m_companyInfoContainer->EnableDebugDraw(true, sf::Color(255, 255, 0, 128)); // Yellow semi-transparent
 }
 
 // Initialize progress bars for cycle, etc.
@@ -794,6 +858,17 @@ void ApplicationUI::SelectMonitor(int monitorIndex) {
         m_monitorHighlights[monitorIndex]->SetVisible(true);
     }
 
+    // Show trade and info containers when a monitor is selected
+    if (m_tradeContainer) {
+        m_tradeContainer->SetVisible(true);
+    }
+    if (m_productInfoContainer) {
+        m_productInfoContainer->SetVisible(true);
+    }
+    if (m_companyInfoContainer) {
+        m_companyInfoContainer->SetVisible(true);
+    }
+
     // Set the current product ID based on monitor index
     if (m_application && m_application->m_stockMarket) {
         switch (monitorIndex) {
@@ -814,6 +889,18 @@ void ApplicationUI::CancelSelection() {
             m_monitorHighlights[m_selectedMonitorIndex]->SetVisible(false);
         }
     }
+    
+    // Hide trade and info containers when selection is cancelled
+    if (m_tradeContainer) {
+        m_tradeContainer->SetVisible(false);
+    }
+    if (m_productInfoContainer) {
+        m_productInfoContainer->SetVisible(false);
+    }
+    if (m_companyInfoContainer) {
+        m_companyInfoContainer->SetVisible(false);
+    }
+    
     m_selectedMonitorIndex = -1;
 }
 

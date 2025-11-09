@@ -24,6 +24,7 @@ struct StockProduct final
 	uint32_t m_stackReplenishment;
 	float m_sellStackRatio;
 	uint32_t m_maxQuantity;
+	std::string m_productInfo;
 
 	//Inventory defined members
 	uint32_t m_quantity;

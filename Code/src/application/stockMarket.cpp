@@ -231,6 +231,11 @@ void StockMarket::LoadJsonStockProducts(const std::string& path)
 		assert(arrayObject[i]["maxQuantity"].IsInt());
 		newProduct.m_maxQuantity = static_cast<uint32_t>(arrayObject[i]["maxQuantity"].GetInt());
 
+		//productInfo
+		assert(arrayObject[i].HasMember("productInfo"));
+		assert(arrayObject[i]["productInfo"].IsString());
+		newProduct.m_productInfo = arrayObject[i]["productInfo"].GetString();
+
 		m_stockProducts.push_back(std::move(newProduct));
 	}
 }
