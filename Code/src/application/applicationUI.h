@@ -40,6 +40,8 @@ public:
   ui::WidgetContainer* GetMonitorMenuContainer() const { return m_monitorMenuContainer; }
   ui::WidgetContainer* GetSubMenuContainer() const { return m_subMenuContainer; }
   ui::WidgetText* GetGameTimeText() const { return m_gameTimeText; }
+  ui::WidgetText* GetRollingText1() const { return m_rollingText1; }
+  ui::WidgetText* GetRollingText2() const { return m_rollingText2; }
 
   // Getters for Image Widgets
   ui::WidgetImage* GetIconMaterialLumi() const { return m_iconMaterialLumi; }
@@ -68,6 +70,8 @@ private:
   ui::WidgetContainer* m_monitorMenuContainer; // Pointer to monitor menu container (owned by root container)
   ui::WidgetContainer* m_subMenuContainer;  // Pointer to sub menu container (owned by root container)
   ui::WidgetText* m_gameTimeText; // Pointer to game time text widget (owned by container)
+  ui::WidgetText* m_rollingText1; // Rolling text widget 1 at top of screen
+  ui::WidgetText* m_rollingText2; // Rolling text widget 2 at top of screen
 
   // Monitor containers
   ui::WidgetContainer* m_monitor1Container;

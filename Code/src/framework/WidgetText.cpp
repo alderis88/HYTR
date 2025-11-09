@@ -38,7 +38,11 @@ namespace ui
 
   void WidgetText::Draw(RenderContext& context) const
   {
-    context.draw(m_text);
+    // Only draw if we have a valid font
+    if (m_text.getFont() != nullptr)
+    {
+      context.draw(m_text);
+    }
   }
 
   void WidgetText::SetText(const std::string& text)
@@ -51,12 +55,16 @@ namespace ui
     SetWidth(static_cast<int>(textBounds.width));
     SetHeight(static_cast<int>(textBounds.height));
 
-    // ApplicationUpdate position based on alignment
-    ApplicationUpdateTextPosition();
+      // ApplicationUpdate position based on alignment
+      ApplicationUpdateTextPosition();
   }
+  
 
   void WidgetText::SetFont(const sf::Font& font)
-  {
+  { if (m_text.getFont() != nullptr)
+    {
+      return;
+     } // 
     m_text.setFont(font);
     m_hasCustomFont = true;
 
@@ -127,6 +135,12 @@ namespace ui
 
   void WidgetText::ApplicationUpdateTextPosition()
   {
+    // Check if text has a valid font before getting bounds
+    if (m_text.getFont() == nullptr)
+    {
+      return; // Cannot position text without a valid font
+    }
+
     sf::FloatRect textBounds = m_text.getLocalBounds();
     float posX = static_cast<float>(GetPosAbsX());
     float posY = static_cast<float>(GetPosAbsY());
