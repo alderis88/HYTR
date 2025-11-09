@@ -34,6 +34,7 @@ ApplicationUI::ApplicationUI()
   , m_rollingText1Position(1920.0f) // Start off-screen to the right
   , m_rollingText2Position(3940.0f) // Start off-screen with offset (1920 + 960)
   , m_rollingSpeed(100.0f) // 100 pixels per second
+  , m_selectedMonitorIndex(-1) // No monitor selected initially
 {
   // Initialize all widget arrays to nullptr for safe access checks later
   for (int i = 0; i < 5; ++i)
@@ -43,6 +44,8 @@ ApplicationUI::ApplicationUI()
     m_txtProd[i] = nullptr;
     m_txtProdQuantity[i] = nullptr;
     m_txtProdPrice[i] = nullptr;
+    m_monitorButtons[i] = nullptr;
+    m_monitorHighlights[i] = nullptr;
   }
 }
 
@@ -171,11 +174,16 @@ void ApplicationUI::UI_InitializeMonitorMenuContainer()
   auto ButtonMonitor1 = std::make_unique<ui::WidgetButton>(0, 0, 380, 340);
   ButtonMonitor1->LoadImage("BgMonitor.png");
   ButtonMonitor1->SetOnClickCallback([this](){
-    if (m_application && m_application->m_stockMarket) {
-      m_application->m_stockMarket->SetCurrentProductID("TRI"); // Select Tritanium Ore
-    }
+    SelectMonitor(0); // Call SelectMonitor instead of direct product ID setting
   });
+  m_monitorButtons[0] = ButtonMonitor1.get(); // Store button reference
   m_monitor1Container->AddWidget(std::move(ButtonMonitor1));
+
+  // Add purple highlight overlay (initially hidden)
+  auto highlight1 = std::make_unique<ui::WidgetImage>(0, 0, 380, 340, "BgMonitorSelected.png");
+  highlight1->SetVisible(false); // Initially hidden
+  m_monitorHighlights[0] = highlight1.get();
+  m_monitor1Container->AddWidget(std::move(highlight1));
 
   // === Monitor 2: Neuroflux (NFX) ===
   const uint16_t gapX = 5;  // Spacing between monitors
@@ -188,11 +196,16 @@ void ApplicationUI::UI_InitializeMonitorMenuContainer()
   auto ButtonMonitor2 = std::make_unique<ui::WidgetButton>(0, 0, 380, 340);
   ButtonMonitor2->LoadImage("BgMonitor.png");
   ButtonMonitor2->SetOnClickCallback([this](){
-    if (m_application && m_application->m_stockMarket) {
-      m_application->m_stockMarket->SetCurrentProductID("NFX"); // Select Neuroflux
-    }
+    SelectMonitor(1); // Call SelectMonitor instead of direct product ID setting
   });
+  m_monitorButtons[1] = ButtonMonitor2.get(); // Store button reference
   m_monitor2Container->AddWidget(std::move(ButtonMonitor2));
+
+  // Add purple highlight overlay (initially hidden)
+  auto highlight2 = std::make_unique<ui::WidgetImage>(0, 0, 380, 340, "BgMonitorSelected.png");
+  highlight2->SetVisible(false); // Initially hidden
+  m_monitorHighlights[1] = highlight2.get();
+  m_monitor2Container->AddWidget(std::move(highlight2));
 
   // === Monitor 3: Zeromass Matter (ZER) ===
   posX += 380 + gapX;
@@ -204,11 +217,16 @@ void ApplicationUI::UI_InitializeMonitorMenuContainer()
   auto ButtonMonitor3 = std::make_unique<ui::WidgetButton>(0, 0, 380, 340);
   ButtonMonitor3->LoadImage("BgMonitor.png");
   ButtonMonitor3->SetOnClickCallback([this](){
-    if (m_application && m_application->m_stockMarket) {
-      m_application->m_stockMarket->SetCurrentProductID("ZER"); // Select Zeromass Matter
-    }
+    SelectMonitor(2); // Call SelectMonitor instead of direct product ID setting
   });
+  m_monitorButtons[2] = ButtonMonitor3.get(); // Store button reference
   m_monitor3Container->AddWidget(std::move(ButtonMonitor3));
+
+  // Add purple highlight overlay (initially hidden)
+  auto highlight3 = std::make_unique<ui::WidgetImage>(0, 0, 380, 340, "BgMonitorSelected.png");
+  highlight3->SetVisible(false); // Initially hidden
+  m_monitorHighlights[2] = highlight3.get();
+  m_monitor3Container->AddWidget(std::move(highlight3));
 
   // === Monitor 4: Lumirite Crystal (LUM) ===
   posX += 380 + gapX;
@@ -220,11 +238,16 @@ void ApplicationUI::UI_InitializeMonitorMenuContainer()
   auto ButtonMonitor4 = std::make_unique<ui::WidgetButton>(0, 0, 380, 340);
   ButtonMonitor4->LoadImage("BgMonitor.png");
   ButtonMonitor4->SetOnClickCallback([this](){
-    if (m_application && m_application->m_stockMarket) {
-      m_application->m_stockMarket->SetCurrentProductID("LUM"); // Select Lumirite Crystal
-    }
+    SelectMonitor(3); // Call SelectMonitor instead of direct product ID setting
   });
+  m_monitorButtons[3] = ButtonMonitor4.get(); // Store button reference
   m_monitor4Container->AddWidget(std::move(ButtonMonitor4));
+
+  // Add purple highlight overlay (initially hidden)
+  auto highlight4 = std::make_unique<ui::WidgetImage>(0, 0, 380, 340, "BgMonitorSelected.png");
+  highlight4->SetVisible(false); // Initially hidden
+  m_monitorHighlights[3] = highlight4.get();
+  m_monitor4Container->AddWidget(std::move(highlight4));
 
   // === Monitor 5: Nanochip (NAN) ===
   posX += 380 + gapX;
@@ -236,11 +259,16 @@ void ApplicationUI::UI_InitializeMonitorMenuContainer()
   auto ButtonMonitor5 = std::make_unique<ui::WidgetButton>(0, 0, 380, 340);
   ButtonMonitor5->LoadImage("BgMonitor.png");
   ButtonMonitor5->SetOnClickCallback([this](){
-    if (m_application && m_application->m_stockMarket) {
-      m_application->m_stockMarket->SetCurrentProductID("NAN"); // Select Nanochip
-    }
+    SelectMonitor(4); // Call SelectMonitor instead of direct product ID setting
   });
+  m_monitorButtons[4] = ButtonMonitor5.get(); // Store button reference
   m_monitor5Container->AddWidget(std::move(ButtonMonitor5));
+
+  // Add purple highlight overlay (initially hidden)
+  auto highlight5 = std::make_unique<ui::WidgetImage>(0, 0, 380, 340, "BgMonitorSelected.png");
+  highlight5->SetVisible(false); // Initially hidden
+  m_monitorHighlights[4] = highlight5.get();
+  m_monitor5Container->AddWidget(std::move(highlight5));
 }
 
 /// @brief Initialize the sub menu container with additional functionality buttons
@@ -618,6 +646,52 @@ void ApplicationUI::UpdateApplicationUI(sf::Time deltaTime)
   //DebugLog("Rolling Text 2 position: " + std::to_string(m_rollingText2Position));
 
 
+}
+
+/// @brief Select a monitor button and apply purple highlighting
+/// @param monitorIndex Index of the monitor button to select (0-4)
+void ApplicationUI::SelectMonitor(int monitorIndex) {
+    if (monitorIndex < 0 || monitorIndex >= 5) {
+        return;
+    }
+
+    // If clicking the same monitor that's already selected, do nothing
+    if (m_selectedMonitorIndex == monitorIndex) {
+        return;
+    }
+
+    // Cancel any previous selection
+    CancelSelection();
+
+    // Set the new selection
+    m_selectedMonitorIndex = monitorIndex;
+
+    // Show purple highlight overlay for selected monitor
+    if (m_monitorHighlights[monitorIndex]) {
+        m_monitorHighlights[monitorIndex]->SetVisible(true);
+    }
+
+    // Set the current product ID based on monitor index
+    if (m_application && m_application->m_stockMarket) {
+        switch (monitorIndex) {
+            case 0: m_application->m_stockMarket->SetCurrentProductID("TRI"); break; // Tritanium
+            case 1: m_application->m_stockMarket->SetCurrentProductID("NEU"); break; // Neuro Catalyst
+            case 2: m_application->m_stockMarket->SetCurrentProductID("ZER"); break; // Zeromass Matter
+            case 3: m_application->m_stockMarket->SetCurrentProductID("LUM"); break; // Lumirite Crystal
+            case 4: m_application->m_stockMarket->SetCurrentProductID("NAN"); break; // Nanochip
+        }
+    }
+}
+
+/// @brief Cancel the current monitor selection and hide purple highlight
+void ApplicationUI::CancelSelection() {
+    if (m_selectedMonitorIndex >= 0 && m_selectedMonitorIndex < 5) {
+        // Hide the purple highlight overlay
+        if (m_monitorHighlights[m_selectedMonitorIndex]) {
+            m_monitorHighlights[m_selectedMonitorIndex]->SetVisible(false);
+        }
+    }
+    m_selectedMonitorIndex = -1;
 }
 
 /// @brief Load initial news content into rolling text widgets

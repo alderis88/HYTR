@@ -36,6 +36,10 @@ public:
   // Update functions
   void UpdateProductDisplays();
   void UpdateApplicationUI( sf::Time delta);
+  
+  // Monitor selection functions
+  void SelectMonitor(int monitorIndex);
+  void CancelSelection();
 
   // Getters for UI components
   std::unique_ptr<ui::WidgetContainer>& GetRootContainer() { return m_rootContainer; }
@@ -53,6 +57,8 @@ public:
   ui::WidgetImage* GetIconMaterialZeromass() const { return m_iconMaterialZeromass; }
   ui::WidgetImage* GetImageTrendArrowDown(int monitorIndex) const { return (monitorIndex >= 0 && monitorIndex < 5) ? m_imageTrendArrowDown[monitorIndex] : nullptr; }
   ui::WidgetImage* GetImageTrendArrowUp(int monitorIndex) const { return (monitorIndex >= 0 && monitorIndex < 5) ? m_imageTrendArrowUp[monitorIndex] : nullptr; }
+  ui::WidgetButton* GetMonitorButton(int monitorIndex) const { return (monitorIndex >= 0 && monitorIndex < 5) ? m_monitorButtons[monitorIndex] : nullptr; }
+  ui::WidgetImage* GetMonitorHighlight(int monitorIndex) const { return (monitorIndex >= 0 && monitorIndex < 5) ? m_monitorHighlights[monitorIndex] : nullptr; }
 
   // Getters for Text Widgets
   ui::WidgetText* GettxtProd(int monitorIndex) const { return (monitorIndex >= 0 && monitorIndex < 5) ? m_txtProd[monitorIndex] : nullptr; }
@@ -81,6 +87,11 @@ private:
   ui::WidgetContainer* m_monitor3Container;
   ui::WidgetContainer* m_monitor4Container;
   ui::WidgetContainer* m_monitor5Container;
+  
+  // Monitor buttons for selection management
+  ui::WidgetButton* m_monitorButtons[5];     // Array of monitor buttons for selection
+  ui::WidgetImage* m_monitorHighlights[5];  // Array of purple highlight overlays for selected monitors
+  int m_selectedMonitorIndex;               // Currently selected monitor (-1 if none)
 
   // Material Icons
   ui::WidgetImage* m_iconMaterialLumi;
