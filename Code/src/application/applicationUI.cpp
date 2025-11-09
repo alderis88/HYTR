@@ -60,6 +60,10 @@ ApplicationUI::ApplicationUI()
 	, m_predictedMoneyChangeText(nullptr)
 	, m_predictedVolumeText(nullptr)
 	, m_tradePredictedVolumeText(nullptr)
+	, m_quantityMinus1Button(nullptr)
+	, m_quantityMinus5Button(nullptr)
+	, m_quantityPlus1Button(nullptr)
+	, m_quantityPlus5Button(nullptr)
 	, m_infoPanelSelectorContainer(nullptr)
 	, m_productInfoSelectorButton(nullptr)
 	, m_companyInfoSelectorButton(nullptr)
@@ -404,7 +408,7 @@ void ApplicationUI::UI_InitializeTradeContainer()
 	m_tradeContainer->AddWidget(std::move(predictedMoneyChangeText));
 
 	// === Traded Quantity Display ===
-	auto tradedQuantityText = std::make_unique<ui::WidgetText>(360, 130, "0");
+	auto tradedQuantityText = std::make_unique<ui::WidgetText>(360, 110, "0");
 	tradedQuantityText->SetCharacterSize(22);
 	tradedQuantityText->SetStyle(sf::Text::Bold);
 	tradedQuantityText->SetAlignment(ui::WidgetText::Alignment::Center);
@@ -417,6 +421,67 @@ void ApplicationUI::UI_InitializeTradeContainer()
 
 	m_predictedVolumeText = tradedQuantityText.get();
 	m_tradeContainer->AddWidget(std::move(tradedQuantityText));
+
+	// === Quantity Adjustment Buttons ===
+	// Left side buttons (positioned further left from tradedQuantityText at x=360)
+	
+	// Top left: -1 button
+	auto quantityMinus1Button = std::make_unique<ui::WidgetButton>(250, 80, 70, 55);
+	quantityMinus1Button->LoadImage("ButtonMain2.png");
+	quantityMinus1Button->SetText("-1");
+	quantityMinus1Button->SetTextColor(sf::Color::White);
+	if (m_digitalFont.getInfo().family != "") {
+		quantityMinus1Button->SetFont(m_digitalFont);
+	}
+	quantityMinus1Button->SetOnClickCallback([this]() {
+		// TODO: Decrease quantity by 1
+	});
+	m_quantityMinus1Button = quantityMinus1Button.get();
+	m_tradeContainer->AddWidget(std::move(quantityMinus1Button));
+
+	// Bottom left: -5 button
+	auto quantityMinus5Button = std::make_unique<ui::WidgetButton>(250, 135, 70, 55);
+	quantityMinus5Button->LoadImage("ButtonMain2.png");
+	quantityMinus5Button->SetText("-5");
+	quantityMinus5Button->SetTextColor(sf::Color::White);
+	if (m_digitalFont.getInfo().family != "") {
+		quantityMinus5Button->SetFont(m_digitalFont);
+	}
+	quantityMinus5Button->SetOnClickCallback([this]() {
+		// TODO: Decrease quantity by 5
+	});
+	m_quantityMinus5Button = quantityMinus5Button.get();
+	m_tradeContainer->AddWidget(std::move(quantityMinus5Button));
+
+	// Right side buttons (positioned further right from tradedQuantityText at x=360)
+	
+	// Top right: +1 button
+	auto quantityPlus1Button = std::make_unique<ui::WidgetButton>(400, 80, 70, 55);
+	quantityPlus1Button->LoadImage("ButtonMain2.png");
+	quantityPlus1Button->SetText("+1");
+	quantityPlus1Button->SetTextColor(sf::Color::White);
+	if (m_digitalFont.getInfo().family != "") {
+		quantityPlus1Button->SetFont(m_digitalFont);
+	}
+	quantityPlus1Button->SetOnClickCallback([this]() {
+		// TODO: Increase quantity by 1
+	});
+	m_quantityPlus1Button = quantityPlus1Button.get();
+	m_tradeContainer->AddWidget(std::move(quantityPlus1Button));
+
+	// Bottom right: +5 button
+	auto quantityPlus5Button = std::make_unique<ui::WidgetButton>(400, 135, 70, 55);
+	quantityPlus5Button->LoadImage("ButtonMain2.png");
+	quantityPlus5Button->SetText("+5");
+	quantityPlus5Button->SetTextColor(sf::Color::White);
+	if (m_digitalFont.getInfo().family != "") {
+		quantityPlus5Button->SetFont(m_digitalFont);
+	}
+	quantityPlus5Button->SetOnClickCallback([this]() {
+		// TODO: Increase quantity by 5
+	});
+	m_quantityPlus5Button = quantityPlus5Button.get();
+	m_tradeContainer->AddWidget(std::move(quantityPlus5Button));
 
 	// === Predicted Volume Display (positioned left, near inventory volume bar) ===
 	auto tradePredictedVolumeText = std::make_unique<ui::WidgetText>(50, 360, "0");

@@ -160,6 +160,12 @@ private:
   ui::WidgetText* m_predictedMoneyChangeText; // Predicted money change display text
   ui::WidgetText* m_predictedVolumeText;    // Traded quantity display text (former predicted volume)
   ui::WidgetText* m_tradePredictedVolumeText; // New predicted volume display text
+  
+  // Quantity adjustment buttons around traded quantity text
+  ui::WidgetButton* m_quantityMinus1Button;  // -1 button (top left)
+  ui::WidgetButton* m_quantityMinus5Button;  // -5 button (bottom left)
+  ui::WidgetButton* m_quantityPlus1Button;   // +1 button (top right)
+  ui::WidgetButton* m_quantityPlus5Button;   // +5 button (bottom right)
 
   // Info panel selector container and buttons
   ui::WidgetContainer* m_infoPanelSelectorContainer; // Container for info panel selector buttons
