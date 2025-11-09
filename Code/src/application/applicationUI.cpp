@@ -31,6 +31,9 @@ ApplicationUI::ApplicationUI()
   , m_iconMaterialZeromass(nullptr)
   , m_healthProgressBar(nullptr)
   , m_energyProgressBar(nullptr)
+  , m_rollingText1Position(1920.0f) // Start off-screen to the right
+  , m_rollingText2Position(3940.0f) // Start off-screen with offset (1920 + 960)
+  , m_rollingSpeed(100.0f) // 100 pixels per second
 {
   // Initialize all widget arrays to nullptr for safe access checks later
   for (int i = 0; i < 5; ++i)
@@ -61,7 +64,7 @@ void ApplicationUI::InitializeUI(Application* app)
   // Load and display initial stock market data on all product monitors
   UpdateProductDisplays();
 
-  // Perform final layout calculations now that all widgets are created and positioned
+    // Perform final layout calculations now that all widgets are created and positioned
   m_rootContainer->UpdateLayout();
 }
 
@@ -114,7 +117,7 @@ std::string fontPath = Application::s_assetsPath + "FontLedNews.ttf";
   {
     
   // Add rolling text 1 - full width at very top of screen
-  auto rollingText1 = std::make_unique<ui::WidgetText>(0, 17, "Tritanium shares plunge 3% amid factory fire");
+  auto rollingText1 = std::make_unique<ui::WidgetText>(0, 50, "Loading news...");
   rollingText1->SetCharacterSize(50);
   rollingText1->SetFont(m_ledFont); // Use led font for rolling text 1
   rollingText1->SetStyle(sf::Text::Regular);
@@ -126,18 +129,20 @@ std::string fontPath = Application::s_assetsPath + "FontLedNews.ttf";
   m_rootContainer->AddWidget(std::move(rollingText1));
 
   // Add rolling text 2 - full width below the first one
-  auto rollingText2 = std::make_unique<ui::WidgetText>(1920,17, "Corporate announcements: Zeromass Labs reports quantum breakthrough...");
+  auto rollingText2 = std::make_unique<ui::WidgetText>(1920,20, "Loading news...2");
   rollingText2->SetCharacterSize(50);
   rollingText2->SetFont(m_ledFont); // Use led font for rolling text 2
   rollingText2->SetStyle(sf::Text::Regular);
   rollingText2->SetAlignment(ui::WidgetText::Alignment::Left);
-  rollingText2->SetTextColor(sf::Color::Cyan);
+  rollingText2->SetTextColor(sf::Color::Red);
   rollingText2->SetWidth(1920);  // Full screen width
   rollingText2->SetHeight(100);
   m_rollingText2 = rollingText2.get();
   m_rootContainer->AddWidget(std::move(rollingText2));
   }
-
+// Load initial news content for rolling text
+  LoadingNewText(true);
+   LoadingNewText(false);
 }
 
 /// @brief Initialize the monitor menu container with 5 trading product displays
@@ -550,6 +555,97 @@ void ApplicationUI::UpdateProductDisplays()
           m_txtProdPrice[i]->SetTextColor(sf::Color::Red);
         }
       }
+    }
+  }
+}
+
+/// @brief Update rolling text animations - moves text continuously from right to left
+/// @param deltaTime Time elapsed since last frame in seconds
+/// @details This function animates the rolling news ticker by:
+///          - Moving both rolling texts to the left at constant speed
+///          - Resetting position when text moves completely off-screen
+///          - Using different starting positions for staggered effect
+void ApplicationUI::UpdateApplicationUI(sf::Time deltaTime)
+{
+
+  // Safety check for rolling text widgets
+  if (!m_rollingText1 || !m_rollingText2)
+    return;
+
+  // Update rolling text 1 position
+  m_rollingText1Position -= m_rollingSpeed * deltaTime.asSeconds();
+  
+  // Reset position when text moves completely off-screen to the left
+  if (m_rollingText1Position < -1920.0f) // Assume text width is ~500px
+  {
+    m_rollingText1Position = 1920.0f; // Reset to right side of screen
+    LoadingNewText(true);
+    // Get new news content when rolling text 1 resets
+    if (m_application && m_application->m_stockMarket)
+    {
+      News* nextNews = m_application->m_stockMarket->GetNextNews();
+      if (nextNews)
+      {
+        m_rollingText1->SetText(nextNews->m_newsContent);
+      }
+    }
+  }  
+  // Update rolling text 2 position (offset by half screen for staggered effect)
+  m_rollingText2Position -= m_rollingSpeed * deltaTime.asSeconds();
+  
+  // Reset position when text moves completely off-screen to the left
+  if (m_rollingText2Position < -1920.0f) // Assume text width is ~500px
+  {
+    m_rollingText2Position = 1920.0f ; // Reset with offset for staggered effect
+	DebugLog("PutBack Rolling Text 2 to position: " + std::to_string(m_rollingText2Position));
+    LoadingNewText(false);
+    // Get new news content when rolling text 2 resets
+    if (m_application && m_application->m_stockMarket)
+    {
+      News* nextNews = m_application->m_stockMarket->GetNextNews();
+      if (nextNews)
+      {
+        m_rollingText2->SetText(nextNews->m_newsContent);
+      }
+    }
+  }
+
+  // Apply new positions to the widgets
+  m_rollingText1->SetPosition(m_rollingText1Position, 17.0f);
+  //DebugLog("Rolling Text 1 position: " + std::to_string(m_rollingText1Position));
+
+  m_rollingText2->SetPosition(m_rollingText2Position, 17.0f);
+  //DebugLog("Rolling Text 2 position: " + std::to_string(m_rollingText2Position));
+
+
+}
+
+/// @brief Load initial news content into rolling text widgets
+/// @details Called once during UI initialization to populate rolling text with real news
+///          instead of placeholder text. Gets first two news items from stock market.
+void ApplicationUI::LoadingNewText(bool first)
+{
+  // Safety check: ensure we have application and stock market references
+  if (!m_application || !m_application->m_stockMarket)
+    return;
+
+  // Load first news item for rolling text 1
+  if (m_rollingText1)
+  {
+    News* firstNews = m_application->m_stockMarket->GetNextNews();
+    if (firstNews)
+    {
+      m_rollingText1->SetText(firstNews->m_newsContent);
+    }
+  }
+
+  // Load second news item for rolling text 2  
+  if (m_rollingText2)
+  {
+    News* secondNews = m_application->m_stockMarket->GetNextNews();
+    if (secondNews)
+    {
+      m_rollingText2->SetText(secondNews->m_newsContent);
     }
   }
 }

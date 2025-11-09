@@ -31,9 +31,11 @@ public:
   void UI_InitializeImageWidgets();
   void UI_InitializeProgressBars();
   void UI_DebugContainers();
+  void LoadingNewText(bool first);
 
   // Update functions
   void UpdateProductDisplays();
+  void UpdateApplicationUI( sf::Time delta);
 
   // Getters for UI components
   std::unique_ptr<ui::WidgetContainer>& GetRootContainer() { return m_rootContainer; }
@@ -103,4 +105,9 @@ private:
   // Fonts
   sf::Font m_digitalFont; // Font for game time display
   sf::Font m_ledFont; // Font for rolling news ticker
+
+  // Rolling text animation variables
+  float m_rollingText1Position; // Current X position of rolling text 1
+  float m_rollingText2Position; // Current X position of rolling text 2
+  float m_rollingSpeed; // Speed of rolling animation (pixels per second)
 };

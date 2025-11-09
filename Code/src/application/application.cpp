@@ -285,6 +285,12 @@ void Application::ApplicationUpdate(sf::Time delta)
 	{
 		//DebugLog("StockMarket not exist", DebugType::Error);
 	}
+
+	// Update rolling text animation (not affected by global time multiplier)
+	if (m_applicationUI)
+	{
+		m_applicationUI->UpdateApplicationUI(scaledDelta);
+	}
 }
 
 /// @brief Updates and displays total elapsed game time
