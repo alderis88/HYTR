@@ -508,7 +508,7 @@ bool StockMarket::ValidateBuyFromStock(const std::string& productId, uint32_t de
 	// Check if desired quantity is available in stock
 	if (product->m_quantity < desiredQuantity)
 	{
-		DebugLog("ValidateBuyFromStock - Not enough stock for product: " + product->m_name + 
+		DebugLog("ValidateBuyFromStock - Not enough stock for product: " + product->m_name +
 			" (ID: " + productId + ") - Requested: " + std::to_string(desiredQuantity) +
 			", Available: " + std::to_string(product->m_quantity), DebugType::Warning);
 		return false;
@@ -550,9 +550,9 @@ bool StockMarket::ValidateBuyFromStock(const std::string& productId, uint32_t de
 
 	// All checks passed - transaction is valid
 	DebugLog("ValidateBuyFromStock - Product: " + product->m_name + " (ID: " + productId + ") - " +
-		"Quantity: " + std::to_string(desiredQuantity) + 
+		"Quantity: " + std::to_string(desiredQuantity) +
 		", Cost: " + std::to_string(totalCost) +
-		", Volume required: " + std::to_string(requiredVolume) + 
+		", Volume required: " + std::to_string(requiredVolume) +
 		" - Transaction VALID");
 
 	return true;
@@ -596,8 +596,8 @@ bool StockMarket::ValidateSellForStock(const std::string& productId, uint32_t de
 
 	// All checks passed - transaction is valid
 	DebugLog("ValidateSellForStock - Product: " + product->m_name + " (ID: " + productId + ") - " +
-		"Quantity to sell: " + std::to_string(desiredQuantity) + 
-		", Available in inventory: " + std::to_string(playerQuantity) + 
+		"Quantity to sell: " + std::to_string(desiredQuantity) +
+		", Available in inventory: " + std::to_string(playerQuantity) +
 		" - Transaction VALID");
 
 	return true;
@@ -628,7 +628,7 @@ bool StockMarket::BuyFromStock(const std::string& productId, uint32_t quantity)
 
 	// Execute the transaction (we know all conditions are met)
 	uint32_t currentMoney = m_application->GetPlayerInventory()->GetCurrentMoney();
-	
+
 	// Deduct the cost from player's money
 	m_application->GetPlayerInventory()->SetCurrentMoney(currentMoney - totalCost);
 
@@ -640,10 +640,10 @@ bool StockMarket::BuyFromStock(const std::string& productId, uint32_t quantity)
 
 	// Update current player impact for purchase (increases demand pressure) - REVERSED EFFECT
 	product->m_currentPlayerImpact += product->m_playerImpact * quantity;
-	
+
 	// Clamp current player impact between -0.5 and 0.5
 	product->m_currentPlayerImpact = std::max(-0.5f, std::min(0.5f, product->m_currentPlayerImpact));
-	
+
 	// Debug log the purchase
 	DebugLog("BuyFromStock - Product: " + product->m_name + " (ID: " + productId + ") - " +
 		"Bought: " + std::to_string(quantity) +
@@ -689,7 +689,7 @@ bool StockMarket::SellForStock(const std::string& productId, uint32_t quantity)
 
 	// Execute the transaction (we know all conditions are met)
 	uint32_t currentMoney = m_application->GetPlayerInventory()->GetCurrentMoney();
-	
+
 	// Add the earnings to player's money
 	m_application->GetPlayerInventory()->SetCurrentMoney(currentMoney + totalEarnings);
 
@@ -704,7 +704,7 @@ bool StockMarket::SellForStock(const std::string& productId, uint32_t quantity)
 
 	// Update current player impact for sale (decreases demand pressure) - REVERSED EFFECT
 	product->m_currentPlayerImpact -= product->m_playerImpact * quantity;
-	
+
 	// Clamp current player impact between -0.5 and 0.5
 	product->m_currentPlayerImpact = std::max(-0.5f, std::min(0.5f, product->m_currentPlayerImpact));
 
@@ -737,37 +737,46 @@ void StockMarket::LoadJsonStockVendors(const std::string& path)
 {
 	DebugLog("Loading Stock Vendors from: " + path);
 	std::ifstream stream(path);
-	
+
 	if (!stream.is_open()) {
 		DebugLog("ERROR: Could not open file: " + path);
-		assert(false);
+		return; // Gracefully handle the error instead of assertion
 	}
-	
+
 	std::string fileData((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
-	
+
 	if (fileData.empty()) {
 		DebugLog("ERROR: File is empty: " + path);
-		assert(false);
+		return; // Gracefully handle the error instead of assertion
 	}
-	
+
 	DebugLog("File size: " + std::to_string(fileData.size()) + " bytes");
 
 	Json::Document document;
 	document.Parse(fileData.c_str());
-	
+
 	if (document.HasParseError()) {
 		DebugLog("ERROR: JSON Parse Error at offset " + std::to_string(document.GetErrorOffset()));
 		DebugLog("ERROR: " + std::string(Json::GetParseError_En(document.GetParseError())));
 		DebugLog("File content preview (first 200 chars): " + fileData.substr(0, 200));
-		assert(false);
+		return; // Gracefully handle the error instead of assertion
 	}
 
-	assert(document.IsObject());
+	if (!document.IsObject()) {
+		DebugLog("ERROR: JSON document is not an object: " + path);
+		return;
+	}
 
 	//characters
-	assert(document.HasMember("characters"));
+	if (!document.HasMember("characters")) {
+		DebugLog("ERROR: JSON document missing 'characters' member: " + path);
+		return;
+	}
 	const Json::Value& arrayObject = document["characters"];
-	assert(arrayObject.IsArray());
+	if (!arrayObject.IsArray()) {
+		DebugLog("ERROR: 'characters' is not an array: " + path);
+		return;
+	}
 	for (Json::SizeType i = 0; i < arrayObject.Size(); i++)
 	{
 		StockVendor newVendor;

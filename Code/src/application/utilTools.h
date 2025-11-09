@@ -8,3 +8,4 @@ enum DebugType
 };
 
 void DebugLog(const std::string& message, DebugType type = DebugType::Message);
+std::string GetExecutableDirectory();

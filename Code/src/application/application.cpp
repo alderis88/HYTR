@@ -55,8 +55,20 @@ void Application::Initialize()
 	SetVideoSettings();
 
 	// Set up file system paths for data and assets
+	// In DEBUG mode: use development folder structure
+	// In RELEASE mode: use portable paths relative to executable
+#ifdef _DEBUG
+	DebugLog("DEBUG mode: Using development folder structure");
 	SetDataPath("../../data/");
 	SetAssetsPath("../../assets/");
+#else
+	DebugLog("RELEASE mode: Using portable paths relative to executable");
+	std::string exeDir = GetExecutableDirectory();
+	SetDataPath((exeDir + "data/").c_str());
+	SetAssetsPath((exeDir + "assets/").c_str());
+#endif
+	DebugLog("Data path: " + s_dataPath);
+	DebugLog("Assets path: " + s_assetsPath);
 
 	// Initialize core game systems
 	SetupStockMarket();
@@ -425,7 +437,7 @@ void Application::InputHandle()
 				DebugLog("Game unpaused - time multiplier restored to: " + std::to_string(s_globalTimeMultiplier), DebugType::Message);
 			}
 		}
-		
+
 		else if (event.type == InputEvent::KeyPressed)
 		{
 			// Test trading hotkeys: 1-5 to buy, Shift+1-5 to sell
@@ -453,13 +465,13 @@ void Application::InputHandle()
 			}
 		}
 	}
-	
+
 	// Handle gamepad A button press to simulate mouse click
 	if (sf::Joystick::isConnected(m_gamepadId))
 	{
 		static bool wasAButtonPressed = false;
 		bool isAButtonPressed = sf::Joystick::isButtonPressed(m_gamepadId, 0); // Button 0 is typically A button
-		
+
 		// Detect button press (rising edge)
 		if (isAButtonPressed && !wasAButtonPressed)
 		{
@@ -469,7 +481,7 @@ void Application::InputHandle()
 			clickEvent.mouseButton.button = sf::Mouse::Left;
 			clickEvent.mouseButton.x = static_cast<int>(m_gamepadCursorPosition.x);
 			clickEvent.mouseButton.y = static_cast<int>(m_gamepadCursorPosition.y);
-			
+
 			// Forward the synthetic click to UI system
 			if (m_rootWidgetContainer)
 			{
@@ -485,14 +497,14 @@ void Application::InputHandle()
 			releaseEvent.mouseButton.button = sf::Mouse::Left;
 			releaseEvent.mouseButton.x = static_cast<int>(m_gamepadCursorPosition.x);
 			releaseEvent.mouseButton.y = static_cast<int>(m_gamepadCursorPosition.y);
-			
+
 			// Forward the synthetic release to UI system
 			if (m_rootWidgetContainer)
 			{
 				m_rootWidgetContainer->ProcessInput(releaseEvent);
 			}
 		}
-		
+
 		wasAButtonPressed = isAButtonPressed;
 	}
 }

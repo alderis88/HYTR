@@ -38,3 +38,22 @@ void DebugLog(const std::string& message, DebugType type)
 		SetConsoleTextAttribute(h, WORD(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE));
 #endif
 }
+
+std::string GetExecutableDirectory()
+{
+#ifdef _WIN32
+	char buffer[MAX_PATH];
+	DWORD length = GetModuleFileNameA(NULL, buffer, MAX_PATH);
+	if (length > 0)
+	{
+		std::string exePath(buffer, length);
+		size_t lastSlash = exePath.find_last_of("\\/");
+		if (lastSlash != std::string::npos)
+		{
+			return exePath.substr(0, lastSlash + 1);
+		}
+	}
+#endif
+	// Fallback to current directory
+	return "./";
+}
