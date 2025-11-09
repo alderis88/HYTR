@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <fstream>
 #include <sstream>
+#include <iomanip>
 
 Inventory::Inventory() = default;
 Inventory::~Inventory() = default;
@@ -29,6 +30,9 @@ void Inventory::InventoryInitialize(Application* app)
 	
 	DebugLog("Player Inventory initialized with " + std::to_string(m_playerProducts.size()) + " products, each with quantity 1. Total volume: " + 
 			 std::to_string(m_currentInventoryVolume) + "/" + std::to_string(s_maxInventoryVolume));
+
+	// Initialize UI visual state
+	UpdateInventoryVisual();
 }
 
 /// @brief Load inventory products from JSON file
@@ -156,10 +160,13 @@ void Inventory::LoadInventoryProducts(const std::string& path)
 		newProduct.m_currentPlayerImpact = 0.0f;
 		newProduct.m_trendIncreased = false;
 
+		newProduct.m_quantity = 0; // Reset for next iteration
 		// Add to current inventory volume (quantity * volume)
 		m_currentInventoryVolume += newProduct.m_quantity * newProduct.m_volume;
 
 		m_playerProducts.push_back(std::move(newProduct));
+
+	
 	}
 }
 
@@ -255,6 +262,9 @@ void Inventory::AddProduct(const std::string& productId, uint32_t quantity)
 		", New quantity: " + std::to_string(product->m_quantity) +
 		", Volume added: " + std::to_string(volumeAdded) +
 		", Total volume: " + std::to_string(m_currentInventoryVolume) + "/" + std::to_string(s_maxInventoryVolume));
+
+	// Update UI to reflect volume changes
+	UpdateInventoryVisual();
 }
 
 /// @brief Remove quantity from a product in inventory and update volume
@@ -295,6 +305,51 @@ void Inventory::RemoveProduct(const std::string& productId, uint32_t quantity)
 		", New quantity: " + std::to_string(product->m_quantity) +
 		", Volume removed: " + std::to_string(volumeRemoved) +
 		", Total volume: " + std::to_string(m_currentInventoryVolume) + "/" + std::to_string(s_maxInventoryVolume));
+
+	// Update UI to reflect volume changes
+	UpdateInventoryVisual();
+}
+
+// === UI Update ===
+
+/// @brief Update inventory visual elements (progress bar and volume display)
+/// @details Updates the volume progress bar with current volume/max volume ratio
+///          and displays the values in format "current/max"
+void Inventory::UpdateInventoryVisual()
+{
+	if (!m_application)
+	{
+		DebugLog("UpdateInventoryVisual - No application reference", DebugType::Warning);
+		return;
+	}
+
+	// Get the volume progress bar from the UI
+	auto* volumeProgressBar = m_application->GetApplicationUI()->GetVolumeProgressBar();
+	if (!volumeProgressBar)
+	{
+		DebugLog("UpdateInventoryVisual - Volume progress bar not found", DebugType::Warning);
+		return;
+	}
+
+	// Calculate progress ratio (0.0 to 1.0)
+	float progressRatio = (s_maxInventoryVolume > 0.0f) ? (m_currentInventoryVolume / s_maxInventoryVolume) : 0.0f;
+	
+	// Ensure ratio stays within bounds
+	progressRatio = std::max(0.0f, std::min(1.0f, progressRatio));
+
+	// Set the progress bar value
+	volumeProgressBar->SetProgress(progressRatio);
+
+	// Create the display text in format "current/max"
+	std::ostringstream volumeText;
+	volumeText << std::fixed << std::setprecision(0) << m_currentInventoryVolume 
+	           << "/" << s_maxInventoryVolume << " VOL";
+
+	// Set the custom text (this will override the default percentage display)
+	volumeProgressBar->SetCustomText(volumeText.str());
+
+	DebugLog("UpdateInventoryVisual - Volume updated: " + volumeText.str() + 
+	         " (Progress: " + std::to_string(progressRatio * 100.0f) + "%)");
 }
 
 // === Private Helper Functions ===

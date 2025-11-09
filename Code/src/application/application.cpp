@@ -57,8 +57,7 @@ void Application::Initialize()
 	SetAssetsPath("../../assets/");
 
 	// Initialize core game systems
-	SetupStockMarket();
-	SetupInventory();
+	SetupStockMarket();	
 	SetupCustomCursor();
 
 	// Create main window and initialize UI system
@@ -75,6 +74,7 @@ void Application::Initialize()
 		m_monitorMenuContainer = m_applicationUI->GetMonitorMenuContainer();
 		m_gameTimeText = m_applicationUI->GetGameTimeText();
 	}
+	SetupInventory();
 }
 
 /// @brief Configures video and rendering settings

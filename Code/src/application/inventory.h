@@ -59,6 +59,9 @@ public:
 	void AddProduct(const std::string& productId, uint32_t quantity);
 	void RemoveProduct(const std::string& productId, uint32_t quantity);
 
+	// === UI Update ===
+	void UpdateInventoryVisual();
+
 private:
 	StockProduct* FindProduct(const std::string& productId);
 	void LoadInventoryProducts(const std::string& path);
