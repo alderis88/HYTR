@@ -109,35 +109,35 @@ void ApplicationUI::UI_InitializeRootContainer()
   titleText->SetTextColor(sf::Color::White); // White text for visibility on background
   m_rootContainer->AddWidget(std::move(titleText));
 
-
-  // led font for rolling news ticker
-  std::string fontPath = Application::s_assetsPath + "FontLed.ttf";
-  sf::Font ledFont;
-  ledFont.loadFromFile(fontPath);
-
+std::string fontPath = Application::s_assetsPath + "FontLedNews.ttf";
+  if (m_ledFont.loadFromFile(fontPath))
+  {
+    
   // Add rolling text 1 - full width at very top of screen
-  auto rollingText1 = std::make_unique<ui::WidgetText>(0, 10, "Tritanium shares plunge 3% amid factory fire");
-  rollingText1->SetCharacterSize(30);
-  rollingText1->SetFont(ledFont); // Use led font for rolling text 1
+  auto rollingText1 = std::make_unique<ui::WidgetText>(0, 17, "Tritanium shares plunge 3% amid factory fire");
+  rollingText1->SetCharacterSize(50);
+  rollingText1->SetFont(m_ledFont); // Use led font for rolling text 1
   rollingText1->SetStyle(sf::Text::Regular);
   rollingText1->SetAlignment(ui::WidgetText::Alignment::Left);
   rollingText1->SetTextColor(sf::Color::Red);
   rollingText1->SetWidth(1920);  // Full screen width
-  rollingText1->SetHeight(40);
+  rollingText1->SetHeight(100);
   m_rollingText1 = rollingText1.get();
   m_rootContainer->AddWidget(std::move(rollingText1));
 
   // Add rolling text 2 - full width below the first one
-  auto rollingText2 = std::make_unique<ui::WidgetText>(1920,10, "Corporate announcements: Zeromass Labs reports quantum breakthrough...");
-  rollingText2->SetCharacterSize(30);
-  rollingText2->SetFont(ledFont); // Use led font for rolling text 2
+  auto rollingText2 = std::make_unique<ui::WidgetText>(1920,17, "Corporate announcements: Zeromass Labs reports quantum breakthrough...");
+  rollingText2->SetCharacterSize(50);
+  rollingText2->SetFont(m_ledFont); // Use led font for rolling text 2
   rollingText2->SetStyle(sf::Text::Regular);
   rollingText2->SetAlignment(ui::WidgetText::Alignment::Left);
   rollingText2->SetTextColor(sf::Color::Cyan);
   rollingText2->SetWidth(1920);  // Full screen width
-  rollingText2->SetHeight(40);
+  rollingText2->SetHeight(100);
   m_rollingText2 = rollingText2.get();
   m_rootContainer->AddWidget(std::move(rollingText2));
+  }
+
 }
 
 /// @brief Initialize the monitor menu container with 5 trading product displays

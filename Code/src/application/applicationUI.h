@@ -102,4 +102,5 @@ private:
 
   // Fonts
   sf::Font m_digitalFont; // Font for game time display
+  sf::Font m_ledFont; // Font for rolling news ticker
 };

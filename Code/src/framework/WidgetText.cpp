@@ -61,10 +61,7 @@ namespace ui
   
 
   void WidgetText::SetFont(const sf::Font& font)
-  { if (m_text.getFont() != nullptr)
-    {
-      return;
-     } // 
+  {  
     m_text.setFont(font);
     m_hasCustomFont = true;
 
