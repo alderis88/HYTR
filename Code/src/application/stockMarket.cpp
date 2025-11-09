@@ -460,6 +460,24 @@ StockProduct* StockMarket::GetStockProductById(const std::string& productId)
 	return nullptr;
 }
 
+/// @brief Get vendor by associated product ID
+/// @param productId ID of the product to find the associated vendor for
+/// @return Pointer to StockVendor if found, nullptr otherwise
+StockVendor* StockMarket::GetStockVendorByProductId(const std::string& productId)
+{
+	// Find the vendor by product ID
+	for (auto& vendor : m_stockVendors)
+	{
+		if (vendor.m_productId == productId)
+		{
+			return &vendor;
+		}
+	}
+
+	// Vendor not found
+	return nullptr;
+}
+
 /// @brief Validate if a buy transaction is possible
 /// Checks if sufficient stock is available without actually executing the trade
 /// @param productId ID of the product to check
@@ -721,6 +739,11 @@ void StockMarket::LoadJsonStockVendors(const std::string& path)
 		assert(arrayObject[i].HasMember("style"));
 		assert(arrayObject[i]["style"].IsString());
 		newVendor.m_style = arrayObject[i]["style"].GetString();
+
+		// companyInfo
+		assert(arrayObject[i].HasMember("companyInfo"));
+		assert(arrayObject[i]["companyInfo"].IsString());
+		newVendor.m_companyInfo = arrayObject[i]["companyInfo"].GetString();
 
 		// personality
 		assert(arrayObject[i].HasMember("personality"));

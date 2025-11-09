@@ -25,6 +25,7 @@ struct StockVendor final
 	std::vector<std::string> m_colorTheme;      ///< UI color scheme
 	std::string m_quote;                        ///< Signature quote
 	std::string m_style;                        ///< Visual style description
+	std::string m_companyInfo;                  ///< Company information description
 	Personality m_personality;                  ///< Personality traits
 };
 
@@ -63,6 +64,9 @@ public:
 	bool ValidateBuyFromStock(const std::string& productId, uint32_t desiredQuantity);
 	bool BuyFromStock(const std::string& productId, uint32_t quantity);
 	void SellForStock(const std::string& productId, uint32_t quantity);
+
+	// === Vendor Access Functions ===
+	StockVendor* GetStockVendorByProductId(const std::string& productId);
 
 	// === Current Product Management ===
 	void SetCurrentProductID(const std::string& productId);

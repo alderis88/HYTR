@@ -30,6 +30,7 @@ public:
   void UI_InitializeInventoryContainer();
   void UI_InitializeProductInfoContainer();
   void UI_InitializeCompanyInfoContainer();
+  void UI_InitializeVendorInfoContainer();
   void UI_InitializeGameTimeWidget();
   void UI_InitializeImageWidgets();
   void UI_InitializeProgressBars();
@@ -53,6 +54,7 @@ public:
   ui::WidgetContainer* GetInventoryContainer() const { return m_inventoryContainer; }
   ui::WidgetContainer* GetProductInfoContainer() const { return m_productInfoContainer; }
   ui::WidgetContainer* GetCompanyInfoContainer() const { return m_companyInfoContainer; }
+  ui::WidgetContainer* GetVendorInfoContainer() const { return m_vendorInfoContainer; }
   ui::WidgetText* GetGameTimeText() const { return m_gameTimeText; }
   ui::WidgetText* GetRollingText1() const { return m_rollingText1; }
   ui::WidgetText* GetRollingText2() const { return m_rollingText2; }
@@ -84,13 +86,15 @@ public:
   ui::WidgetProgressBar* GetVolumeProgressBar() const { return m_volumeProgressBar; }
 
   // Getters for Product Info Container Widgets
-  ui::WidgetImage* GetCompanyInfoImage() const { return m_companyInfoImage; }
+  ui::WidgetImage* GetProductInfoImage() const { return m_productInfoImage; }
   ui::WidgetText* GetProductInfoText() const { return m_productInfoText; }
   ui::WidgetText* GetProductVolumeText() const { return m_productVolumeText; }
+  ui::WidgetText* GetProductRarityText() const { return m_productRarityText; }
 
   // Getters for Company Info Container Widgets
-  ui::WidgetText* GetCompanyInfoText() const { return m_companyInfoText; }
-  ui::WidgetText* GetCompanyStatusText() const { return m_companyStatusText; }
+  ui::WidgetText* GetCompanyNameText() const { return m_companyNameText; }
+  ui::WidgetText* GetVendorRoleText() const { return m_vendorRoleText; }
+  ui::WidgetText* GetProductNameText() const { return m_productNameText; }
 
 private:
   // Application reference
@@ -103,6 +107,7 @@ private:
   ui::WidgetContainer* m_inventoryContainer; // Pointer to inventory container (bottom left)
   ui::WidgetContainer* m_productInfoContainer; // Pointer to product info container (bottom right)
   ui::WidgetContainer* m_companyInfoContainer; // Pointer to company info container (bottom right)
+  ui::WidgetContainer* m_vendorInfoContainer; // Pointer to vendor info container (bottom right)
   ui::WidgetText* m_gameTimeText; // Pointer to game time text widget (owned by container)
   ui::WidgetText* m_rollingText1; // Rolling text widget 1 at top of screen
   ui::WidgetText* m_rollingText2; // Rolling text widget 2 at top of screen
@@ -151,13 +156,23 @@ private:
   ui::WidgetProgressBar* m_volumeProgressBar; // Volume progress bar in inventory container
 
   // Product Info container widgets
-  ui::WidgetImage* m_companyInfoImage;       // Company info image in product info container
+  ui::WidgetImage* m_productInfoImage;       // Product info image in product info container
   ui::WidgetText* m_productInfoText;         // Product info text in product info container
   ui::WidgetText* m_productVolumeText;       // Product volume text in product info container
+  ui::WidgetText* m_productRarityText;       // Product rarity text in product info container
+  ui::WidgetText* m_productNameText;         // Product name text in product info container
 
   // Company Info container widgets
-  ui::WidgetText* m_companyInfoText;         // Company info text in company info container
-  ui::WidgetText* m_companyStatusText;       // Company status text in company info container
+  ui::WidgetText* m_companyNameText;         // Company name text in company info container
+  ui::WidgetText* m_companyInfoText;         // Company detailed info text in company info container
+  ui::WidgetImage* m_companyLogo;            // Company logo image in company info container
+ 
+  // Vendor info container widgets
+  ui::WidgetText* m_vendorInfoText;           // Vendor info text in vendor info container
+  ui::WidgetText* m_vendorNameText;           // Vendor name text in vendor info container
+  ui::WidgetText* m_vendorProfileText;        // Vendor profile text in vendor info container
+   ui::WidgetImage* m_vendorImage;            // Vendor character image in vendor info container
+  ui::WidgetText* m_vendorRoleText;           // Vendor role text in vendor info container
 
   // Fonts
   sf::Font m_digitalFont; // Font for game time display

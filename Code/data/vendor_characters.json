@@ -6,7 +6,7 @@
       "name": "Boros Kane",
       "company": "Triton Dynamics",
       "role": "CEO",
-      "profile": "Veteran of deep-space mining and industrial material development. A blunt, honest man who trusts metal more than words.",
+      "profile": "Veteran of deep-space\nmining and industrial\nmaterial development.\nA blunt, honest man\nwho trusts metal.",
       "appearance": "Worn exosuit armor, face smudged with grease, a glowing blue cyber-implant behind his left eye, rugged build.",
       "mood": "Reliable, technocratic",
       "colorTheme": ["#3B6EA5", "#D6A23D"],
@@ -17,7 +17,8 @@
         "greed": 5,
         "honor": 9
       },
-      "style": "Industrial miner, blue-gold tones, sparks and welding lights."
+      "style": "Industrial miner, blue-gold tones, sparks and welding lights.",
+      "companyInfo": "Galaxy's largest\nheavy metal mining\ncorporation.\nSpecializes in deep\nspace operations."
     },
     {
       "id": "NFX_AI",
@@ -26,7 +27,7 @@
       "alias": "The Whisper",
       "company": "Flux Neural Systems",
       "role": "AI Construct",
-      "profile": "A hybrid organic-digital intelligence that manages human-mind network interfaces and consciousness links.",
+      "profile": "A hybrid organic-\ndigital intelligence\nthat manages human-\nmind network interfaces\nand consciousness.",
       "appearance": "Suspended in a fluid capsule, transparent skull with visible optical fibers glowing pink and violet, mechanical neural implants.",
       "mood": "Futuristic, organic",
       "colorTheme": ["#E04DD2", "#A25AF8"],
@@ -37,15 +38,16 @@
         "greed": 2,
         "honor": 3
       },
-      "style": "Encased AI core, neon tubes, synthetic consciousness with shifting voices."
+      "style": "Encased AI core, neon tubes, synthetic consciousness with shifting voices.",
+      "companyInfo": "Cutting-edge neural\nenhancement research.\nPioneers in AI-human\ninterface technology\nand consciousness."
     },
     {
       "id": "ZER_SCI",
       "product_id": "ZER",
       "name": "Dr. Nyra Voss",
       "company": "Zeromass Labs",
-      "role": "Lead Quantum Scientist",
-      "profile": "Leading researcher in quantum energetics, a cold and logical mind who sees the universe as an equation.",
+      "role": "Chief Scientist",
+      "profile": "Leading researcher in\nquantum energetics,\na cold and logical\nmind who sees the\nuniverse as equation.",
       "appearance": "Tall, elegant figure wearing black and violet scientific robes, slim frame, calm precision in her gaze.",
       "mood": "Mysterious, elegant",
       "colorTheme": ["#4A148C", "#000000"],
@@ -56,15 +58,16 @@
         "greed": 6,
         "honor": 7
       },
-      "style": "Elite scientist, quantum lab ambience, deep violet lighting and holographic formulas."
+      "style": "Elite scientist, quantum lab ambience, deep violet lighting and holographic formulas.",
+      "companyInfo": "Advanced quantum\nresearch facility.\nExotic matter\nmanipulation and\nanti-gravity tech."
     },
     {
       "id": "NAN_YAK",
       "product_id": "NAN",
       "name": "Riku Tanaka",
       "company": "Nanodyne Industries",
-      "role": "Corporate Enforcer / CEO",
-      "profile": "A precise, cold-blooded businessman with Yakuza roots, known for smiling while raising prices.",
+      "role": "Corp Enforcer",
+      "profile": "A precise, cold-\nblooded businessman\nwith Yakuza roots,\nknown for smiling\nwhile raising prices.",
       "appearance": "Dark tailored suit with faint glowing magenta tattoos underneath, steel gaze, mirrored cyber-lenses reflecting neon light.",
       "mood": "Precise, technological",
       "colorTheme": [ "#FF007F", "#555B6E" ],
@@ -75,7 +78,8 @@
         "greed": 8,
         "honor": 5
       },
-      "style": "Yakuza-style executive, magenta glow, rain-soaked urban skyline."
+      "style": "Yakuza-style executive, magenta glow, rain-soaked urban skyline.",
+      "companyInfo": "Precision tech\nmanufacturing corp.\nMicroprocessor and\nrobotics systems\nproduction leader."
     },
     {
       "id": "LUM_CEO",
@@ -83,7 +87,7 @@
       "name": "Elara Sunvale",
       "company": "LumaCore Energy",
       "role": "Founder & CEO",
-      "profile": "Ambassador of light and energy - an idealist leader who literally illuminates the future.",
+      "profile": "Ambassador of light\nand energy - an\nidealist leader who\nliterally illuminates\nthe future.",
       "appearance": "White and gold attire surrounded by a soft luminescent aura, her eyes radiate pure light instead of lenses.",
       "mood": "Radiant, optimistic",
       "colorTheme": ["#FFD54F", "#FFB74D", "#FFFFFF"],
@@ -94,7 +98,8 @@
         "greed": 4,
         "honor": 10
       },
-      "style": "High-tech visionary, gold-white holographic light, luminous environment."
+      "style": "High-tech visionary, gold-white holographic light, luminous environment.",
+      "companyInfo": "Premium energy\nsolutions provider.\nLuminescent crystal\nharvesting and\nshield technology."
     }
   ]
 }

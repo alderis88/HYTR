@@ -13,7 +13,7 @@
       "stackReplenishment": 20,
       "sellStackRatio": 0.7,
       "maxQuantity": 1000,
-      "productInfo": "High-volume industrial mineral essential for starship hull construction. Common rarity makes it widely available. Base price: 50 credits. Volume: 10.0m³. Market volatility: High (0.1-2.5x multiplier). Replenishment rate: 20 units per cycle."
+      "productInfo": "Gleaming chunks of\nheavy metal that\nspark under station\nlights. The backbone\nof every starship\nhull in the galaxy."
     },
     {
       "id": "NFX",
@@ -28,7 +28,7 @@
       "stackReplenishment": 3,
       "sellStackRatio": 0.25,
       "maxQuantity": 300,
-      "productInfo": "Advanced neural enhancement compound used in AI systems and cybernetic implants. Rare material with extreme market volatility. Base price: 300 credits. Volume: 0.6m³. High player impact: 0.1. Limited supply: 3 units per cycle. Price range: 0.3-3.0x multiplier."
+      "productInfo": "Shimmering blue\nserum that pulses\nwith electric energy.\nOne drop can enhance\na cyborg's reflexes\nbeyond human limits."
     },
     {
       "id": "ZER",
@@ -43,7 +43,7 @@
       "stackReplenishment": 30,
       "sellStackRatio": 0.5,
       "maxQuantity": 2000,
-      "productInfo": "Exotic matter with near-zero mass used in gravity manipulation technology. Normal rarity with stable pricing. Base price: 400 credits. Volume: 0.4m³. Low market volatility (0.9-1.1x). High availability: 30 units per cycle. Maximum storage: 2000 units."
+      "productInfo": "Mysterious substance\nthat seems to float\nin defiance of\ngravity. Scientists\nstill debate its\ntrue nature."
     },
     {
       "id": "LUM",
@@ -58,7 +58,7 @@
       "stackReplenishment": 2,
       "sellStackRatio": 0.35,
       "maxQuantity": 100,
-      "productInfo": "Rare luminescent crystal used in high-end energy shields and optical systems. Premium material with high value. Base price: 1000 credits. Volume: 2.5m³. Moderate player impact: 0.07. Ultra-rare supply: Only 2 units per cycle. Limited capacity: 100 units max."
+      "productInfo": "Breathtaking crystal\nthat radiates pure\nlight from within.\nLegends say it was\nborn in the heart\nof dying stars."
     },
     {
       "id": "NAN",
@@ -73,7 +73,7 @@
       "stackReplenishment": 10,
       "sellStackRatio": 0.55,
       "maxQuantity": 200,
-      "productInfo": "Advanced microprocessor technology for automated systems and robotics. Common but valuable component. Base price: 200 credits. Volume: 1.0m³. Moderate volatility (0.6-1.8x multiplier). Standard supply: 10 units per cycle. Storage limit: 200 units."
+      "productInfo": "Tiny silicon wafer\nthat hums with\nartificial intelligence.\nThe brain of every\nrobot and automated\nsystem in space."
     }
   ]
 }
