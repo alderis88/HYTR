@@ -10,6 +10,18 @@
 class Application; // Forward declaration
 
 //==============================================================================
+// Enums for UI functionality
+//==============================================================================
+
+/// @brief Inventory sort types for sorting inventory items
+enum class InventorySortType
+{
+  Volume,   // Sort by item volume
+  Value,    // Sort by item value
+  Quantity  // Sort by item quantity
+};
+
+//==============================================================================
 // ApplicationUI Class - Handles all UI initialization and management
 //==============================================================================
 
@@ -32,6 +44,7 @@ public:
   void UI_InitializeCompanyInfoContainer();
   void UI_InitializeVendorInfoContainer();
   void UI_InitializeInfoPanelSelector();
+  void UI_InitializeInventorySortSelector();
   void UI_InitializeGameTimeWidget();
   void UI_InitializeImageWidgets();
   void UI_InitializeProgressBars();
@@ -50,6 +63,9 @@ public:
 
   // Info panel selection functions
   void SelectInfoPanel(int panelIndex);
+
+  // Inventory sort selection functions
+  void SelectInventorySort(InventorySortType sortType);
 
   // Getters for UI components
   std::unique_ptr<ui::WidgetContainer>& GetRootContainer() { return m_rootContainer; }
@@ -138,6 +154,13 @@ private:
   ui::WidgetButton* m_companyInfoSelectorButton;     // Company info selector button  
   ui::WidgetButton* m_vendorInfoSelectorButton;      // Vendor info selector button
   int m_selectedInfoPanel;                           // Currently selected info panel (0=Product, 1=Company, 2=Vendor)
+
+  // Inventory sort selector container and buttons
+  ui::WidgetContainer* m_inventorySortSelectorContainer; // Container for inventory sort selector buttons
+  ui::WidgetButton* m_volumeSortButton;                  // Volume sort selector button
+  ui::WidgetButton* m_valueSortButton;                   // Value sort selector button
+  ui::WidgetButton* m_quantitySortButton;                // Quantity sort selector button
+  InventorySortType m_selectedSortType;                  // Currently selected sort type
 
   // Material Icons
   ui::WidgetImage* m_iconMaterialLumi;

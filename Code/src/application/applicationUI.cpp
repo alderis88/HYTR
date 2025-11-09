@@ -59,6 +59,11 @@ ApplicationUI::ApplicationUI()
 	, m_companyInfoSelectorButton(nullptr)
 	, m_vendorInfoSelectorButton(nullptr)
 	, m_selectedInfoPanel(0) // Default to Product info panel
+	, m_inventorySortSelectorContainer(nullptr)
+	, m_volumeSortButton(nullptr)
+	, m_valueSortButton(nullptr)
+	, m_quantitySortButton(nullptr)
+	, m_selectedSortType(InventorySortType::Volume) // Default to Volume sort
 	, m_rollingText1Position(1920.0f) // Start off-screen to the right
 	, m_rollingText2Position(3940.0f) // Start off-screen with offset (1920 + 960)
 	, m_rollingSpeed(100.0f) // 100 pixels per second
@@ -117,6 +122,7 @@ void ApplicationUI::InitializeContainersUI()
 	UI_InitializeMonitorMenuContainer();   // 5 trading monitor displays with click handlers
 	UI_InitializeTradeContainer();         // Trade confirm/cancel buttons
 	UI_InitializeInventoryContainer();     // Inventory container (bottom left)
+	UI_InitializeInventorySortSelector();  // Inventory sort selector buttons (above inventory container)
 	UI_InitializeProductInfoContainer();   // Product info container (bottom right)
 	UI_InitializeCompanyInfoContainer();   // Company info container (bottom right)
 	UI_InitializeVendorInfoContainer();    // Vendor info container (bottom right)
@@ -414,6 +420,56 @@ void ApplicationUI::UI_InitializeInventoryContainer()
 	}
 	m_volumeProgressBar = volumeProgressBar.get();
 	m_inventoryContainer->AddWidget(std::move(volumeProgressBar));
+}
+
+/// @brief Initialize the inventory sort selector with 3 toggle buttons
+/// @details Creates a horizontal container with Volume, Value, and Quantity buttons
+///          that switch between different inventory sorting modes. Only one button
+///          can be selected at a time, with the selected button showing a different background.
+///          Position: Above the inventory container (bottom left area)
+void ApplicationUI::UI_InitializeInventorySortSelector()
+{
+	// Create inventory sort selector container (small horizontal container above inventory)
+	auto inventorySortSelectorContainer = std::make_unique<ui::WidgetContainer>(30, 550, 550, 50);
+	inventorySortSelectorContainer->SetLayout(ui::LayoutType::Native); // Manual positioning for precise control
+	m_inventorySortSelectorContainer = inventorySortSelectorContainer.get(); // Store raw pointer for later access
+	m_rootContainer->AddWidget(std::move(inventorySortSelectorContainer));
+
+	// === Volume Sort Button ===
+	auto volumeSortButton = std::make_unique<ui::WidgetButton>(0, 0, 180, 50);
+	volumeSortButton->LoadImage("ButtonMain2.png"); // Default button background
+	volumeSortButton->SetText("VOLUME");
+	volumeSortButton->SetTextColor(sf::Color::White);
+	volumeSortButton->SetOnClickCallback([this]() {
+		SelectInventorySort(InventorySortType::Volume); // Select Volume sort
+		});
+	m_volumeSortButton = volumeSortButton.get();
+	m_inventorySortSelectorContainer->AddWidget(std::move(volumeSortButton));
+
+	// === Value Sort Button ===
+	auto valueSortButton = std::make_unique<ui::WidgetButton>(185, 0, 180, 50);
+	valueSortButton->LoadImage("ButtonMain2.png"); // Default button background
+	valueSortButton->SetText("VALUE");
+	valueSortButton->SetTextColor(sf::Color::White);
+	valueSortButton->SetOnClickCallback([this]() {
+		SelectInventorySort(InventorySortType::Value); // Select Value sort
+		});
+	m_valueSortButton = valueSortButton.get();
+	m_inventorySortSelectorContainer->AddWidget(std::move(valueSortButton));
+
+	// === Quantity Sort Button ===
+	auto quantitySortButton = std::make_unique<ui::WidgetButton>(370, 0, 180, 50);
+	quantitySortButton->LoadImage("ButtonMain2.png"); // Default button background
+	quantitySortButton->SetText("QUANTITY");
+	quantitySortButton->SetTextColor(sf::Color::White);
+	quantitySortButton->SetOnClickCallback([this]() {
+		SelectInventorySort(InventorySortType::Quantity); // Select Quantity sort
+		});
+	m_quantitySortButton = quantitySortButton.get();
+	m_inventorySortSelectorContainer->AddWidget(std::move(quantitySortButton));
+
+	// Set initial selection to Volume (default)
+	SelectInventorySort(InventorySortType::Volume);
 }
 
 /// @brief Initialize the product info container in the bottom right corner
@@ -1311,6 +1367,50 @@ void ApplicationUI::SelectInfoPanel(int panelIndex) {
 	if (m_vendorInfoContainer) {
 		m_vendorInfoContainer->SetVisible(monitorSelected && panelIndex == 2);
 	}
+}
+
+/// @brief Select an inventory sort type and update button states
+/// @param sortType The inventory sort type to select (Volume, Value, or Quantity)
+/// @details This function switches between the three inventory sorting modes and updates the
+///          selector button states. The selected button gets a different background
+///          (BgInventory.png) and calls the inventory sorting function with the selected type.
+void ApplicationUI::SelectInventorySort(InventorySortType sortType) {
+	// Update selected sort type
+	m_selectedSortType = sortType;
+
+	// Reset all selector buttons to default state (ButtonMain2.png)
+	if (m_volumeSortButton) {
+		m_volumeSortButton->LoadImage("ButtonMain2.png");
+	}
+	if (m_valueSortButton) {
+		m_valueSortButton->LoadImage("ButtonMain2.png");
+	}
+	if (m_quantitySortButton) {
+		m_quantitySortButton->LoadImage("ButtonMain2.png");
+	}
+
+	// Set selected button to pressed state (BgInventory.png)
+	switch (sortType) {
+	case InventorySortType::Volume:
+		if (m_volumeSortButton) {
+			m_volumeSortButton->LoadImage("BgInventory.png");
+		}
+		break;
+	case InventorySortType::Value:
+		if (m_valueSortButton) {
+			m_valueSortButton->LoadImage("BgInventory.png");
+		}
+		break;
+	case InventorySortType::Quantity:
+		if (m_quantitySortButton) {
+			m_quantitySortButton->LoadImage("BgInventory.png");
+		}
+		break;
+	}
+
+	// TODO: Call inventory sorting function with selected sort type
+	// This will be implemented later when inventory system is ready
+	// SortInventoryItems(sortType);
 }
 
 /// @brief Load initial news content into rolling text widgets
