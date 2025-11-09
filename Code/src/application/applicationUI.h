@@ -61,7 +61,7 @@ public:
   void UpdateInventoryVerticalButtons();
 
   void UpdateApplicationUI( sf::Time delta);
-  
+
   // Monitor selection functions
   void SelectMonitor(int monitorIndex);
   void CancelSelection();
@@ -72,11 +72,13 @@ public:
 
   // Inventory sort selection functions
   void SelectInventorySort(InventorySortType sortType);
+  InventorySortType GetSelectedSortType() const { return m_selectedSortType; }
 
 
   // Getters for UI components
   std::unique_ptr<ui::WidgetContainer>& GetRootContainer() { return m_rootContainer; }
   ui::WidgetContainer* GetMonitorMenuContainer() const { return m_monitorMenuContainer; }
+  ui::WidgetContainer* GetMonitor1Container() const { return m_monitor1Container; }
   ui::WidgetContainer* GetTradeContainer() const { return m_tradeContainer; }
   ui::WidgetContainer* GetInventoryContainer() const { return m_inventoryContainer; }
   ui::WidgetContainer* GetProductInfoContainer() const { return m_productInfoContainer; }
@@ -145,7 +147,7 @@ private:
   ui::WidgetContainer* m_monitor3Container;
   ui::WidgetContainer* m_monitor4Container;
   ui::WidgetContainer* m_monitor5Container;
-  
+
   // Monitor buttons for selection management
   ui::WidgetButton* m_monitorButtons[5];     // Array of monitor buttons for selection
   ui::WidgetImage* m_monitorHighlights[5];  // Array of purple highlight overlays for selected monitors
@@ -159,7 +161,7 @@ private:
   // Info panel selector container and buttons
   ui::WidgetContainer* m_infoPanelSelectorContainer; // Container for info panel selector buttons
   ui::WidgetButton* m_productInfoSelectorButton;     // Product info selector button
-  ui::WidgetButton* m_companyInfoSelectorButton;     // Company info selector button  
+  ui::WidgetButton* m_companyInfoSelectorButton;     // Company info selector button
   ui::WidgetButton* m_vendorInfoSelectorButton;      // Vendor info selector button
   int m_selectedInfoPanel;                           // Currently selected info panel (0=Product, 1=Company, 2=Vendor)
 
@@ -193,7 +195,7 @@ private:
   ui::WidgetText* m_volumeText;              // Volume text in inventory container
   ui::WidgetProgressBar* m_volumeProgressBar; // Volume progress bar in inventory container
   ui::WidgetContainer* m_inventoryProductsContainer; // Vertical container for inventory products
-  
+
   // Inventory button containers (1-5)
   ui::WidgetContainer* m_inventoryButton1Container;  // Container for inventory button 1
   ui::WidgetContainer* m_inventoryButton2Container;  // Container for inventory button 2
@@ -238,7 +240,7 @@ private:
   ui::WidgetText* m_companyNameText;         // Company name text in company info container
   ui::WidgetText* m_companyInfoText;         // Company detailed info text in company info container
   ui::WidgetImage* m_companyLogo;            // Company logo image in company info container
- 
+
   // Vendor info container widgets
   ui::WidgetText* m_vendorInfoText;           // Vendor info text in vendor info container
   ui::WidgetText* m_vendorNameText;           // Vendor name text in vendor info container

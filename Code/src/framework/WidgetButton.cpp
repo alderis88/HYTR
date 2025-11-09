@@ -122,7 +122,17 @@ namespace ui
     m_text.setFillColor(color);
   }
 
+  void WidgetButton::UpdatePosition()
+  {
+    // Call parent UpdatePosition first
+    WidgetImage::UpdatePosition();
 
+    // Re-center text after position update
+    if (!m_text.getString().isEmpty())
+    {
+      SetText(m_text.getString());
+    }
+  }
 
   bool WidgetButton::IsHovered() const
   {

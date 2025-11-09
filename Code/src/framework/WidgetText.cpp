@@ -9,6 +9,11 @@ namespace ui
     , m_hasCustomFont(false)
     , m_alignment(Alignment::Left)
     , m_textString(text)
+    , m_fadingEnabled(false)
+    , m_fadeDirection(true)
+    , m_fadingSpeed(255.0f)  // Default: 255 alpha/second (1 second for full fade)
+    , m_currentAlpha(255.0f)
+    , m_originalColor(sf::Color::White)
   {
     std::string fullPath = Application::s_assetsPath + "FontBasic.ttf";
 
@@ -19,7 +24,8 @@ namespace ui
     }
 
     // Set default text properties
-    m_text.setFillColor(sf::Color::White);
+    m_originalColor = sf::Color::White;
+    m_text.setFillColor(m_originalColor);
     m_text.setCharacterSize(24);
     m_text.setStyle(sf::Text::Regular);
 
@@ -38,10 +44,43 @@ namespace ui
 
   void WidgetText::Draw(RenderContext& context) const
   {
-    // Only draw if we have a valid font
-    if (m_text.getFont() != nullptr)
+    // Only draw if we have a valid font and widget is visible
+    if (m_text.getFont() != nullptr && IsVisible())
     {
       context.draw(m_text);
+    }
+  }
+
+  void WidgetText::Update(float deltaTime)
+  {
+    if (m_fadingEnabled)
+    {
+      // Calculate alpha change based on speed and time
+      float alphaChange = m_fadingSpeed * deltaTime;
+
+      if (m_fadeDirection)
+      {
+        // Fade in
+        m_currentAlpha += alphaChange;
+        if (m_currentAlpha >= 255.0f)
+        {
+          m_currentAlpha = 255.0f;
+          m_fadingEnabled = false; // Stop fading when fully visible
+        }
+      }
+      else
+      {
+        // Fade out
+        m_currentAlpha -= alphaChange;
+        if (m_currentAlpha <= 0.0f)
+        {
+          m_currentAlpha = 0.0f;
+          m_fadingEnabled = false; // Stop fading when fully transparent
+        }
+      }
+
+      // Update the text alpha
+      UpdateTextAlpha();
     }
   }
 
@@ -58,10 +97,10 @@ namespace ui
       // ApplicationUpdate position based on alignment
       ApplicationUpdateTextPosition();
   }
-  
+
 
   void WidgetText::SetFont(const sf::Font& font)
-  {  
+  {
     m_text.setFont(font);
     m_hasCustomFont = true;
 
@@ -74,7 +113,10 @@ namespace ui
 
   void WidgetText::SetTextColor(const sf::Color& color)
   {
+    m_originalColor = color;
     m_text.setFillColor(color);
+    // Update current alpha to match new color
+    m_currentAlpha = static_cast<float>(color.a);
   }
 
   void WidgetText::SetCharacterSize(unsigned int size)
@@ -169,6 +211,92 @@ namespace ui
   {
     // Called when position is changed by container - update SFML text position
     ApplicationUpdateTextPosition();
+  }
+
+  // Fading functionality implementation
+  void WidgetText::SetFadingEnabled(bool enabled)
+  {
+    m_fadingEnabled = enabled;
+  }
+
+  void WidgetText::SetFadingSpeed(float durationSeconds)
+  {
+    // Convert duration in seconds to alpha change per second
+    if (durationSeconds > 0.0f)
+    {
+      m_fadingSpeed = 255.0f / durationSeconds;
+    }
+    else
+    {
+      m_fadingSpeed = 255.0f; // Default 1 second
+    }
+  }
+
+  void WidgetText::SetFadeDirection(bool fadeIn)
+  {
+    m_fadeDirection = fadeIn;
+  }
+
+  void WidgetText::StartFading(bool fadeIn, float durationSeconds)
+  {
+    m_fadeDirection = fadeIn;
+
+    // Convert duration in seconds to alpha change per second
+    if (durationSeconds > 0.0f)
+    {
+      m_fadingSpeed = 255.0f / durationSeconds;
+    }
+    else
+    {
+      m_fadingSpeed = 255.0f; // Default 1 second
+    }
+
+    m_fadingEnabled = true;
+
+    // Set starting alpha based on fade direction
+    if (fadeIn)
+    {
+      m_currentAlpha = 0.0f; // Start transparent for fade in
+    }
+    else
+    {
+      m_currentAlpha = 255.0f; // Start opaque for fade out
+    }
+
+    UpdateTextAlpha();
+  }
+
+  void WidgetText::StopFading()
+  {
+    m_fadingEnabled = false;
+  }
+
+  bool WidgetText::IsFading() const
+  {
+    return m_fadingEnabled;
+  }
+
+  float WidgetText::GetCurrentAlpha() const
+  {
+    return m_currentAlpha;
+  }
+
+  void WidgetText::UpdateTextAlpha()
+  {
+    // Create new color with updated alpha while preserving RGB
+    sf::Color newColor = m_originalColor;
+    newColor.a = static_cast<sf::Uint8>(m_currentAlpha);
+    m_text.setFillColor(newColor);
+  }
+
+  void WidgetText::FadeShow(float durationSeconds)
+  {
+    StartFading(true, durationSeconds);  // Fade in (show)
+  }
+
+  void WidgetText::FadeHide(float durationSeconds)
+  {
+    StartFading(false, durationSeconds); // Fade out (hide)
   }
 
 }

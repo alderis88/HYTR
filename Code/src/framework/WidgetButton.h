@@ -15,6 +15,7 @@ namespace ui
     // Widget interface implementation
     virtual InputEventState ProcessInput(const InputEvent& event) override;
     virtual void Draw(RenderContext& context) const override;
+    virtual void UpdatePosition() override;
 
     // Button specific methods
     void SetText(const std::string& text);

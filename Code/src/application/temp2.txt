@@ -1,0 +1,112 @@
+﻿				DebugLog(std::string("Inventory sort changed to: ") + sortName, DebugType::Message);
+			}
+		}
+		else if (event.type == InputEvent::KeyPressed)
+		{
+			// Test trading hotkeys: 1-5 to buy, Shift+1-5 to sell
+			bool isShiftPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) || sf::Keyboard::isKeyPressed(sf::Keyboard::RShift);
+
+			if (event.key.code >= sf::Keyboard::Num1 && event.key.code <= sf::Keyboard::Num5)
+			{
+				HandleTestTrading(event.key.code, isShiftPressed);
+			}
+			else
+			{
+				// Forward all other input events to UI widget system for processing
+				if (m_rootWidgetContainer)
+				{
+					m_rootWidgetContainer->ProcessInput(event);
+				}
+			}
+		}
+		else
+		{
+			// Forward all other input events to UI widget system for processing
+			if (m_rootWidgetContainer)
+			{
+				m_rootWidgetContainer->ProcessInput(event);
+			}
+		}
+	}
+}
+
+/// @brief Gets pointer to the main application window
+/// @return Pointer to the main UI window object, or nullptr if not initialized
+/// Used by subsystems that need access to the main window for UI operations
+ui::Window* Application::GetMainWindow() const
+{
+	return m_mainWindow.get();
+}
+
+/// @brief Get access to the player inventory system
+/// @return Pointer to the player inventory object, or nullptr if not initialized
+/// Used by subsystems that need to modify or query player inventory
+Inventory* Application::GetPlayerInventory() const
+{
+	return m_playerInventory.get();
+}
+
+/// @brief Get access to the application UI system
+/// @return Pointer to the application UI object, or nullptr if not initialized
+/// Used by subsystems that need to update UI displays
+ApplicationUI* Application::GetApplicationUI() const
+{
+	return m_applicationUI.get();
+}
+
+/// @brief Handle test trading functionality with keyboard shortcuts
+/// @param key The keyboard key pressed (Num1-Num5)
+/// @param isShiftPressed Whether Shift key is held down
+/// @details Keys 1-5 buy 1 unit, Shift+1-5 sell 1 unit of corresponding products:
+///          1/Shift+1 = TRI (Tritanium), 2/Shift+2 = NFX (Neuroflux), 3/Shift+3 = ZER (Zeromass),
+///          4/Shift+4 = LUM (Lumirite), 5/Shift+5 = NAN (Nanochip)
+void Application::HandleTestTrading(sf::Keyboard::Key key, bool isShiftPressed)
+{
+	// Safety checks
+	if (!m_playerInventory || !m_stockMarket)
+		return;
+
+	// Map keyboard keys to product IDs
+	std::string productIds[5] = { "TRI", "NFX", "ZER", "LUM", "NAN" };
+	std::string productNames[5] = { "Tritanium", "Neuroflux", "Zeromass", "Lumirite", "Nanochip" };
+
+	// Convert key to array index (Num1=0, Num2=1, etc.)
+	int productIndex = static_cast<int>(key) - static_cast<int>(sf::Keyboard::Num1);
+
+	if (productIndex < 0 || productIndex >= 5)
+		return;
+
+	const std::string& productId = productIds[productIndex];
+	const std::string& productName = productNames[productIndex];
+
+	if (isShiftPressed)
+	{
+		// Shift+Number: Sell 1 unit using StockMarket
+		uint32_t currentQuantity = m_playerInventory->GetProductQuantity(productId);
+		if (currentQuantity > 0)
+		{
+			m_stockMarket->SellForStock(productId, 1);
+			uint32_t remainingQuantity = m_playerInventory->GetProductQuantity(productId);
+			DebugLog("TEST SELL: Sold 1 " + productName + " (" + productId + ") to market. Remaining: " + std::to_string(remainingQuantity), DebugType::Message);
+		}
+		else
+		{
+			DebugLog("TEST SELL: Cannot sell " + productName + " (" + productId + ") - no units in inventory!", DebugType::Warning);
+		}
+	}
+	else
+	{
+		// Number only: Buy 1 unit using StockMarket
+		bool success = m_stockMarket->BuyFromStock(productId, 1);
+		if (success)
+		{
+			uint32_t newQuantity = m_playerInventory->GetProductQuantity(productId);
+			DebugLog("TEST BUY: Bought 1 " + productName + " (" + productId + ") from market. Total: " + std::to_string(newQuantity), DebugType::Message);
+		}
+		else
+		{
+			DebugLog("TEST BUY: Cannot buy " + productName + " (" + productId + ") - not enough stock or funds!", DebugType::Warning);
+		}
+	}
+
+

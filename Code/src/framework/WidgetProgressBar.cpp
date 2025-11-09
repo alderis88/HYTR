@@ -13,6 +13,7 @@ namespace ui
         , m_borderColor(sf::Color::Black)
         , m_textColor(sf::Color::White)
         , m_borderThickness(2.0f)
+        , m_borderEnabled(true)
         , m_showPercentage(true)
         , m_showText(true)
         , m_suffix(suffix)
@@ -48,7 +49,7 @@ namespace ui
         }
 
         // Draw border
-        if (m_borderThickness > 0.0f)
+        if (m_borderEnabled && m_borderThickness > 0.0f)
         {
             context.draw(m_borderRect);
         }
@@ -89,6 +90,11 @@ namespace ui
     void WidgetProgressBar::SetBorderThickness(float thickness)
     {
         m_borderThickness = thickness;
+    }
+
+    void WidgetProgressBar::SetBorderEnabled(bool enabled)
+    {
+        m_borderEnabled = enabled;
     }
 
     void WidgetProgressBar::SetShowPercentage(bool show)

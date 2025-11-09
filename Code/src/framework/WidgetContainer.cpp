@@ -15,11 +15,15 @@ namespace ui
 
   InputEventState WidgetContainer::ProcessInput(const InputEvent& event)
   {
-    // Process input for all children, starting from the last added (top-most)
+    // Only process input if this container is visible
+    if (!IsVisible())
+      return InputEventState::Unhandled;
+
+    // Process input for all visible children, starting from the last added (top-most)
     // This allows for proper event handling in cases of overlapping widgets
     for (auto it = m_children.rbegin(); it != m_children.rend(); ++it)
     {
-      if ((*it)->ProcessInput(event) == InputEventState::Handled)
+      if ((*it)->IsVisible() && (*it)->ProcessInput(event) == InputEventState::Handled)
       {
         return InputEventState::Handled;
       }
@@ -29,17 +33,24 @@ namespace ui
 
   void WidgetContainer::Draw(RenderContext& context) const
   {
-    // Draw all children in order (first added = bottom-most)
+    // Only draw if this container is visible
+    if (!IsVisible())
+      return;
+
+    // Draw all visible children in order (first added = bottom-most)
     for (const auto& child : m_children)
     {
-      child->Draw(context);
+      if (child->IsVisible())
+      {
+        child->Draw(context);
+      }
     }
 
     // Draw debug bounds if enabled (after children so it's always visible on top)
     if (m_debugDraw)
     {
-      sf::RectangleShape debugRect(sf::Vector2f(static_cast<float>(GetWidth()), static_cast<float>(GetHeight())));
-      debugRect.setPosition(static_cast<float>(GetPosAbsX()), static_cast<float>(GetPosAbsY()));
+      sf::RectangleShape debugRect(sf::Vector2f(static_cast<float>(GetWidth()-2), static_cast<float>(GetHeight()-2)));
+      debugRect.setPosition(static_cast<float>(GetPosAbsX()+1), static_cast<float>(GetPosAbsY())+1);
       debugRect.setFillColor(sf::Color::Transparent);
       debugRect.setOutlineColor(m_debugColor);
       debugRect.setOutlineThickness(1.0f);

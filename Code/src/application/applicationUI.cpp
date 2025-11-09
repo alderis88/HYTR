@@ -372,12 +372,12 @@ void ApplicationUI::UI_InitializeTradeContainer()
 	currentMoneyText->SetStyle(sf::Text::Bold);
 	currentMoneyText->SetAlignment(ui::WidgetText::Alignment::Center);
 	currentMoneyText->SetTextColor(sf::Color::Yellow);
-	
+
 	// Set font if available
 	if (m_digitalFont.getInfo().family != "") {
 		currentMoneyText->SetFont(m_digitalFont);
 	}
-	
+
 	m_currentMoneyText = currentMoneyText.get();
 	m_tradeContainer->AddWidget(std::move(currentMoneyText));
 
@@ -627,6 +627,10 @@ void ApplicationUI::UI_InitializeInventorySortSelector()
 	volumeSortButton->LoadImage("ButtonMain2.png"); // Default button background
 	volumeSortButton->SetText("VOLUME");
 	volumeSortButton->SetTextColor(sf::Color::White);
+	// Set font if digital font is loaded
+	if (m_digitalFont.getInfo().family != "") {
+		volumeSortButton->SetFont(m_digitalFont);
+	}
 	volumeSortButton->SetOnClickCallback([this]() {
 		SelectInventorySort(InventorySortType::Volume); // Select Volume sort
 		});
@@ -638,6 +642,10 @@ void ApplicationUI::UI_InitializeInventorySortSelector()
 	quantitySortButton->LoadImage("ButtonMain2.png"); // Default button background
 	quantitySortButton->SetText("QUANTITY");
 	quantitySortButton->SetTextColor(sf::Color::White);
+	// Set font if digital font is loaded
+	if (m_digitalFont.getInfo().family != "") {
+		quantitySortButton->SetFont(m_digitalFont);
+	}
 	quantitySortButton->SetOnClickCallback([this]() {
 		SelectInventorySort(InventorySortType::Quantity); // Select Quantity sort
 		});
@@ -703,7 +711,7 @@ void ApplicationUI::UI_InitializeProductInfoContainer()
  m_productRarityText = productRarityText.get();
  m_productInfoContainer->AddWidget(std::move(productRarityText));
 
-   // Add product info text
+	 // Add product info text
  auto productInfoText = std::make_unique<ui::WidgetText>(50, 200, "PI: None ");
  productInfoText->SetCharacterSize(18);
  productInfoText->SetTextColor(sf::Color::White);
@@ -762,7 +770,7 @@ void ApplicationUI::UI_InitializeCompanyInfoContainer()
 	m_companyLogo = companyLogo.get();
 	m_companyInfoContainer->AddWidget(std::move(companyLogo));
 
-  // // Initially hide company info container until a monitor is selected
+	// // Initially hide company info container until a monitor is selected
 	m_companyInfoContainer->SetVisible(false);
 }
 
@@ -774,54 +782,54 @@ void ApplicationUI::UI_InitializeCompanyInfoContainer()
 ///          Position: bottom right corner of the screen (same as company info)
 void ApplicationUI::UI_InitializeVendorInfoContainer()
 {
-	  // Create vendor info container in bottom right corner (550x450 pixels)
-	  auto vendorInfoContainer = std::make_unique<ui::WidgetContainer>(1340, 600, 550, 450);
-	  vendorInfoContainer->SetLayout(ui::LayoutType::Native); // Manual positioning for precise control
-	  m_vendorInfoContainer = vendorInfoContainer.get(); // Store raw pointer for later access
-	  m_rootContainer->AddWidget(std::move(vendorInfoContainer));
+		// Create vendor info container in bottom right corner (550x450 pixels)
+		auto vendorInfoContainer = std::make_unique<ui::WidgetContainer>(1340, 600, 550, 450);
+		vendorInfoContainer->SetLayout(ui::LayoutType::Native); // Manual positioning for precise control
+		m_vendorInfoContainer = vendorInfoContainer.get(); // Store raw pointer for later access
+		m_rootContainer->AddWidget(std::move(vendorInfoContainer));
 
-	  // Add background for vendor info container
-	  auto vendorInfoBackground = std::make_unique<ui::WidgetImage>(0, 0, 550, 450, "BgInventory.png");
-	  m_vendorInfoContainer->AddWidget(std::move(vendorInfoBackground));
+		// Add background for vendor info container
+		auto vendorInfoBackground = std::make_unique<ui::WidgetImage>(0, 0, 550, 450, "BgInventory.png");
+		m_vendorInfoContainer->AddWidget(std::move(vendorInfoBackground));
 
-	  // Add vendor info title text
-	  auto vendorInfoTitle = std::make_unique<ui::WidgetText>(275, 40, "VENDOR INFO");
-	  vendorInfoTitle->SetCharacterSize(24);
-	  vendorInfoTitle->SetStyle(sf::Text::Bold);
-	  vendorInfoTitle->SetAlignment(ui::WidgetText::Alignment::Center);
-	  vendorInfoTitle->SetTextColor(sf::Color::White);
-	  m_vendorInfoContainer->AddWidget(std::move(vendorInfoTitle));
+		// Add vendor info title text
+		auto vendorInfoTitle = std::make_unique<ui::WidgetText>(275, 40, "VENDOR INFO");
+		vendorInfoTitle->SetCharacterSize(24);
+		vendorInfoTitle->SetStyle(sf::Text::Bold);
+		vendorInfoTitle->SetAlignment(ui::WidgetText::Alignment::Center);
+		vendorInfoTitle->SetTextColor(sf::Color::White);
+		m_vendorInfoContainer->AddWidget(std::move(vendorInfoTitle));
 
-	  // Add vendor character image
-	  auto vendorImage = std::make_unique<ui::WidgetImage>(300, 80, 200, 300, "CharacterNano.png");
-	  m_vendorImage = vendorImage.get();
-	  m_vendorInfoContainer->AddWidget(std::move(vendorImage));
+		// Add vendor character image
+		auto vendorImage = std::make_unique<ui::WidgetImage>(300, 80, 200, 300, "CharacterNano.png");
+		m_vendorImage = vendorImage.get();
+		m_vendorInfoContainer->AddWidget(std::move(vendorImage));
 
-	  // Add vendor name text widget
-	  auto vendorNameText = std::make_unique<ui::WidgetText>(50, 80, "Vendor Name");
-	  vendorNameText->SetCharacterSize(18);
-	  vendorNameText->SetTextColor(sf::Color::White);
-	  vendorNameText->SetStyle(sf::Text::Bold);
-	  m_vendorNameText = vendorNameText.get();
-	  m_vendorInfoContainer->AddWidget(std::move(vendorNameText));
+		// Add vendor name text widget
+		auto vendorNameText = std::make_unique<ui::WidgetText>(50, 80, "Vendor Name");
+		vendorNameText->SetCharacterSize(18);
+		vendorNameText->SetTextColor(sf::Color::White);
+		vendorNameText->SetStyle(sf::Text::Bold);
+		m_vendorNameText = vendorNameText.get();
+		m_vendorInfoContainer->AddWidget(std::move(vendorNameText));
 
-	  // Add vendor role text
-	  auto vendorRoleText = std::make_unique<ui::WidgetText>(50, 120, "Role: ");
-	  vendorRoleText->SetCharacterSize(18);
-	  vendorRoleText->SetTextColor(sf::Color::White);
-	  vendorRoleText->SetStyle(sf::Text::Bold);
-	  m_vendorRoleText = vendorRoleText.get();
-	  m_vendorInfoContainer->AddWidget(std::move(vendorRoleText));
+		// Add vendor role text
+		auto vendorRoleText = std::make_unique<ui::WidgetText>(50, 120, "Role: ");
+		vendorRoleText->SetCharacterSize(18);
+		vendorRoleText->SetTextColor(sf::Color::White);
+		vendorRoleText->SetStyle(sf::Text::Bold);
+		m_vendorRoleText = vendorRoleText.get();
+		m_vendorInfoContainer->AddWidget(std::move(vendorRoleText));
 
-	  // Add vendor profile text widget (multi-line description)
-	  auto vendorProfileText = std::make_unique<ui::WidgetText>(50, 170, "Vendor Profile");
-	  vendorProfileText->SetCharacterSize(18);
-	  vendorProfileText->SetTextColor(sf::Color::White);
-	  m_vendorProfileText = vendorProfileText.get();
-	  m_vendorInfoContainer->AddWidget(std::move(vendorProfileText));
+		// Add vendor profile text widget (multi-line description)
+		auto vendorProfileText = std::make_unique<ui::WidgetText>(50, 170, "Vendor Profile");
+		vendorProfileText->SetCharacterSize(18);
+		vendorProfileText->SetTextColor(sf::Color::White);
+		m_vendorProfileText = vendorProfileText.get();
+		m_vendorInfoContainer->AddWidget(std::move(vendorProfileText));
 
-	  // Initially hide vendor info container until a monitor is selected
-	  m_vendorInfoContainer->SetVisible(false);
+		// Initially hide vendor info container until a monitor is selected
+		m_vendorInfoContainer->SetVisible(false);
 }
 
 /// @brief Initialize the info panel selector with 3 toggle buttons
@@ -842,6 +850,9 @@ void ApplicationUI::UI_InitializeInfoPanelSelector()
 	productInfoSelectorButton->LoadImage("ButtonMain2.png"); // Default button background
 	productInfoSelectorButton->SetText("PRODUCT");
 	productInfoSelectorButton->SetTextColor(sf::Color::White);
+	if (m_digitalFont.getInfo().family != "") {
+		productInfoSelectorButton->SetFont(m_digitalFont);
+	}
 	productInfoSelectorButton->SetOnClickCallback([this]() {
 		SelectInfoPanel(0); // Select Product info panel
 		});
@@ -853,6 +864,9 @@ void ApplicationUI::UI_InitializeInfoPanelSelector()
 	companyInfoSelectorButton->LoadImage("ButtonMain2.png"); // Default button background
 	companyInfoSelectorButton->SetText("COMPANY");
 	companyInfoSelectorButton->SetTextColor(sf::Color::White);
+	if (m_digitalFont.getInfo().family != "") {
+		companyInfoSelectorButton->SetFont(m_digitalFont);
+	}
 	companyInfoSelectorButton->SetOnClickCallback([this]() {
 		SelectInfoPanel(1); // Select Company info panel
 		});
@@ -864,6 +878,9 @@ void ApplicationUI::UI_InitializeInfoPanelSelector()
 	vendorInfoSelectorButton->LoadImage("ButtonMain2.png"); // Default button background
 	vendorInfoSelectorButton->SetText("VENDOR");
 	vendorInfoSelectorButton->SetTextColor(sf::Color::White);
+	if (m_digitalFont.getInfo().family != "") {
+		vendorInfoSelectorButton->SetFont(m_digitalFont);
+	}
 	vendorInfoSelectorButton->SetOnClickCallback([this]() {
 		SelectInfoPanel(2); // Select Vendor info panel
 		});
@@ -872,7 +889,7 @@ void ApplicationUI::UI_InitializeInfoPanelSelector()
 
 	// Set initial selection to Product (index 0)
 	SelectInfoPanel(0);
-	
+
 	// Initially hide info panel selector until a monitor is selected
 	m_infoPanelSelectorContainer->SetVisible(false);
 }
@@ -962,8 +979,8 @@ void ApplicationUI::UI_InitializeImageWidgets()
 	// Trend Images - Arrow indicators for up/down trends (32x32 pixels)
 	// Create trend arrows for all monitor containers
 	ui::WidgetContainer* monitorContainers[] = {
-	  m_monitor1Container, m_monitor2Container, m_monitor3Container,
-	  m_monitor4Container, m_monitor5Container
+		m_monitor1Container, m_monitor2Container, m_monitor3Container,
+		m_monitor4Container, m_monitor5Container
 	};
 
 	for (int i = 0; i < 5; ++i)
@@ -1373,7 +1390,7 @@ void ApplicationUI::SelectMonitor(int monitorIndex) {
 				std::string productImageFile;
 				switch (monitorIndex) {
 				case 0: productImageFile = "IconMaterialTritanium.png"; break;  // TRI
-				case 1: productImageFile = "IconMaterialNeuro.png"; break;      // NFX  
+				case 1: productImageFile = "IconMaterialNeuro.png"; break;      // NFX
 				case 2: productImageFile = "IconMaterialZeromass.png"; break;   // ZER
 				case 3: productImageFile = "IconMaterialLumi.png"; break;       // LUM
 				case 4: productImageFile = "IconMaterialNano.png"; break;       // NAN
@@ -1609,7 +1626,7 @@ void ApplicationUI::LoadingNewText(bool first)
 		}
 	}
 
-	// Load second news item for rolling text 2  
+	// Load second news item for rolling text 2
 	if (m_rollingText2)
 	{
 		News* secondNews = m_application->m_stockMarket->GetNextNews();
@@ -1631,10 +1648,10 @@ void ApplicationUI::UpdateCurrentMoneyDisplay()
 
 	// Get current player money from inventory
 	uint32_t currentMoney = m_application->GetPlayerInventory()->GetCurrentMoney();
-	
+
 	// Format money display with $ symbol and comma separators for readability
 	std::string moneyText = "Money: $" + std::to_string(currentMoney);
-	
+
 	// Update the text widget
 	m_currentMoneyText->SetText(moneyText);
 }
@@ -1650,7 +1667,7 @@ void ApplicationUI::UpdateInventoryVerticalButtons()
 
 	// Get player inventory products
 	const std::vector<StockProduct>& playerProducts = m_application->GetPlayerInventory()->GetPlayerProducts();
-	
+
 	// Create a copy for sorting (filter out items with 0 quantity)
 	std::vector<StockProduct> sortedProducts;
 	for (const auto& product : playerProducts)
@@ -1665,7 +1682,7 @@ void ApplicationUI::UpdateInventoryVerticalButtons()
 	if (m_selectedSortType == InventorySortType::Quantity)
 	{
 		// Sort by quantity in descending order (highest quantity first)
-		std::sort(sortedProducts.begin(), sortedProducts.end(), 
+		std::sort(sortedProducts.begin(), sortedProducts.end(),
 			[](const StockProduct& a, const StockProduct& b) {
 				return a.m_quantity > b.m_quantity;
 			});
@@ -1673,7 +1690,7 @@ void ApplicationUI::UpdateInventoryVerticalButtons()
 	else if (m_selectedSortType == InventorySortType::Volume)
 	{
 		// Sort by total volume in descending order (highest volume first)
-		std::sort(sortedProducts.begin(), sortedProducts.end(), 
+		std::sort(sortedProducts.begin(), sortedProducts.end(),
 			[](const StockProduct& a, const StockProduct& b) {
 				float volumeA = a.m_quantity * a.m_volume;
 				float volumeB = b.m_quantity * b.m_volume;
@@ -1682,21 +1699,21 @@ void ApplicationUI::UpdateInventoryVerticalButtons()
 	}
 
 	// Array of button containers, buttons, images and texts for easy access
-	ui::WidgetContainer* containers[5] = { 
+	ui::WidgetContainer* containers[5] = {
 		m_inventoryButton1Container, m_inventoryButton2Container, m_inventoryButton3Container,
-		m_inventoryButton4Container, m_inventoryButton5Container 
+		m_inventoryButton4Container, m_inventoryButton5Container
 	};
-	ui::WidgetImage* productImages[5] = { 
+	ui::WidgetImage* productImages[5] = {
 		m_inventoryButton1ProductImage, m_inventoryButton2ProductImage, m_inventoryButton3ProductImage,
-		m_inventoryButton4ProductImage, m_inventoryButton5ProductImage 
+		m_inventoryButton4ProductImage, m_inventoryButton5ProductImage
 	};
-	ui::WidgetText* volumeTexts[5] = { 
+	ui::WidgetText* volumeTexts[5] = {
 		m_inventoryButton1VolumeText, m_inventoryButton2VolumeText, m_inventoryButton3VolumeText,
-		m_inventoryButton4VolumeText, m_inventoryButton5VolumeText 
+		m_inventoryButton4VolumeText, m_inventoryButton5VolumeText
 	};
-	ui::WidgetText* quantityTexts[5] = { 
+	ui::WidgetText* quantityTexts[5] = {
 		m_inventoryButton1QuantityText, m_inventoryButton2QuantityText, m_inventoryButton3QuantityText,
-		m_inventoryButton4QuantityText, m_inventoryButton5QuantityText 
+		m_inventoryButton4QuantityText, m_inventoryButton5QuantityText
 	};
 
 	// Hide all containers first
@@ -1712,7 +1729,7 @@ void ApplicationUI::UpdateInventoryVerticalButtons()
 	for (int i = 0; i < std::min(5, (int)sortedProducts.size()); i++)
 	{
 		const StockProduct& product = sortedProducts[i];
-		
+
 		// Show container
 		if (containers[i])
 		{
@@ -1728,7 +1745,7 @@ void ApplicationUI::UpdateInventoryVerticalButtons()
 			else if (product.m_id == "ZER") imageFile = "IconMaterialZeromass.png";
 			else if (product.m_id == "LUM") imageFile = "IconMaterialLumi.png";
 			else if (product.m_id == "NAN") imageFile = "IconMaterialNano.png";
-			
+
 			productImages[i]->LoadImage(imageFile);
 		}
 
@@ -1761,7 +1778,7 @@ void ApplicationUI::SelectInventoryItemMonitor(int inventoryIndex)
 
 	// Get player inventory products
 	const std::vector<StockProduct>& playerProducts = m_application->GetPlayerInventory()->GetPlayerProducts();
-	
+
 	// Create a sorted copy matching the current inventory display order
 	std::vector<StockProduct> sortedProducts;
 	for (const auto& product : playerProducts)
@@ -1775,14 +1792,14 @@ void ApplicationUI::SelectInventoryItemMonitor(int inventoryIndex)
 	// Sort based on current sort type (same logic as UpdateInventoryVerticalButtons)
 	if (m_selectedSortType == InventorySortType::Quantity)
 	{
-		std::sort(sortedProducts.begin(), sortedProducts.end(), 
+		std::sort(sortedProducts.begin(), sortedProducts.end(),
 			[](const StockProduct& a, const StockProduct& b) {
 				return a.m_quantity > b.m_quantity;
 			});
 	}
 	else if (m_selectedSortType == InventorySortType::Volume)
 	{
-		std::sort(sortedProducts.begin(), sortedProducts.end(), 
+		std::sort(sortedProducts.begin(), sortedProducts.end(),
 			[](const StockProduct& a, const StockProduct& b) {
 				float volumeA = a.m_quantity * a.m_volume;
 				float volumeB = b.m_quantity * b.m_volume;
@@ -1799,7 +1816,7 @@ void ApplicationUI::SelectInventoryItemMonitor(int inventoryIndex)
 
 	// Map product IDs to monitor indices (same mapping as in SelectMonitor)
 	std::string productIds[5] = { "TRI", "NFX", "ZER", "LUM", "NAN" };
-	
+
 	// Find the monitor index that corresponds to this product
 	int monitorIndex = -1;
 	for (int i = 0; i < 5; i++)
