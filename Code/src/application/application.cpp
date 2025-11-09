@@ -21,8 +21,7 @@ float Application::s_previousTimeMultiplier = 1.0f;
 /// Initializes UI pointers, input mode settings, and gamepad cursor configuration
 Application::Application()
   : m_applicationUI(nullptr)
-  , m_mainMenuContainer(nullptr)
-  , m_subMenuContainer(nullptr)
+  , m_monitorMenuContainer(nullptr)
   , m_gameTimeText(nullptr)
   , m_currentInputMode(InputMode::Mouse)
   , m_gamepadCursorPosition(960.0f, 540.0f) // Center of 1920x1080 screen
@@ -73,8 +72,7 @@ void Application::Initialize()
 		m_rootWidgetContainer = std::move(m_applicationUI->GetRootContainer());
 
 		// Get UI component pointers for direct access
-		m_mainMenuContainer = m_applicationUI->GetMonitorMenuContainer();
-		m_subMenuContainer = m_applicationUI->GetSubMenuContainer();
+		m_monitorMenuContainer = m_applicationUI->GetMonitorMenuContainer();
 		m_gameTimeText = m_applicationUI->GetGameTimeText();
 	}
 }

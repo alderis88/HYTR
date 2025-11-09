@@ -15,8 +15,9 @@
 /// @details Initializes all member pointers to nullptr and sets up widget arrays for safe access
 ApplicationUI::ApplicationUI()
   : m_monitorMenuContainer(nullptr)
-  , m_subMenuContainer(nullptr)
   , m_tradeContainer(nullptr)
+  , m_inventoryContainer(nullptr)
+  , m_infoContainer(nullptr)
   , m_gameTimeText(nullptr)
   , m_rollingText1(nullptr)
   , m_rollingText2(nullptr)
@@ -32,6 +33,11 @@ ApplicationUI::ApplicationUI()
   , m_iconMaterialZeromass(nullptr)
   , m_healthProgressBar(nullptr)
   , m_energyProgressBar(nullptr)
+  , m_volumeText(nullptr)
+  , m_volumeProgressBar(nullptr)
+  , m_companyInfoImage(nullptr)
+  , m_productInfoText(nullptr)
+  , m_productVolumeText(nullptr)
   , m_confirmTradeButton(nullptr)
   , m_cancelTradeButton(nullptr)
   , m_rollingText1Position(1920.0f) // Start off-screen to the right
@@ -89,8 +95,9 @@ void ApplicationUI::InitializeContainersUI()
   UI_InitializeRootContainer();          // Full-screen root container with background
   UI_InitializeGameTimeWidget();         // Digital time display with custom font (loads fonts first)
   UI_InitializeMonitorMenuContainer();   // 5 trading monitor displays with click handlers
-  UI_InitializeSubMenuContainer();       // Additional menu buttons (expandable)
   UI_InitializeTradeContainer();         // Trade confirm/cancel buttons
+  UI_InitializeInventoryContainer();     // Inventory container (bottom left)
+  UI_InitializeInfoContainer();          // Info container (bottom right)
   UI_InitializeImageWidgets();           // Material icons and trend arrows for each monitor
   UI_InitializeProgressBars();           // Player health and energy indicators
 
@@ -275,40 +282,6 @@ void ApplicationUI::UI_InitializeMonitorMenuContainer()
   m_monitor5Container->AddWidget(std::move(highlight5));
 }
 
-/// @brief Initialize the sub menu container with additional functionality buttons
-/// @details Creates a vertical container on the left side with expandable menu buttons.
-///          Currently contains placeholder buttons for future features like:
-///          - Player inventory management
-///          - Settings and configuration
-///          - Trading history and statistics
-///          Uses vertical layout with 50px spacing between buttons
-void ApplicationUI::UI_InitializeSubMenuContainer()
-{
-  // Create left-side vertical menu container for additional game functions
-  auto menuSubContainer = std::make_unique<ui::WidgetContainer>(50, 600, 500, 600);
-  menuSubContainer->SetLayout(ui::LayoutType::Vertical, 50);  // Vertical stack with spacing
-  m_subMenuContainer = menuSubContainer.get(); // Store for future expansion
-  m_rootContainer->AddWidget(std::move(menuSubContainer));
-
-  // === Placeholder buttons for future features ===
-  // All positions are relative to the container (50, 600)
-
-  auto subMenuButton1 = std::make_unique<ui::WidgetButton>(10, 10, 300, 100);
-  subMenuButton1->LoadImage("BgInventory.png");
-  subMenuButton1->SetOnClickCallback([](){ /* TODO: Open player inventory */ });
-  m_subMenuContainer->AddWidget(std::move(subMenuButton1));
-
-  auto subMenuButton2 = std::make_unique<ui::WidgetButton>(10, 120, 200, 100);
-  subMenuButton2->LoadImage("BgInventory.png");
-  subMenuButton2->SetOnClickCallback([](){ /* TODO: Open settings menu */ });
-  m_subMenuContainer->AddWidget(std::move(subMenuButton2));
-
-  auto subMenuButton3 = std::make_unique<ui::WidgetButton>(10, 230, 200, 100);
-  subMenuButton3->LoadImage("BgInventory.png");
-  subMenuButton3->SetOnClickCallback([](){ /* TODO: Open trading history */ });
-  m_subMenuContainer->AddWidget(std::move(subMenuButton3));
-}
-
 /// @brief Initialize the trade container with confirm and cancel trade buttons
 /// @details Creates a horizontal container in the center of the screen with two trading action buttons.
 ///          Used for confirming or canceling trading operations when a monitor is selected.
@@ -361,6 +334,107 @@ void ApplicationUI::UI_InitializeTradeContainer()
   });
   m_cancelTradeButton = cancelTradeButton.get();
   m_tradeContainer->AddWidget(std::move(cancelTradeButton));
+}
+
+/// @brief Initialize the inventory container in the bottom left corner
+/// @details Creates a container for inventory management UI elements such as:
+///          - Player inventory items
+///          - Item quantities and descriptions
+///          - Drag and drop functionality for trading
+///          Position: bottom left corner of the screen
+void ApplicationUI::UI_InitializeInventoryContainer()
+{
+  // Create inventory container in bottom left corner (400x300 pixels)
+  auto inventoryContainer = std::make_unique<ui::WidgetContainer>(30, 600, 550, 400);
+  inventoryContainer->SetLayout(ui::LayoutType::Native); // Manual positioning for precise control
+  m_inventoryContainer = inventoryContainer.get(); // Store raw pointer for later access
+  m_rootContainer->AddWidget(std::move(inventoryContainer));
+
+  // Add background for inventory container
+  auto inventoryBackground = std::make_unique<ui::WidgetImage>(0, 0, 550, 400, "BgInventory.png");
+  m_inventoryContainer->AddWidget(std::move(inventoryBackground));
+
+  // Add inventory title text
+  auto inventoryTitle = std::make_unique<ui::WidgetText>(270, 35, "INVENTORY");
+  inventoryTitle->SetCharacterSize(24);
+  inventoryTitle->SetStyle(sf::Text::Bold);
+  inventoryTitle->SetAlignment(ui::WidgetText::Alignment::Center);
+  inventoryTitle->SetTextColor(sf::Color::White);
+  m_inventoryContainer->AddWidget(std::move(inventoryTitle));
+
+  // Add volume text
+  auto volumeText = std::make_unique<ui::WidgetText>(50, 330, "Volume:");
+  volumeText->SetCharacterSize(18);
+  volumeText->SetStyle(sf::Text::Bold);
+  volumeText->SetTextColor(sf::Color::White);
+  m_volumeText = volumeText.get();
+  m_inventoryContainer->AddWidget(std::move(volumeText));
+
+  // Create Volume Progress Bar (green theme) with "VOL" suffix
+  auto volumeProgressBar = std::make_unique<ui::WidgetProgressBar>(50, 355, 450, 25, " VOL");
+  volumeProgressBar->SetForegroundColor(sf::Color(20, 220, 20)); // Green
+  volumeProgressBar->SetBackgroundColor(sf::Color(64, 64, 64));   // Dark gray
+  volumeProgressBar->SetBorderColor(sf::Color::White);
+  volumeProgressBar->SetBorderThickness(2.0f);
+  volumeProgressBar->SetProgress(0.30f);  // 30% volume
+  volumeProgressBar->SetShowPercentage(true);
+  volumeProgressBar->SetTextSize(12); // Smaller text
+
+  // Set font if available
+  if (m_digitalFont.getInfo().family != "")
+  {
+    volumeProgressBar->SetFont(m_digitalFont);
+  }
+  m_volumeProgressBar = volumeProgressBar.get();
+  m_inventoryContainer->AddWidget(std::move(volumeProgressBar));
+}
+
+/// @brief Initialize the info container in the bottom right corner
+/// @details Creates a container for displaying game information such as:
+///          - Current product details when selected
+///          - Trading statistics and market trends
+///          - Player status and notifications
+///          Position: bottom right corner of the screen
+void ApplicationUI::UI_InitializeInfoContainer()
+{
+  // Create info container in bottom right corner (500x300 pixels)
+  auto infoContainer = std::make_unique<ui::WidgetContainer>(1340, 600, 550, 450); //(30, 600, 550, 400);
+  infoContainer->SetLayout(ui::LayoutType::Native); // Manual positioning for precise control
+  m_infoContainer = infoContainer.get(); // Store raw pointer for later access
+  m_rootContainer->AddWidget(std::move(infoContainer));
+
+  // Add background for info container
+  auto infoBackground = std::make_unique<ui::WidgetImage>(0, 0, 550, 450, "BgInventory.png");
+  m_infoContainer->AddWidget(std::move(infoBackground));
+
+  // Add info title text
+  auto infoTitle = std::make_unique<ui::WidgetText>(300, 300, "INFORMATION");
+  infoTitle->SetCharacterSize(24);
+  infoTitle->SetStyle(sf::Text::Bold);
+  infoTitle->SetAlignment(ui::WidgetText::Alignment::Center);
+  infoTitle->SetTextColor(sf::Color::White);
+  m_infoContainer->AddWidget(std::move(infoTitle));
+
+  // Add company info image
+  auto companyInfoImage = std::make_unique<ui::WidgetImage>(300, 60, 200, 150, "NanodyneIndustries.png");
+  m_companyInfoImage = companyInfoImage.get();
+  m_infoContainer->AddWidget(std::move(companyInfoImage));
+
+  // Add product info text
+  auto productInfoText = std::make_unique<ui::WidgetText>(50, 80, "PI: None ");
+  productInfoText->SetCharacterSize(18);
+  productInfoText->SetTextColor(sf::Color::Yellow);
+  productInfoText->SetStyle(sf::Text::Bold);
+  m_productInfoText = productInfoText.get();
+  m_infoContainer->AddWidget(std::move(productInfoText));
+
+  // Add product volume text
+  auto productVolumeText = std::make_unique<ui::WidgetText>(50, 120, "Volume: 0");
+  productVolumeText->SetCharacterSize(18);
+  productVolumeText->SetTextColor(sf::Color::Cyan);
+  productVolumeText->SetStyle(sf::Text::Bold);
+  m_productVolumeText = productVolumeText.get();
+  m_infoContainer->AddWidget(std::move(productVolumeText));
 }
 
 /// @brief Initialize the game time display widget with digital font
@@ -542,12 +616,17 @@ void ApplicationUI::UI_DebugContainers()
     // For now, buttons debug is handled during creation if needed
   }
 
-  // Sub menu container debug (blue border)
-  m_subMenuContainer->EnableDebugDraw(true, sf::Color(0, 0, 255, 128)); // Blue semi-transparent
-  
   // Trade container debug (yellow border)
   if (m_tradeContainer)
     m_tradeContainer->EnableDebugDraw(true, sf::Color(255, 255, 0, 255)); // Yellow opaque
+  
+  // Inventory container debug (magenta border)
+  if (m_inventoryContainer)
+    m_inventoryContainer->EnableDebugDraw(true, sf::Color(255, 0, 255, 255)); // Magenta opaque
+  
+  // Info container debug (cyan border)
+  if (m_infoContainer)
+    m_infoContainer->EnableDebugDraw(true, sf::Color(0, 255, 255, 255)); // Cyan opaque
 }
 
 // Initialize progress bars for health, energy, etc.
@@ -569,23 +648,6 @@ void ApplicationUI::UI_InitializeProgressBars()
     healthProgressBar->SetFont(m_digitalFont);
   }  m_healthProgressBar = healthProgressBar.get();
   m_rootContainer->AddWidget(std::move(healthProgressBar));
-
-  // Create Energy Progress Bar (blue theme) with "MP" suffix
-  auto energyProgressBar = std::make_unique<ui::WidgetProgressBar>(50, 85, 300, 25, " MP");
-  energyProgressBar->SetForegroundColor(sf::Color(20, 120, 220)); // Blue
-  energyProgressBar->SetBackgroundColor(sf::Color(64, 64, 64));   // Dark gray
-  energyProgressBar->SetBorderColor(sf::Color::White);
-  energyProgressBar->SetBorderThickness(2.0f);
-  energyProgressBar->SetProgress(0.45f);  // 45% energy
-  energyProgressBar->SetShowPercentage(true);
-  energyProgressBar->SetTextSize(12); // Smaller text
-
-  // Set font if available
-  if (m_digitalFont.getInfo().family != "")
-  {
-    energyProgressBar->SetFont(m_digitalFont);
-  }  m_energyProgressBar = energyProgressBar.get();
-  m_rootContainer->AddWidget(std::move(energyProgressBar));
 }
 
 /// @brief Update all product displays with current stock market data

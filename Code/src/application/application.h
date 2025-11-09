@@ -89,8 +89,7 @@ private:
 	// UI variables
 	std::unique_ptr<ApplicationUI> m_applicationUI; // UI management class
 	std::unique_ptr<ui::WidgetContainer> m_rootWidgetContainer; // Root container for all widgets
-	ui::WidgetContainer* m_mainMenuContainer; // Pointer to main menu container (owned by root)
-	ui::WidgetContainer* m_subMenuContainer;  // Pointer to sub menu container (owned by root)
+	ui::WidgetContainer* m_monitorMenuContainer; // Pointer to monitor menu container (owned by root)
 	ui::WidgetText* m_gameTimeText; // Pointer to game time text widget (owned by container)
 };
 

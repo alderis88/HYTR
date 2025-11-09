@@ -26,8 +26,9 @@ public:
   // Individual UI initialization functions
   void UI_InitializeRootContainer();
   void UI_InitializeMonitorMenuContainer();
-  void UI_InitializeSubMenuContainer();
   void UI_InitializeTradeContainer();
+  void UI_InitializeInventoryContainer();
+  void UI_InitializeInfoContainer();
   void UI_InitializeGameTimeWidget();
   void UI_InitializeImageWidgets();
   void UI_InitializeProgressBars();
@@ -45,8 +46,9 @@ public:
   // Getters for UI components
   std::unique_ptr<ui::WidgetContainer>& GetRootContainer() { return m_rootContainer; }
   ui::WidgetContainer* GetMonitorMenuContainer() const { return m_monitorMenuContainer; }
-  ui::WidgetContainer* GetSubMenuContainer() const { return m_subMenuContainer; }
   ui::WidgetContainer* GetTradeContainer() const { return m_tradeContainer; }
+  ui::WidgetContainer* GetInventoryContainer() const { return m_inventoryContainer; }
+  ui::WidgetContainer* GetInfoContainer() const { return m_infoContainer; }
   ui::WidgetText* GetGameTimeText() const { return m_gameTimeText; }
   ui::WidgetText* GetRollingText1() const { return m_rollingText1; }
   ui::WidgetText* GetRollingText2() const { return m_rollingText2; }
@@ -73,6 +75,15 @@ public:
   ui::WidgetProgressBar* GetHealthProgressBar() const { return m_healthProgressBar; }
   ui::WidgetProgressBar* GetEnergyProgressBar() const { return m_energyProgressBar; }
 
+  // Getters for Inventory Container Widgets
+  ui::WidgetText* GetVolumeText() const { return m_volumeText; }
+  ui::WidgetProgressBar* GetVolumeProgressBar() const { return m_volumeProgressBar; }
+
+  // Getters for Info Container Widgets
+  ui::WidgetImage* GetCompanyInfoImage() const { return m_companyInfoImage; }
+  ui::WidgetText* GetProductInfoText() const { return m_productInfoText; }
+  ui::WidgetText* GetProductVolumeText() const { return m_productVolumeText; }
+
 private:
   // Application reference
   Application* m_application = nullptr;
@@ -80,8 +91,9 @@ private:
   // UI variables
   std::unique_ptr<ui::WidgetContainer> m_rootContainer; // Root container for all widgets
   ui::WidgetContainer* m_monitorMenuContainer; // Pointer to monitor menu container (owned by root container)
-  ui::WidgetContainer* m_subMenuContainer;  // Pointer to sub menu container (owned by root container)
   ui::WidgetContainer* m_tradeContainer; // Pointer to trade container with confirm/cancel buttons
+  ui::WidgetContainer* m_inventoryContainer; // Pointer to inventory container (bottom left)
+  ui::WidgetContainer* m_infoContainer; // Pointer to info container (bottom right)
   ui::WidgetText* m_gameTimeText; // Pointer to game time text widget (owned by container)
   ui::WidgetText* m_rollingText1; // Rolling text widget 1 at top of screen
   ui::WidgetText* m_rollingText2; // Rolling text widget 2 at top of screen
@@ -121,6 +133,15 @@ private:
   // Progress Bars
   ui::WidgetProgressBar* m_healthProgressBar;  // Health/HP progress bar
   ui::WidgetProgressBar* m_energyProgressBar;  // Energy/Mana progress bar
+
+  // Inventory container widgets
+  ui::WidgetText* m_volumeText;              // Volume text in inventory container
+  ui::WidgetProgressBar* m_volumeProgressBar; // Volume progress bar in inventory container
+
+  // Info container widgets
+  ui::WidgetImage* m_companyInfoImage;       // Company info image in info container
+  ui::WidgetText* m_productInfoText;         // Product info text in info container
+  ui::WidgetText* m_productVolumeText;       // Product volume text in info container
 
   // Fonts
   sf::Font m_digitalFont; // Font for game time display
