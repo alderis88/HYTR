@@ -50,16 +50,20 @@ void StockMarket::InitializeStockMarket(Application* app)
 /// @param delta Time elapsed since last frame
 void StockMarket::StockMarketUpdate(sf::Time delta)
 {
-	// Accumulate time for market cycle timing
-	m_currentCycleTime += delta.asSeconds() /* * Application::s_stockGameSpeed */;
-
-	// Check if it's time for a new market cycle
-	if (m_currentCycleTime >= s_stockCycleTime)
+	// Only update cycle timer if not in trade pause
+	if (m_application && !m_application->m_inTradePause)
 	{
-		// Execute market cycle: price updates, stock replenishment, trend shifts
-		m_currentCycleTime = 0.0f;  // Reset cycle timer
-		m_cycleCount++;             // Increment cycle counter
-		StockMarketCycleStep();     // Perform all market updates
+		// Accumulate time for market cycle timing
+		m_currentCycleTime += delta.asSeconds() /* * Application::s_stockGameSpeed */;
+
+		// Check if it's time for a new market cycle
+		if (m_currentCycleTime >= s_stockCycleTime)
+		{
+			// Execute market cycle: price updates, stock replenishment, trend shifts
+			m_currentCycleTime = 0.0f;  // Reset cycle timer
+			m_cycleCount++;             // Increment cycle counter
+			StockMarketCycleStep();     // Perform all market updates
+		}
 	}
 
 	// Always Update the cycle timer, even if no cycle step occurred

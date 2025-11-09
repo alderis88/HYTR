@@ -53,6 +53,9 @@ public:
 	std::unique_ptr< Inventory > m_playerInventory;
 	std::unique_ptr< StockMarket > m_stockMarket;
 
+	// Trade control variables (public for subsystem access)
+	bool m_inTradePause; // Pauses cycle timer when true (during trade operations)
+
 private:
 	void SetDataPath(const char* dataPath);
 	void SetAssetsPath(const char* assetsPath);

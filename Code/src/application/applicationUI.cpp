@@ -12,6 +12,7 @@
 #include <sstream>
 #include <sstream>
 #include <iomanip>
+#include <string>
 #include "stockMarket.h" // Required for SetCurrentProductID method
 #include "inventory.h" // Required for StockProduct structure
 
@@ -77,6 +78,7 @@ ApplicationUI::ApplicationUI()
 	, m_rollingText2Position(3940.0f) // Start off-screen with offset (1920 + 960)
 	, m_rollingSpeed(100.0f) // 100 pixels per second
 	, m_selectedMonitorIndex(-1) // No monitor selected initially
+	, m_currentTradedQuantity(0) // No trade quantity selected initially
 {
 	// Initialize all widget arrays to nullptr for safe access checks later
 	for (int i = 0; i < 5; ++i)
@@ -369,6 +371,11 @@ void ApplicationUI::UI_InitializeTradeContainer()
 			// Confirm the selected monitor trading action
 			// Implementation depends on specific game logic requirements
 		}
+		
+		// Exit trade pause mode after confirming trade
+		if (m_application) {
+			m_application->m_inTradePause = false;
+		}
 		});
 	m_confirmTradeButton = confirmTradeButton.get();
 	m_tradeContainer->AddWidget(std::move(confirmTradeButton));
@@ -434,7 +441,8 @@ void ApplicationUI::UI_InitializeTradeContainer()
 		quantityMinus1Button->SetFont(m_digitalFont);
 	}
 	quantityMinus1Button->SetOnClickCallback([this]() {
-		// TODO: Decrease quantity by 1
+		m_currentTradedQuantity -= 1;
+		UpdateTradeDisplay();
 	});
 	m_quantityMinus1Button = quantityMinus1Button.get();
 	m_tradeContainer->AddWidget(std::move(quantityMinus1Button));
@@ -448,7 +456,8 @@ void ApplicationUI::UI_InitializeTradeContainer()
 		quantityMinus5Button->SetFont(m_digitalFont);
 	}
 	quantityMinus5Button->SetOnClickCallback([this]() {
-		// TODO: Decrease quantity by 5
+		m_currentTradedQuantity -= 5;
+		UpdateTradeDisplay();
 	});
 	m_quantityMinus5Button = quantityMinus5Button.get();
 	m_tradeContainer->AddWidget(std::move(quantityMinus5Button));
@@ -464,7 +473,8 @@ void ApplicationUI::UI_InitializeTradeContainer()
 		quantityPlus1Button->SetFont(m_digitalFont);
 	}
 	quantityPlus1Button->SetOnClickCallback([this]() {
-		// TODO: Increase quantity by 1
+		m_currentTradedQuantity += 1;
+		UpdateTradeDisplay();
 	});
 	m_quantityPlus1Button = quantityPlus1Button.get();
 	m_tradeContainer->AddWidget(std::move(quantityPlus1Button));
@@ -478,7 +488,8 @@ void ApplicationUI::UI_InitializeTradeContainer()
 		quantityPlus5Button->SetFont(m_digitalFont);
 	}
 	quantityPlus5Button->SetOnClickCallback([this]() {
-		// TODO: Increase quantity by 5
+		m_currentTradedQuantity += 5;
+		UpdateTradeDisplay();
 	});
 	m_quantityPlus5Button = quantityPlus5Button.get();
 	m_tradeContainer->AddWidget(std::move(quantityPlus5Button));
@@ -842,10 +853,10 @@ void ApplicationUI::UI_InitializeProductInfoContainer()
 
 ///@brief Initialize the company info container in the bottom right corner
 ///@details Creates a container for displaying company information such as:
-//         - Current company details when selected
-//         - Company statistics and information
-//         - Company status and notifications
-//         Position: bottom right corner of the screen (same as product info)
+///         - Current company details when selected
+///         - Company statistics and information
+///         - Company status and notifications
+///         Position: bottom right corner of the screen (same as product info)
 void ApplicationUI::UI_InitializeCompanyInfoContainer()
 {
 	// Create company info container in bottom right corner (550x450 pixels)
@@ -1414,9 +1425,7 @@ void ApplicationUI::UpdateCycleProgressBar()
 	// Set the custom countdown text
 	m_cycleProgressBar->SetCustomText(countdownText.str());
 }
-
-
-
+/// @brief Select a monitor button and apply purple highlighting
 /// @brief Select a monitor button and apply purple highlighting
 /// @param monitorIndex Index of the monitor button to select (0-4)
 void ApplicationUI::SelectMonitor(int monitorIndex) {
@@ -1434,6 +1443,14 @@ void ApplicationUI::SelectMonitor(int monitorIndex) {
 
 	// Set the new selection
 	m_selectedMonitorIndex = monitorIndex;
+
+	// Reset traded quantity when selecting a new monitor
+	m_currentTradedQuantity = 0;
+
+	// Enter trade pause mode to stop cycle timer
+	if (m_application) {
+		m_application->m_inTradePause = true;
+	}
 
 	// Show purple highlight overlay for selected monitor
 	if (m_monitorHighlights[monitorIndex]) {
@@ -1600,15 +1617,24 @@ void ApplicationUI::SelectMonitor(int monitorIndex) {
 			}
 		}
 	}
+
+	// Update trade display after selecting monitor
+	UpdateTradeDisplay();
 }
 
 /// @brief Cancel the current monitor selection and hide purple highlight
-void ApplicationUI::CancelSelection() {
+void ApplicationUI::CancelSelection() 
+{
 	if (m_selectedMonitorIndex >= 0 && m_selectedMonitorIndex < 5) {
 		// Hide the purple highlight overlay
 		if (m_monitorHighlights[m_selectedMonitorIndex]) {
 			m_monitorHighlights[m_selectedMonitorIndex]->SetVisible(false);
 		}
+	}
+
+	// Exit trade pause mode to resume cycle timer
+	if (m_application) {
+		m_application->m_inTradePause = false;
 	}
 
 	// Hide trade container, info panel selector, and all info containers when selection is cancelled
@@ -1627,6 +1653,10 @@ void ApplicationUI::CancelSelection() {
 	if (m_vendorInfoContainer) {
 		m_vendorInfoContainer->SetVisible(false);
 	}
+
+	// Reset traded quantity when cancelling selection
+	m_currentTradedQuantity = 0;
+	UpdateTradeDisplay();
 
 	m_selectedMonitorIndex = -1;
 }
@@ -1949,5 +1979,58 @@ void ApplicationUI::SelectInventoryItemMonitor(int inventoryIndex)
 	if (monitorIndex >= 0)
 	{
 		SelectMonitor(monitorIndex);
+	}
+}
+
+/// @brief Update trade display texts based on current traded quantity
+/// @details Updates the traded quantity display and predicted money change based on selected product and quantity
+void ApplicationUI::UpdateTradeDisplay()
+{
+	// Safety checks
+	if (!m_application || !m_application->m_stockMarket || !m_predictedVolumeText || !m_predictedMoneyChangeText)
+		return;
+
+	// Update traded quantity text
+	m_predictedVolumeText->SetText(std::to_string(m_currentTradedQuantity));
+
+	// Calculate predicted money change if a monitor is selected
+	if (m_selectedMonitorIndex >= 0 && m_selectedMonitorIndex < 5)
+	{
+		// Get the selected product
+		std::string productIds[5] = { "TRI", "NFX", "ZER", "LUM", "NAN" };
+		StockProduct* product = m_application->m_stockMarket->GetStockProductById(productIds[m_selectedMonitorIndex]);
+
+		if (product)
+		{
+			// Calculate predicted money change: quantity * price
+			// Positive quantity = selling (gaining money), negative = buying (spending money)
+			int predictedMoneyChange = m_currentTradedQuantity * (int)product->m_currentPrice;
+
+			// Format the money change text
+			std::string moneyText;
+			if (predictedMoneyChange > 0)
+			{
+				moneyText = "+$" + std::to_string(predictedMoneyChange);
+				m_predictedMoneyChangeText->SetTextColor(sf::Color::Green); // Green for positive (gain)
+			}
+			else if (predictedMoneyChange < 0)
+			{
+				moneyText = "-$" + std::to_string(-predictedMoneyChange); // Make positive for display
+				m_predictedMoneyChangeText->SetTextColor(sf::Color::Red); // Red for negative (cost)
+			}
+			else
+			{
+				moneyText = "$0";
+				m_predictedMoneyChangeText->SetTextColor(sf::Color::Cyan); // Blue for zero
+			}
+
+			m_predictedMoneyChangeText->SetText(moneyText);
+		}
+	}
+	else
+	{
+		// No monitor selected, reset to default
+		m_predictedMoneyChangeText->SetText("$0");
+		m_predictedMoneyChangeText->SetTextColor(sf::Color::Cyan);
 	}
 }

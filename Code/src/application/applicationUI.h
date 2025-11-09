@@ -59,6 +59,7 @@ public:
   void UpdateCycleProgressBar();
   void UpdateCurrentMoneyDisplay();
   void UpdateInventoryVerticalButtons();
+  void UpdateTradeDisplay();
 
   void UpdateApplicationUI( sf::Time delta);
 
@@ -256,6 +257,9 @@ private:
   ui::WidgetText* m_vendorProfileText;        // Vendor profile text in vendor info container
    ui::WidgetImage* m_vendorImage;            // Vendor character image in vendor info container
   ui::WidgetText* m_vendorRoleText;           // Vendor role text in vendor info container
+
+  // Trade quantity tracking
+  int m_currentTradedQuantity;                // Current quantity selected for trading (positive=sell, negative=buy)
 
   // Fonts
   sf::Font m_digitalFont; // Font for game time display

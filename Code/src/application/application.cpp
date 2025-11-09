@@ -29,6 +29,7 @@ Application::Application()
 	, m_lastMousePosition(0, 0)
 	, m_gamepadCursorSpeed(500.0f) // pixels per second
 	, m_gamepadId(0)
+	, m_inTradePause(false) // Initially not in trade pause
 {
 }
 /// @brief Destructor - cleans up resources and releases memory
