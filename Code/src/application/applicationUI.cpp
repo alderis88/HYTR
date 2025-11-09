@@ -8,6 +8,8 @@
 #include "pch.h"
 #include "application.h" // Aggregates required widget headers
 #include "applicationUI.h"
+#include <sstream>
+#include <iomanip>
 #include "stockMarket.h" // Required for SetCurrentProductID method
 #include "inventory.h" // Required for StockProduct structure
 
@@ -370,9 +372,10 @@ void ApplicationUI::UI_InitializeInventoryContainer()
   m_inventoryContainer->AddWidget(std::move(inventoryTitle));
 
   // Add volume text
-  auto volumeText = std::make_unique<ui::WidgetText>(50, 330, "Volume:");
+  auto volumeText = std::make_unique<ui::WidgetText>(270, 330, "Volume");
   volumeText->SetCharacterSize(18);
   volumeText->SetStyle(sf::Text::Bold);
+  volumeText->SetAlignment(ui::WidgetText::Alignment::Center);
   volumeText->SetTextColor(sf::Color::White);
   m_volumeText = volumeText.get();
   m_inventoryContainer->AddWidget(std::move(volumeText));
@@ -697,7 +700,7 @@ void ApplicationUI::UI_DebugContainers()
 void ApplicationUI::UI_InitializeProgressBars()
 {
   // Create Cycle Progress Bar (orange theme) with "CYCLE" suffix - positioned at top center (2x size)
-  auto cycleProgressBar = std::make_unique<ui::WidgetProgressBar>(660, 150, 600, 50, " CYCLE");
+  auto cycleProgressBar = std::make_unique<ui::WidgetProgressBar>(630, 150, 720, 25, " CYCLE");
   cycleProgressBar->SetForegroundColor(sf::Color(255, 165, 0));  // Orange
   cycleProgressBar->SetBackgroundColor(sf::Color(64, 64, 64));   // Dark gray
   cycleProgressBar->SetBorderColor(sf::Color::White);
@@ -833,6 +836,44 @@ void ApplicationUI::UpdateApplicationUI(sf::Time deltaTime)
   //DebugLog("Rolling Text 2 position: " + std::to_string(m_rollingText2Position));
 
 
+}
+
+/// @brief Update cycle progress bar with remaining time countdown
+/// Updates the cycle progress bar to show remaining time in the current market cycle
+/// Displays countdown text with 1 decimal place precision
+void ApplicationUI::UpdateCycleProgressBar()
+{
+	// Check if we have the necessary components
+	if (!m_application || !m_application->m_stockMarket || !m_cycleProgressBar)
+	{
+		return;
+	}
+
+	// Get cycle timing information from stock market
+	float currentCycleTime = m_application->m_stockMarket->m_currentCycleTime;
+	float totalCycleTime = 5.0f; // s_stockCycleTime is 5.0f seconds
+
+	// Calculate remaining time (countdown)
+	float remainingTime = totalCycleTime - currentCycleTime;
+	
+	// Ensure remaining time is not negative (safety check)
+	remainingTime = std::max(0.0f, remainingTime);
+
+	// Calculate progress as ratio of elapsed time (0.0 to 1.0)
+	float progressRatio = (totalCycleTime > 0.0f) ? (currentCycleTime / totalCycleTime) : 0.0f;
+	
+	// Ensure progress ratio stays within bounds
+	progressRatio = std::max(0.0f, std::min(1.0f, progressRatio));
+
+	// Set the progress bar value
+	m_cycleProgressBar->SetProgress(progressRatio);
+
+	// Create countdown text with 1 decimal place
+	std::ostringstream countdownText;
+	countdownText << std::fixed << std::setprecision(1) << remainingTime << "s";
+
+	// Set the custom countdown text
+	m_cycleProgressBar->SetCustomText(countdownText.str());
 }
 
 /// @brief Select a monitor button and apply purple highlighting

@@ -38,6 +38,7 @@ public:
 
   // Update functions
   void UpdateProductDisplays();
+  void UpdateCycleProgressBar();
   void UpdateApplicationUI( sf::Time delta);
   
   // Monitor selection functions

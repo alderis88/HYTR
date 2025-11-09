@@ -284,10 +284,11 @@ void Application::ApplicationUpdate(sf::Time delta)
 		//DebugLog("StockMarket not exist", DebugType::Error);
 	}
 
-	// Update rolling text animation (not affected by global time multiplier)
+	// Update rolling text animation and cycle progress bar (not affected by global time multiplier)
 	if (m_applicationUI)
 	{
 		m_applicationUI->UpdateApplicationUI(scaledDelta);
+		m_applicationUI->UpdateCycleProgressBar();
 	}
 }
 
@@ -306,6 +307,7 @@ void Application::TotalGameTimeUpdate(sf::Time& delta)
 		m_gameTimeText->SetText(std::to_string(static_cast<int>(s_totalGameTime)) + " sec");
 	}
 }
+
 
 /// @brief Handles all rendering operations for the current frame
 /// Clears screen, draws UI elements, renders dual-mode cursor, and presents final image
